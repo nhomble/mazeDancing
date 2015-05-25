@@ -1,0 +1,97 @@
+#!/usr/bin/env python2
+
+'''
+All this node does is relay camera data into detectDrone 
+and then publish centroid and depth data
+'''
+
+# python default modules
+import subprocess
+import sys
+import time
+
+# ROS specifoc
+import roslib; roslib.load_manifest('dfDrone')
+import rospy
+from sensor_msgs.msg import Image
+from std_msgs.msg import Float64MultiArray
+
+# opencv and simplecv modules
+import cv
+import cv2.cv as cv
+from cv_bridge import CvBridge, CvBridgeError
+import SimpleCV
+
+# my modules
+import detectDrone
+
+g_detector = None
+g_publisher = None
+
+# TimeSequencer is not available for python... dumb
+g_depth = None
+g_color = None
+
+THROTTLE = .1
+
+DEBUG_STRING = "[START_DRONE] "
+
+# ROS loop
+def main(argv=None):
+	if argv is None:
+		argv = sys.argv
+
+	rospy.init_node('startDrone')
+	rospy.loginfo(DEBUG_STRING + "startDrone has initialized")
+
+	depth_sub = rospy.Subscriber('/camera/depth/image_raw', Image, depthCallback, queue_size=1)
+	color_sub = rospy.Subscriber('/camera/rgb/image_color', Image, colorCallback, queue_size=1)
+	rospy.spin()
+
+def depthCallback(image):
+	global g_depth
+
+#	rospy.loginfo(DEBUG_STRING + "depth callback in startDrone")
+	g_depth = image
+#	if global_color is not None and global_depth is not None:
+#		processImage(global_color, global_depth)
+
+def colorCallback(image):
+	global g_color
+
+#	rospy.loginfo(DEBUG_STRING + "color callback in startDrone")
+	g_color = image
+
+	if g_color is not None:
+		processImage(g_color, g_depth)
+
+# upon getting BOTH a new color and depth image call this callback
+def processImage(colorImage, depthImage):
+#	rospy.loginfo(DEBUG_STRING + "processing image in startDrone")
+
+	b = CvBridge()
+	colorFrame = b.imgmsg_to_cv(colorImage, "bgr8")
+	color = SimpleCV.Image(colorFrame, cv2image=True)
+	depth = None
+
+	if depthImage is not None:
+		depthFrame = b.imgmsg_to_cv(depthImage, "16UC1")
+		depth = SimpleCV.Image(colorFrame, cv2image=True)
+	
+	# create message - ugly since I do not have my custom message
+	message = g_detector.process(color, depth)	
+#	rospy.loginfo(DEBUG_STRING + "message sent")
+	g_publisher.publish(message.ros())
+	rospy.sleep(THROTTLE)
+
+if __name__ == "__main__":
+	g_detector
+	g_publisher
+
+	# create detector with no debug option
+	g_detector = detectDrone.Detector()
+	g_publisher = rospy.Publisher("startDrone", Float64MultiArray)
+	try:
+		sys.exit(main())
+	except rospy.ROSInterruptException:
+		pass
