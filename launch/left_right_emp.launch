@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="dfDrone" name="left_right_emp" required="true" type="left_right" output="screen">
+		<remap from="left_right_emp/cmd_vel" to="cmd_vel_mux/input/teleop"/>
+	</node>
+</launch>
