@@ -1,29 +1,39 @@
 #!/usr/bin/env python2
 
 import time
+import sys
 
 # ROS specifoc
 import rospy
 
 # my modules
-import Sensor_Manager
-import Move_Manager
-import Speech
+from Speech  import *
+from Sensor_Manager  import *
+from Move_Manager  import *
 
 # ROS loop
-def main(argv=None):
-	speech = Speech_Manager()
-	speech.speak("booting up")
-	sensor = Sensor_Manager()
-	move = Move_Manager(sensor)
-	while True:
-		move.turn_right()
-		time.sleep(1)
-		speech.speak("turned")
-	rospy.spin()
+def main(speech, sensor, move):
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	move.move(0, 1)
+	return 
 
 if __name__ == "__main__":
 	try:
-		sys.exit(main())
+		speech = Speech_Manager()
+		sensor = Sensor_Manager()
+		move = Move_Manager(sensor, z=1)
+		speech.speak("booting up")
+		time.sleep(1)
+		sys.exit(main(speech, sensor, move))
 	except rospy.ROSInterruptException:
 		pass
