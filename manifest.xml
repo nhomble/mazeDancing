@@ -1,22 +1,18 @@
 <package>
-  <description brief="solve maze collaboratively via dance">
+  <description brief="mazeDancing">
 
-	mazeDancing
+     mazeDancing
 
   </description>
   <author>Nicolas Homble</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/drone</url>
-  <depend package="rospy"/>
-  <depend package="roscpp"/>
+  <url>http://ros.org/wiki/mazeDancing</url>
   <depend package="std_msgs"/>
+  <depend package="rospy"/>
   <depend package="openni_camera"/>
   <depend package="turtlebot_bringup"/>
   <depend package="cmd_vel_mux"/>
-
-  <build_depend>message_generation</build_depend>
-  <run_depend>message_runtime</run_depend>
 
 </package>
 
