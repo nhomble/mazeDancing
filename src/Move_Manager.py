@@ -44,8 +44,10 @@ class Move_Manager(object):
 			self.send_twist(self.x, 0)
 		elif direction == Direction.BACKWARD:
 			self.send_twist(-self.x, 0)
-		else:
+		elif direction == Direction.RIGHT or direction == Direction.LEFT:
 			self.turn(direction, hardcode)
+		else:
+			rospy.loginfo("invalid direction to move()")
 
 	def turn(self, direction, hardcode):
 		if hardcode:
@@ -79,6 +81,3 @@ class Move_Manager(object):
 		twist.linear.x = x
 		twist.angular.z = z
 		self.tw_pub.publish(twist)
-		# TODO helps maybe?
-		self.rate.sleep()
-		self.stop()
