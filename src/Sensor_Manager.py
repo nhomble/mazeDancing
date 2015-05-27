@@ -8,6 +8,15 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import PointCloud2, PointField
 import point_cloud2 as pc2
 
+from Direction import *
+
+import cv
+import cv2.cv as cv
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+import SimpleCV
+
 class Sensor_Manager(object):
 	def __init__(self):
 		# ODOM things
@@ -18,11 +27,19 @@ class Sensor_Manager(object):
 		self._pcl_subscriber = rospy.Subscriber('camera/depth_registered/points', PointCloud2, self.pcl_callback)
 		self.last_pcl = None
 
+		# Images
+		self.last_depth_image = None
+		self.last_color_image = None
+		self._depth_subscriber = rospy.Subscriber('camera/depth_reistered/image', Image, depth_callback)
+		# TODO color
+
 	# just save data in memory to call later
 	def odom_callback(self, data):
 		self.last_odom = data
 	def pcl_callback(self, data):
 		self.last_pcl = data
+	def depth_callback(self, data):
+		self.last_depth_image = data
 
 	# on demand get the sensor readings
 	def curr_angle(self):
@@ -33,11 +50,52 @@ class Sensor_Manager(object):
 		lad = lar * 180 / math.pi
 		return lar, lad
 	
-	def read_depth(self):
+	def full_pcl(self):
 		if self.last_pcl is None:
 			return None
-		width = self.last_pcl.width/2
-		height = self.last_pcl.height/2
-		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=False, uvs=[(width, height)])
-		int_data = next(data_out)
-		return int_data
+		width = self.last_pcl.width
+		height = self.last_pcl.height
+		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=True, uvs=[(width/2, height/2)])
+		total = 0
+		num = 0
+		for x, y, z, _ in data_out:
+			total += z
+			num += 1
+		return total/num if num != 0 else None
+	def bias_pcl(self, direction):
+		if self.last_pcl is None:
+			return None
+		width = self.last_pcl.width
+		height = self.last_pcl.height
+		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=True, uvs=[(width-1, height-1)])
+		total = 0
+		num = 0
+		in_bias = lambda x: x > width/2 if direction == Direction.RIGHT else x < width/2
+		for x, y, z, _ in data_out:
+			if in_bias(x):
+				total += z
+				num += 1
+
+		return total/num if num != 0 else None
+	
+	def full_depth(self):
+		bridge = CvBridge()
+		depth_image = b.imgmsg_to_cv(self.last_depth_image, '32FC1')
+		depth = SimpleCV.Image(depth_image, cv2image=True)
+		flat = depth.getNumpy().flatten()
+		accum = 0
+		for i in flat:
+			accum += flat[i]
+		return accum / flat.length if flat.length > 0 else None
+	def bias_depth(self, direction):
+		bridge = CvBridge()
+		depth_image = b.imgmsg_to_cv(self.last_depth_image, '32FC1')
+		depth = SimpleCV.Image(depth_image, cv2image=True)
+		cut_point = 0 if direction == Direction.LEFT else width/2
+		depth_cropped = depth.crop(cut_point, 0, depth.width/2, depth.height)
+		flat = depth_cropped.getNumpy().flatten()
+		accum = 0
+		for i in flat:
+			accum += flat[i]
+		return accum / flat.length if flat.length > 0 else None
+
