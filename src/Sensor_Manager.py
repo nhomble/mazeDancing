@@ -6,6 +6,7 @@ from roslib import message
 from nav_msgs.msg import Odometry
 
 from sensor_msgs.msg import PointCloud2, PointField
+import point_cloud2 as pc2
 
 class Sensor_Manager(object):
 	def __init__(self):
@@ -21,7 +22,6 @@ class Sensor_Manager(object):
 	def odom_callback(self, data):
 		self.last_odom = data
 	def pcl_callback(self, data):
-		rospy.loginfo("pcl callback")
 		self.last_pcl = data
 
 	# on demand get the sensor readings
@@ -38,6 +38,6 @@ class Sensor_Manager(object):
 			return None
 		width = self.last_pcl.width/2
 		height = self.last_pcl.height/2
-		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=False, uvs=[width, height])
+		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=False, uvs=[(width, height)])
 		int_data = next(data_out)
 		return int_data
