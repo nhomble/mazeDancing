@@ -15,7 +15,9 @@ from Move_Manager  import *
 def main(speech, sensor, move):
 	controls = (speech, sensor, move)
 	while not rospy.is_shutdown():
-		rospy.loginfo(sensor.read_depth())
+		rospy.loginfo("FULL: " + str(sensor.full_pcl()))
+		rospy.loginfo("RIGHT BIAS: " + str(sensor.bias_pcl(Direction.RIGHT)))
+		rospy.loginfo("LEFT BIAS: " + str(sensor.bias_pcl(Direction.LEFT)))
 		rospy.Rate(1).sleep()
 
 if __name__ == "__main__":
