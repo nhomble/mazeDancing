@@ -5,13 +5,7 @@ import rospy
 from roslib import message
 # movement
 from geometry_msgs.msg import Twist
-
-class Direction(object):
-	LEFT = 1,
-	RIGHT = 2,
-	FORWARD = 3,
-	BACKWARD = 4
-
+from Direction import *
 class Move_Manager(object):
 	def __init__(self, sensor_manager, min_dist=50, x=1, z=.5, delay=.5, rate=10, hardcode_x = 12):
 		self.sm = sensor_manager
