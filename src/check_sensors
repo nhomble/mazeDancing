@@ -11,16 +11,24 @@ from Speech  import *
 from Sensor_Manager  import *
 from Move_Manager  import *
 
+def pcl(speech, sensor, move):
+	rospy.loginfo("FULL: " + str(sensor.full_pcl()))
+	rospy.loginfo("RIGHT BIAS: " + str(sensor.bias_pcl(Direction.RIGHT)))
+	rospy.loginfo("LEFT BIAS: " + str(sensor.bias_pcl(Direction.LEFT)))
+	rospy.Rate(1).sleep()
+
+def depth(speec, sensor, move):
+	rospy.loginfo("FULL: " + str(sensor.full_depth()))
+	rospy.Rate(1).sleep()
+
 # ROS loop
 def main(speech, sensor, move):
 	controls = (speech, sensor, move)
 	while not rospy.is_shutdown():
-		rospy.loginfo("FULL: " + str(sensor.full_pcl()))
-		rospy.loginfo("RIGHT BIAS: " + str(sensor.bias_pcl(Direction.RIGHT)))
-		rospy.loginfo("LEFT BIAS: " + str(sensor.bias_pcl(Direction.LEFT)))
-		rospy.Rate(1).sleep()
+		depth(*controls)
 
 if __name__ == "__main__":
+
 	try:
 		speech = Speech_Manager()
 		sensor = Sensor_Manager()

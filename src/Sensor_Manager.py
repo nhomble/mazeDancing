@@ -10,12 +10,13 @@ import point_cloud2 as pc2
 
 from Direction import *
 
-import cv
+import cv2
 import cv2.cv as cv
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import SimpleCV
+import numpy as np
 
 class Sensor_Manager(object):
 	def __init__(self):
@@ -24,13 +25,13 @@ class Sensor_Manager(object):
 		self._odom_subscriber = rospy.Subscriber('odom', Odometry, self.odom_callback)
 		self.last_odom = None
 		# PCL things
-		self._pcl_subscriber = rospy.Subscriber('camera/depth_registered/points', PointCloud2, self.pcl_callback)
+		self._pcl_subscriber = rospy.Subscriber('/camera/depth_registered/points', PointCloud2, self.pcl_callback)
 		self.last_pcl = None
 
 		# Images
 		self.last_depth_image = None
 		self.last_color_image = None
-		self._depth_subscriber = rospy.Subscriber('camera/depth_reistered/image', Image, depth_callback)
+		self._depth_subscriber = rospy.Subscriber('/camera/depth/image', Image, self.depth_callback)
 		# TODO color
 
 	# just save data in memory to call later
@@ -79,17 +80,28 @@ class Sensor_Manager(object):
 		return total/num if num != 0 else None
 	
 	def full_depth(self):
-		bridge = CvBridge()
+		if self.last_depth_image is None:
+			return
+		b = CvBridge()
 		depth_image = b.imgmsg_to_cv(self.last_depth_image, '32FC1')
-		depth = SimpleCV.Image(depth_image, cv2image=True)
-		flat = depth.getNumpy().flatten()
+		depth_array = np.array(depth_image, dtype=np.float32)
+
 		accum = 0
-		for i in flat:
-			accum += flat[i]
-		return accum / flat.length if flat.length > 0 else None
+		num = 0
+		for row in depth_array:
+			for ele in row:
+				try:
+					float(ele)
+					accum += ele
+					num += 1
+				except:
+					pass
+		return accum / num if num != 0 else None
 	def bias_depth(self, direction):
-		bridge = CvBridge()
-		depth_image = b.imgmsg_to_cv(self.last_depth_image, '32FC1')
+		if self.last_depth_image is None:
+			return
+		b = CvBridge()
+		depth_image = b.imgmsg_to_cv(self.last_depth_image, '16UC1')
 		depth = SimpleCV.Image(depth_image, cv2image=True)
 		cut_point = 0 if direction == Direction.LEFT else width/2
 		depth_cropped = depth.crop(cut_point, 0, depth.width/2, depth.height)
