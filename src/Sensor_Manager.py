@@ -14,14 +14,14 @@ class Sensor_Manager(object):
 		self._odom_subscriber = rospy.Subscriber('odom', Odometry, self.odom_callback)
 		self.last_odom = None
 		# PCL things
-		# TODO
-		# self._pcl_subscriber = rospy.subscriber('camera/depth_registered/points', PointCloud2, self.pcl_callback)
+		self._pcl_subscriber = rospy.Subscriber('camera/depth_registered/points', PointCloud2, self.pcl_callback)
 		self.last_pcl = None
 
 	# just save data in memory to call later
 	def odom_callback(self, data):
 		self.last_odom = data
 	def pcl_callback(self, data):
+		rospy.loginfo("pcl callback")
 		self.last_pcl = data
 
 	# on demand get the sensor readings
@@ -34,6 +34,8 @@ class Sensor_Manager(object):
 		return lar, lad
 	
 	def read_depth(self):
+		if self.last_pcl is None:
+			return None
 		width = self.last_pcl.width/2
 		height = self.last_pcl.height/2
 		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=False, uvs=[width, height])
