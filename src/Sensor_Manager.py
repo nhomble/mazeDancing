@@ -20,8 +20,9 @@ import numpy as np
 
 class Sensor_Manager(object):
 	def __init__(self):
+		self.node = rospy.init_node('sensor_manager')
+
 		# ODOM things
-		self._odom_node = rospy.init_node('odometry', anonymous=True)
 		self._odom_subscriber = rospy.Subscriber('odom', Odometry, self.odom_callback)
 		self.last_odom = None
 		# PCL things
@@ -56,29 +57,17 @@ class Sensor_Manager(object):
 			return None
 		width = self.last_pcl.width
 		height = self.last_pcl.height
-		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=True, uvs=[(width/2, height/2)])
-		total = 0
-		num = 0
-		for x, y, z, _ in data_out:
-			total += z
-			num += 1
-		return total/num if num != 0 else None
+		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
+		return _process_pcl(data_out)
+
 	def bias_pcl(self, direction):
 		if self.last_pcl is None:
 			return None
 		width = self.last_pcl.width
 		height = self.last_pcl.height
-		data_out = pc2.read_points(self.last_pcl, field_names=None, skip_nans=True, uvs=[(width-1, height-1)])
-		total = 0
-		num = 0
-		in_bias = lambda x: x > width/2 if direction == Direction.RIGHT else x < width/2
-		for x, y, z, _ in data_out:
-			if in_bias(x):
-				total += z
-				num += 1
+		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
+		return _process_pcl(data_out)
 
-		return total/num if num != 0 else None
-	
 	def full_depth(self):
 		if self.last_depth_image is None:
 			return
@@ -111,3 +100,10 @@ class Sensor_Manager(object):
 			accum += flat[i]
 		return accum / flat.length if flat.length > 0 else None
 
+def _process_pcl(data):
+	total = 0
+	num = 0
+	for point in data:
+		total += point[2]
+		num += 1
+	return total/num if num != 0 else None
