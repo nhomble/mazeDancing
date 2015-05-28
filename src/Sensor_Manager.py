@@ -77,8 +77,20 @@ class Sensor_Manager(object):
 			return None
 		width = self.last_pcl.width
 		height = self.last_pcl.height
+		validator = None
+		# we want pcl focused in the middle, ignore surroundings
+		if direction == Direction.FORWARD:
+			validator = _in_square(width, height)
+		elif direction == Direction.LEFT:
+			validator = lambda point: True if point[0] <= width/2 else False
+		elif direction == Direction.RIGHT:
+			validator = lambda point: True if point[0] >= width/2 else False
+		else:
+			rospy.loginfo("you wanted pcl from behind?")
+			return
+
 		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
-		return _process_pcl(data_out)
+		return _process_pcl(data_out, validator)
 
 	def full_depth(self):
 		if self.last_depth_image is None:
@@ -112,10 +124,15 @@ class Sensor_Manager(object):
 			accum += flat[i]
 		return accum / flat.length if flat.length > 0 else None
 
-def _process_pcl(data):
+def _in_square(width, height):
+	return lambda point: True if point[0] > width/3 and point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False
+		
+
+def _process_pcl(data, validator=lambda points: True):
 	total = 0
 	num = 0
 	for point in data:
-		total += point[2]
-		num += 1
+		if validator(point):
+			total += point[2]
+			num += 1
 	return total/num if num != 0 else None
