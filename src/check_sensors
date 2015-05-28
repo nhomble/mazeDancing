@@ -15,17 +15,15 @@ def pcl(speech, sensor, move):
 	rospy.loginfo("FULL: " + str(sensor.full_pcl()))
 	rospy.loginfo("RIGHT BIAS: " + str(sensor.bias_pcl(Direction.RIGHT)))
 	rospy.loginfo("LEFT BIAS: " + str(sensor.bias_pcl(Direction.LEFT)))
-	rospy.Rate(1).sleep()
 
 def depth(speec, sensor, move):
 	rospy.loginfo("FULL: " + str(sensor.full_depth()))
-	rospy.Rate(1).sleep()
 
 # ROS loop
 def main(speech, sensor, move):
 	controls = (speech, sensor, move)
 	while not rospy.is_shutdown():
-		depth(*controls)
+		pcl(*controls)
 
 if __name__ == "__main__":
 
@@ -34,7 +32,6 @@ if __name__ == "__main__":
 		sensor = Sensor_Manager()
 		move = Move_Manager(sensor, z=1)
 		speech.speak("booting up")
-		time.sleep(1)
 		sys.exit(main(speech, sensor, move))
 	except rospy.ROSInterruptException:
 		pass
