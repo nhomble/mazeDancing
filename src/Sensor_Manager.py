@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 import math
+import time
 import rospy
 from roslib import message
 
@@ -26,14 +27,23 @@ class Sensor_Manager(object):
 		self._odom_subscriber = rospy.Subscriber('odom', Odometry, self.odom_callback)
 		self.last_odom = None
 		# PCL things
-		self._pcl_subscriber = rospy.Subscriber('/camera/depth_registered/points', PointCloud2, self.pcl_callback)
+		self._pcl_subscriber = rospy.Subscriber('/camera/depth/points', PointCloud2, self.pcl_callback)
 		self.last_pcl = None
 
 		# Images
 		self.last_depth_image = None
 		self.last_color_image = None
 		self._depth_subscriber = rospy.Subscriber('/camera/depth/image', Image, self.depth_callback)
-		# TODO color
+		self._color_subscriber = rospy.Subscriber('camera/rgb/image_color', Image, self.color_callback)
+
+		while self.not_init():
+			# spin
+			time.sleep(1)
+	
+	def not_init(self):
+		return  self.last_depth_image is None or \
+				self.last_pcl is None or \
+				self.last_color_image is None
 
 	# just save data in memory to call later
 	def odom_callback(self, data):
@@ -42,6 +52,8 @@ class Sensor_Manager(object):
 		self.last_pcl = data
 	def depth_callback(self, data):
 		self.last_depth_image = data
+	def color_callback(self, data):
+		self.last_color_image = data
 
 	# on demand get the sensor readings
 	def curr_angle(self):
