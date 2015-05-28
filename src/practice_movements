@@ -13,21 +13,26 @@ from Move_Manager  import *
 
 def doCircle(speech, sensor, move):
 	speech.speak("do circle")
-	move.move(Direction.RIGHT)
-	move.move(Direction.RIGHT)
-	move.move(Direction.RIGHT)
-	move.move(Direction.RIGHT)
-	move.stop()
+	move.move(Direction.LEFT)
 	speech.speak("now backward")
-	move.move(Direction.LEFT)
-	move.move(Direction.LEFT)
-	move.move(Direction.LEFT)
-	move.move(Direction.LEFT)
+	move.move(Direction.RIGHT)
+
+def forward_backward(speech, sensor, move):
+	dist = sensor.full_pcl()
+	if dist is not None:
+		print(dist)
+		if dist < .75:
+			speech.speak("backwards")
+			move.move(Direction.BACKWARD)
+		else:
+			speech.speak("forward")
+			move.move(Direction.FORWARD)
 
 # ROS loop
 def main(speech, sensor, move):
 	controls = (speech, sensor, move)
-	doCircle(*controls)
+	while not rospy.is_shutdown():
+		forward_backward(*controls)
 	return 
 
 if __name__ == "__main__":
