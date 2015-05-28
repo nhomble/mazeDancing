@@ -1,0 +1,37 @@
+#!/usr/bin/env python2
+
+import time
+import sys
+
+# ROS specifoc
+import rospy
+
+# my modules
+from Speech  import *
+from Sensor_Manager  import *
+from Move_Manager  import *
+
+def doCircle(speech, sensor, move):
+	speech.speak("do circle")
+	move.move(Direction.LEFT)
+	time.sleep(5)
+	speech.speak("now backward")
+	move.move(Direction.RIGHT)
+
+
+# ROS loop
+def main(speech, sensor, move):
+	controls = (speech, sensor, move)
+	doCircle(*controls)
+	return 
+
+if __name__ == "__main__":
+	try:
+		speech = Speech_Manager()
+		sensor = Sensor_Manager()
+		move = Move_Manager(sensor, z=1)
+		speech.speak("booting up")
+		rospy.init_node('wall_follower')
+		sys.exit(main(speech, sensor, move))
+	except rospy.ROSInterruptException:
+		pass
