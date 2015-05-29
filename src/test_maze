@@ -5,4 +5,17 @@ from Maze import *
 m = Maze()
 for i in range(10):
 	m.step()
+m.turn(Direction.RIGHT)
+for i in range(5):
+	m.step()
+m.turn(Direction.LEFT)
+for i in range(5):
+	m.step()
+m.turn(Direction.LEFT)
+for i in range(5):
+	m.step()
+m.turn(Direction.LEFT)
+for i in range(5):
+	m.step()
+
 m.print_maze()
