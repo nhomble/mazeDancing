@@ -15,6 +15,8 @@ class Maze(object):
 		self.start = self.pos
 		self.maze[self.start[0]][self.start[1]] = Cell.OPEN
 
+		this.path = []
+
 	# get new step
 	def step(self):
 		new_pos = None
@@ -54,13 +56,18 @@ class Maze(object):
 		# mark internally
 		self.maze[self.pos[0]][self.pos[1]] = Cell.OPEN
 	
-	# use _best_path but remove duplicates
-	# for communication
+	# based on _best_path array
+	# format list to suit needs 
 	def best_path(self):
-		pass
+		if len(self.path) == 0:
+			raise Exception("we have not reached goal yet, self.path = []!")
+		return None
 
-	# return a series of directions
+	# return a series of directions at every node
+	# this is best case!
+	# assign this.path
 	def _best_path(self):
+		# from self.start, do a BFS to get to self.pos (the end position)
 		pass
 
 	# take nxn maze and pad to 2nx2n
