@@ -8,18 +8,20 @@ class Cell(object):
 	WALL = 3
 
 class Maze(object):
-	def __init__(self, n=32):
+	def __init__(self, n=8):
 		self.orientation = Direction.FORWARD
 		self.maze = [[Cell.UNKNOWN for i in range(n)] for j in range(n)]
 		self.pos = (n//2, n//2)
+		self.start = self.pos
+		self.maze[self.start[0]][self.start[1]] = Cell.OPEN
 
 	# get new step
-	def bot_step(self):
+	def step(self):
 		new_pos = None
 		if self.orientation == Direction.FORWARD:
 			new_pos = (self.pos[0] - 1, self.pos[1])
 		elif self.orientation == Direction.RIGHT:
-			new_pos = (self.pos[0], self.pos[1] + 1])
+			new_pos = (self.pos[0], self.pos[1] + 1)
 		elif self.orientation == Direction.BACKWARD:
 			new_pos = (self.pos[0] + 1, self.pos[1])
 		elif self.orientation == Direction.LEFT:
@@ -45,9 +47,10 @@ class Maze(object):
 	def _update_maze(self, new_pos):
 		# check bounds
 		if not self._new_pos_is_valid(*new_pos):
-			self.maze = self._expand_maze()
+			self._expand_maze()
 			n = len(self.maze)//2
-			new_pos = (new_pos[0] + n, new_pos[1] + n)
+			new_pos = (new_pos[0] + n//2, new_pos[1] + n//2)
+			self.start = (self.start[0] + n//2, self.start[1] + n//2)
 
 		# move
 		self.pos = new_pos
@@ -77,12 +80,12 @@ class Maze(object):
 			new_maze.append([Cell.UNKNOWN for j in range(2*n)])
 		self.maze = new_maze
 
-def print_maze(maze):
-	for row in maze:
-		string = ""
-		for ele in row:
-			if ele == Cell.OPEN:
-				string += " "
-			else:
-				string += "X"
-		print(string)
+	def print_maze(self):
+		for row in self.maze:
+			string = ""
+			for ele in row:
+				if ele == Cell.OPEN:
+					string += " "
+				else:
+					string += "X"
+			print(string)

@@ -1,0 +1,8 @@
+#!/usr/bin/env python2
+
+from Maze import *
+
+m = Maze()
+for i in range(10):
+	m.step()
+m.print_maze()
