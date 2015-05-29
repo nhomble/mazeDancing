@@ -45,7 +45,7 @@ class Sensor_Manager(object):
 				self.last_pcl is None or \
 				self.last_color_image is None
 
-	# just save data in memory to call later
+	# just save data in memory to call later on demand
 	def odom_callback(self, data):
 		self.last_odom = data
 	def pcl_callback(self, data):
@@ -55,7 +55,8 @@ class Sensor_Manager(object):
 	def color_callback(self, data):
 		self.last_color_image = data
 
-	# on demand get the sensor readings
+	# NOTE attempted to use odometry data to determine angle
+	# but the calculations are surprisingly poor
 	def curr_angle(self):
 		if self.last_odom is None:
 			return None, None
@@ -64,6 +65,7 @@ class Sensor_Manager(object):
 		lad = lar * 180 / math.pi
 		return lar, lad
 	
+	# average ALL points in cloud
 	def full_pcl(self):
 		if self.last_pcl is None:
 			return None
@@ -72,6 +74,7 @@ class Sensor_Manager(object):
 		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
 		return _process_pcl(data_out)
 
+	# only look at a portion of the pcl depending on where I want to look
 	def bias_pcl(self, direction):
 		if self.last_pcl is None:
 			return None
@@ -80,7 +83,9 @@ class Sensor_Manager(object):
 		validator = None
 		# we want pcl focused in the middle, ignore surroundings
 		if direction == Direction.FORWARD:
-			validator = _in_square(width, height)
+			validator = lambda point: True if point[0] > width/3 and \
+			point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False
+
 		elif direction == Direction.LEFT:
 			validator = lambda point: True if point[0] <= width/2 else False
 		elif direction == Direction.RIGHT:
@@ -92,42 +97,24 @@ class Sensor_Manager(object):
 		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
 		return _process_pcl(data_out, validator)
 
+	# depracated
+	# pcl takes care of the need to use /camera/depth/image
 	def full_depth(self):
 		if self.last_depth_image is None:
 			return
 		b = CvBridge()
 		depth_image = b.imgmsg_to_cv(self.last_depth_image, '32FC1')
 		depth_array = np.array(depth_image, dtype=np.float32)
-
-		accum = 0
-		num = 0
-		for row in depth_array:
-			for ele in row:
-				try:
-					float(ele)
-					accum += ele
-					num += 1
-				except:
-					pass
-		return accum / num if num != 0 else None
+		return None 
 	def bias_depth(self, direction):
 		if self.last_depth_image is None:
 			return
 		b = CvBridge()
 		depth_image = b.imgmsg_to_cv(self.last_depth_image, '16UC1')
 		depth = SimpleCV.Image(depth_image, cv2image=True)
-		cut_point = 0 if direction == Direction.LEFT else width/2
-		depth_cropped = depth.crop(cut_point, 0, depth.width/2, depth.height)
-		flat = depth_cropped.getNumpy().flatten()
-		accum = 0
-		for i in flat:
-			accum += flat[i]
-		return accum / flat.length if flat.length > 0 else None
+		return None
 
-def _in_square(width, height):
-	return lambda point: True if point[0] > width/3 and point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False
-		
-
+# get depth from pcl if validator say the point is good
 def _process_pcl(data, validator=lambda points: True):
 	total = 0
 	num = 0
