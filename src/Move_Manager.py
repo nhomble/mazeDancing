@@ -7,31 +7,41 @@ from roslib import message
 # movement
 from geometry_msgs.msg import Twist
 from Direction import *
+
 class Move_Manager(object):
-	def __init__(self, sensor_manager, min_dist=.75, x=1, z=1, delay=1, rate=10, hardcode_x=12):
+	def __init__(self, sensor_manager, min_forward_dist=.75, min_turn_dist=.6, x=1, z=1, delay=1, rate=10, hardcode_x=12):
 		# TODO do I need to create another ros node here?
 		self.sm = sensor_manager
-
 		self.tw_pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist)
-		self.min_dist = min_dist
+
+		# TODO
+		# hardcode distance to wall checks
+		self.min_forward_dist = min_forward_dist
+		self.min_turn_dist = min_turn_dist
+
+		# hardcode movements
 		self.z = z
 		self.x = x
 		self.hx = hardcode_x
+
+		# delays
 		self.rate = rospy.Rate(rate)
 		self.delay = delay
 
 	# look right, check distance to wall, return left
-	def _check(self, direction):
+	# return True if should/can move there
+	# this is not in Sensor since we have to move the bot to do the checks
+	def check(self, direction):
 		if direction == Direction.RIGHT:
 			self.right()
-			result = self.min_dist < self.sm.read_depth()
+			result = self.min_turn_dist < self.sm.bias_pcl(direction)
 			self.left()
 		elif direction == Direction.LEFT:
 			self.left()
-			result = self.min_dist < sm.read_depth()
+			result = self.min_turn_dist < self.sm.bias_pcl(direction)
 			self.left()
 		elif direction == Direction.FORWARD:
-			result = self.min_dist < self.sm.read_depth()
+			result = self.min_forward_dist < self.sm.bias_pcl(direction)
 		else:
 			rospy.log("you asked to check backwards?")
 		return result
@@ -48,6 +58,11 @@ class Move_Manager(object):
 			rospy.loginfo("invalid direction to move()")
 		# NOTE this should be the only place where we delay after movement
 		time.sleep(self.delay)
+
+	# halt movement of the turtlebot immediately
+	def stop(self):
+		twist = Twist()
+		self.tw_pub.publish(twist)
 
 	def _turn(self, direction, hardcode):
 		# HACK we just hardcode a fixed number of identical twist messages to do
@@ -72,11 +87,6 @@ class Move_Manager(object):
 				self.move(0, val)
 				_, curr_angle = self.sm.curr_angle()
 				curr_angle = round(curr_angle)
-	
-	# halt movement of the turtlebot immediately
-	def stop(self):
-		twist = Twist()
-		self.tw_pub.publish(twist)
 
 	# actually send message
 	def _send_twist(self, x, z):
