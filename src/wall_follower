@@ -11,18 +11,24 @@ from Speech  import *
 from Sensor_Manager  import *
 from Move_Manager  import *
 
-def doCircle(speech, sensor, move):
-	speech.speak("do circle")
-	move.move(Direction.LEFT)
-	time.sleep(5)
-	speech.speak("now backward")
-	move.move(Direction.RIGHT)
-
+# simple wall following
+def update(speech, sensor, move):
+	if move.check(Direction.RIGHT):
+		# oh we don't have the wall
+		move.move(Direction.RIGHT)
+	elif move.check(Direction.FORWARD):
+		# can we move forward?
+		move.move(Directon.FORWARD)
+	else:
+		# either there is a left turn or we hit a dead end
+		# regardless
+		move.move(Direction.LEFT)
 
 # ROS loop
-def main(speech, sensor, move):
+def main(speech, sensor, move, steps=10):
 	controls = (speech, sensor, move)
-	doCircle(*controls)
+	for i in range(steps):
+		update(*controls)
 	return 
 
 if __name__ == "__main__":
