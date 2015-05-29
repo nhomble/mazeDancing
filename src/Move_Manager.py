@@ -9,7 +9,9 @@ from geometry_msgs.msg import Twist
 from Direction import *
 class Move_Manager(object):
 	def __init__(self, sensor_manager, min_dist=.75, x=1, z=1, delay=1, rate=10, hardcode_x=12):
+		# TODO do I need to create another ros node here?
 		self.sm = sensor_manager
+
 		self.tw_pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist)
 		self.min_dist = min_dist
 		self.z = z
@@ -44,16 +46,18 @@ class Move_Manager(object):
 			self._turn(direction, hardcode)
 		else:
 			rospy.loginfo("invalid direction to move()")
+		# NOTE this should be the only place where we delay after movement
 		time.sleep(self.delay)
 
 	def _turn(self, direction, hardcode):
+		# HACK we just hardcode a fixed number of identical twist messages to do
+		# an orthogonal turn on a flat surface
 		if hardcode:
 			val = -self.hx if direction == Direction.RIGHT else self.hx
 			for i in range(self.hx):
 				self._send_twist(0, val)
 		else:
-			## Odometry is not as good as I imagined
-			# use odometry sensors
+			# NOTE Odometry is not as good as I imagined
 			_, curr_angle = self.sm.curr_angle()
 			if curr_angle is None:
 				return
@@ -69,10 +73,12 @@ class Move_Manager(object):
 				_, curr_angle = self.sm.curr_angle()
 				curr_angle = round(curr_angle)
 	
+	# halt movement of the turtlebot immediately
 	def stop(self):
 		twist = Twist()
 		self.tw_pub.publish(twist)
 
+	# actually send message
 	def _send_twist(self, x, z):
 		twist = Twist()
 		twist.linear.x = x
