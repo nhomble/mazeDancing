@@ -31,11 +31,8 @@ class Maze(object):
 		self._update_maze(new_pos)
 
 	# update orientation
-	def bot_turn(self, direction):
-		if direction == Direction.FORWARD or direction == Direction.BACKWARD:
-			raise Exception("bad direction: " + direction)
-		val = 1 if direction == Direction.RIGHT else 3
-		self.pos %= self.pos + val
+	def turn(self, direction):
+		self.orientation = Direction.TURN[self.orientation][direction]
 	
 	# check bounds on our new point
 	def _new_pos_is_valid(self, x, y):
