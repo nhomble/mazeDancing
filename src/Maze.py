@@ -1,12 +1,14 @@
 #!/usr/bin/env python2
 
+from Direction import *
+
 class Cell(object):
 	UNKNOWN = 1,
 	OPEN = 2,
 	WALL = 3
 
 class Maze(object):
-	def __init__(self, n=20):
+	def __init__(self, n=32):
 		self.orientation = Direction.FORWARD
 		self.maze = [[Cell.UNKNOWN for i in range(n)] for j in range(n)]
 		self.pos = (n//2, n//2)
@@ -43,7 +45,7 @@ class Maze(object):
 	def _update_maze(self, new_pos):
 		# check bounds
 		if not self._new_pos_is_valid(*new_pos):
-			self.maze = _expand_maze(self.maze)
+			self.maze = self._expand_maze()
 			n = len(self.maze)//2
 			new_pos = (new_pos[0] + n, new_pos[1] + n)
 
@@ -61,6 +63,26 @@ class Maze(object):
 	def _best_path(self):
 		pass
 
-# take nxn maze and pad to 2nx2n
-def _expand_maze(maze):
-	pass
+	# take nxn maze and pad to 2nx2n
+	def _expand_maze(self):
+		n = len(self.maze)
+		padding = [Cell.UNKNOWN for i in range(n//2)]
+		new_maze = []
+		# add first n/2 rows
+		for i in range(n//2):
+			new_maze.append([Cell.UNKNOWN for j in range(2*n)])
+		for row in self.maze:
+			new_maze.append(padding + row + padding)
+		for i in range(n//2):
+			new_maze.append([Cell.UNKNOWN for j in range(2*n)])
+		self.maze = new_maze
+
+def print_maze(maze):
+	for row in maze:
+		string = ""
+		for ele in row:
+			if ele == Cell.OPEN:
+				string += " "
+			else:
+				string += "X"
+		print(string)
