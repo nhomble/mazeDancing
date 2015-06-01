@@ -8,39 +8,27 @@ import rospy
 
 # my modules
 from Speech  import *
-from Sensor_Manager  import *
 from Move_Manager  import *
 
-def doCircle(speech, sensor, move):
+def doCircle(speech, move):
 	speech.speak("do circle")
 	move.move(Direction.LEFT)
 	speech.speak("now backward")
 	move.move(Direction.RIGHT)
 
-def forward_backward(speech, sensor, move):
-	dist = sensor.full_pcl()
-	if dist is not None:
-		print(dist)
-		if dist < .75:
-			speech.speak("backwards")
-			move.move(Direction.BACKWARD)
-		else:
-			speech.speak("forward")
-			move.move(Direction.FORWARD)
-
 # ROS loop
-def main(speech, sensor, move):
-	controls = (speech, sensor, move)
+def main(speech, move):
+	controls = (speech, move)
 	while not rospy.is_shutdown():
 		forward_backward(*controls)
 	return 
 
 if __name__ == "__main__":
 	try:
+		rospy.init_node('practice movements')
 		speech = Speech_Manager()
-		sensor = Sensor_Manager()
-		move = Move_Manager(sensor, z=1)
 		speech.speak("booting up")
+		move = Move_Manager(z=1)
 		time.sleep(1)
 		sys.exit(main(speech, sensor, move))
 	except rospy.ROSInterruptException:
