@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 import math
 import time
+import sys
 import rospy
 from roslib import message
 
@@ -13,6 +14,7 @@ from Direction import *
 
 import cv2
 import cv2.cv as cv
+from std_msgs.msg import Float64
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -36,21 +38,59 @@ class Sensor_Manager(object):
 		self._depth_subscriber = rospy.Subscriber('/camera/depth/image', Image, self.depth_callback)
 		self._color_subscriber = rospy.Subscriber('camera/rgb/image_color', Image, self.color_callback)
 	
-	def not_init(self):
-		return  self.last_depth_image is None or \
-				self.last_pcl is None or \
-				self.last_color_image is None
+		#pubs
+		self._full_pcl_pub = rospy.Publisher('pcl/full', Float64)
+		self.left_bias_pcl = rospy.Publisher('pcl/left', Float64)
+		self.right_bias_pcl = rospy.Publisher('pcl/right', Float64)
+		self.middle_bias_pcl = rospy.Publisher('pcl/middle', Float64)
 
 	# just save data in memory to call later on demand
 	def odom_callback(self, data):
 		self.last_odom = data
 	def pcl_callback(self, data):
 		self.last_pcl = data
+		width = self.last_pcl.width
+		height = self.last_pcl.height
+
+		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
+		# front, left, right, full
+		sums = [0, 0, 0, 0]
+		nums = [0, 0, 0, 0]
+		valids = [\
+			lambda point: True if point[0] > width/3 and \
+			point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False,\
+			lambda point: True if point[0] <= width/2 else False,\
+			lambda point: True if point[0] >= width/2 else False]
+		for points in data_out:
+			if valids[0](points):
+				sums[0] += points[2]
+				nums[0] += 1
+			if valids[1](points):
+				sums[1] += points[2]
+				nums[1] += 1
+			if valids[2](points):
+				sums[2] += points[2]
+				nums[2] += 1
+			sums[3] += points[2]
+			nums[3] += 1
+
+		# no nums should be 0
+		if nums[3] != 0:
+			self._full_pcl_pub.publish(Float64(sums[3] / nums[3]))
+		if nums[0] != 0:
+			self.middle_bias_pcl.publish(Float64(sums[0] / nums[0]))
+		if nums[1] != 0:
+			self.left_bias_pcl.publish(Float64(sums[1] / nums[1]))
+		if nums[2] != 0:
+			self.right_bias_pcl.publish(Float64(sums[2] / num[2]))
+
+
 	def depth_callback(self, data):
 		self.last_depth_image = data
 	def color_callback(self, data):
 		self.last_color_image = data
 
+'''
 	# NOTE attempted to use odometry data to determine angle
 	# but the calculations are surprisingly poor
 	def curr_angle(self):
@@ -109,7 +149,6 @@ class Sensor_Manager(object):
 		depth_image = b.imgmsg_to_cv(self.last_depth_image, '16UC1')
 		depth = SimpleCV.Image(depth_image, cv2image=True)
 		return None
-
 # get depth from pcl if validator say the point is good
 def _process_pcl(data, validator=lambda points: True):
 	total = 0
@@ -118,4 +157,18 @@ def _process_pcl(data, validator=lambda points: True):
 		if validator(point):
 			total += point[2]
 			num += 1
-	return total/num if num != 0 else None
+	result = total/num if num != 0 else None
+	print(result)
+	return result
+'''
+
+def main():
+	manager = Sensor_Manager()
+	while not rospy.is_shutdown():
+		rospy.Rate(10).sleep()
+
+if __name__ == "__main__":
+	try:
+		sys.exit(main())
+	except rospy.ROSInterruptException:
+		pass
