@@ -15,11 +15,8 @@ from consts import *
 class Move_Manager(object):
 	def __init__(self):
 		self.tw_pub = rospy.Publisher(TWIST_PUB, Twist)
-
-		# delays
 		self.rate = rospy.Rate(RATE)
 
-	'''
 	# look right, check distance to wall, return left
 	# return True if should/can move there
 	# this is not in Sensor since we have to move the bot to do the checks
@@ -45,20 +42,18 @@ class Move_Manager(object):
 		else:
 			rospy.log("you asked to check backwards?")
 		return result
-	'''
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True):
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
-			self._send_twist(-TWIST_X, 0)
-		elif direction == Direction.BACKWARD:
 			self._send_twist(TWIST_X, 0)
+		elif direction == Direction.BACKWARD:
+			self._send_twist(-TWIST_X, 0)
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
 			self._turn(direction, hardcode)
 		else:
 			rospy.loginfo("invalid direction to move() " + str(direction))
-		time.sleep(2)
 
 	# halt movement of the turtlebot immediately
 	def stop(self):
@@ -69,30 +64,16 @@ class Move_Manager(object):
 		# HACK we just hardcode a fixed number of identical twist messages to do
 		# an orthogonal turn on a flat surface
 		val = TWIST_Z if direction == Direction.RIGHT else -TWIST_Z
-		if hardcode:
-			for i in range(TWIST_TURN_NUM):
-				self._send_twist(0, val)
-		else:
-			return # code is broken below
-			# NOTE Odometry is not as good as I imagined
-			_, curr_angle = self.sm.curr_angle()
-			if curr_angle is None:
-				return
-			curr_angle = round(curr_angle)
-			goal_angle = (curr_angle + 90) % 360
-			# if we move slow enough this could work..
-			# but this is dangerous
-			initial_sign = (goal_angle - curr_angle) > 0
-			val = self.z if direction == Direction.RIGHT else -self.y
-			# look for sign change
-			while initial_sign == (goal_angle - curr_angle > 0):
-				self.move(0, val)
-				_, curr_angle = self.sm.curr_angle()
-				curr_angle = round(curr_angle)
+		self._send_twist(0, val)
 
 	# actually send message
 	def _send_twist(self, x, z):
-		twist = Twist()
-		twist.linear.x = x
-		twist.angular.z = z
-		self.tw_pub.publish(twist)
+		for _ in range(TWIST_NUM):
+			twist = Twist()
+			twist.linear.x = x
+			twist.angular.z = z
+			rospy.loginfo("new twist message: " + str(twist))
+			self.tw_pub.publish(twist)
+			self.rate.sleep()
+		self.stop()
+		rospy.sleep(DELAY)

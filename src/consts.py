@@ -2,11 +2,12 @@
 
 MIN_FORWARD_DIST = .75
 MIN_TURN_DIST = .6
-TWIST_X = 1
-TWIST_Z = 2
-RATE = 10
-DELAY = 1
-TWIST_TURN_NUM = 12
+# taken from ROS mini_max tutorial
+TWIST_X = .15		# .15 m/s
+TWIST_Z = 1.57/2	# 45 deg/s * 2 sec = 90 degress
+TWIST_NUM = 10		
+RATE = 5.0			# 10 * 5 Hz = 2 sec
+DELAY = 1			# hard 1 second delay
 
 SPEECH_NODE = 'espeak_node'
 SPEECH_IO = 'espeak_sub'
