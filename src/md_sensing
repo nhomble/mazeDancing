@@ -2,6 +2,9 @@
 import math
 import time
 import sys
+
+from consts import *
+
 import rospy
 from roslib import message
 
@@ -9,8 +12,6 @@ from nav_msgs.msg import Odometry
 
 from sensor_msgs.msg import PointCloud2, PointField
 import point_cloud2 as pc2
-
-from Direction import *
 
 import cv2
 import cv2.cv as cv
