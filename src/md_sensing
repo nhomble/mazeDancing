@@ -24,25 +24,25 @@ import numpy as np
 class Sensor_Manager(object):
 	def __init__(self):
 		# need to init a node to subscribe 
-		self._node = rospy.init_node('sensor_manager')
+		self._node = rospy.init_node(SENSOR_NODE)
 		# ODOM things
-		self._odom_subscriber = rospy.Subscriber('odom', Odometry, self.odom_callback)
+		self._odom_subscriber = rospy.Subscriber(ODOM_SUB, Odometry, self.odom_callback)
 		self.last_odom = None
 		# PCL things
-		self._pcl_subscriber = rospy.Subscriber('/camera/depth/points', PointCloud2, self.pcl_callback)
+		self._pcl_subscriber = rospy.Subscriber(PCL_SUB, PointCloud2, self.pcl_callback)
 		self.last_pcl = None
 
 		# Images
 		self.last_depth_image = None
 		self.last_color_image = None
-		self._depth_subscriber = rospy.Subscriber('/camera/depth/image', Image, self.depth_callback)
-		self._color_subscriber = rospy.Subscriber('camera/rgb/image_color', Image, self.color_callback)
+		self._depth_subscriber = rospy.Subscriber(DEPTH_SUB, Image, self.depth_callback)
+		self._color_subscriber = rospy.Subscriber(COLOR_SUB, Image, self.color_callback)
 	
 		#pubs
-		self._full_pcl_pub = rospy.Publisher('pcl/full', Float64)
-		self.left_bias_pcl = rospy.Publisher('pcl/left', Float64)
-		self.right_bias_pcl = rospy.Publisher('pcl/right', Float64)
-		self.middle_bias_pcl = rospy.Publisher('pcl/middle', Float64)
+		self._full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64)
+		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64)
+		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64)
+		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64)
 
 	# just save data in memory to call later on demand
 	def odom_callback(self, data):
