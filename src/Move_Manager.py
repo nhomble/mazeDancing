@@ -3,13 +3,15 @@
 import time
 import math
 
+from functools import partial
+
 # ROS
 import rospy
 from roslib import message
 
 # movement
 from geometry_msgs.msg import Twist
-from std_msgs.msg import FLoat64
+from std_msgs.msg import Float64
 from consts import *
 
 # NOTE MUST BE import by a ROS NODE
@@ -24,14 +26,14 @@ class Move_Manager(object):
 			"RIGHT": False\
 		}
 		self._sense_subs = [\
-			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl(info="FULL")\
-			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl(info="LEFT"))\
-			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl(info="RIGHT"))\
-			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl(info="MIDDLE"))\
+			rospy.Subscriber(PCL_FULL_IO, Float64, partial(self._pcl(info="FULL"))),\
+			rospy.Subscriber(PCL_LEFT_IO, Float64, partial(self._pcl(info="LEFT"))),\
+			rospy.Subscriber(PCL_RIGHT_IO, Float64, partial(self._pcl(info="RIGHT"))),\
+			rospy.Subscriber(PCL_MIDDLE_IO, Float64, partial(self._pcl(info="MIDDLE")))\
 		]
 	
 	# generic callback, use info
-	def _pcl(self, data, info=None):
+	def _pcl(self, info, data=None):
 		if info is None:
 			rospy.loginfo("pcl callback has None as info")
 			return
