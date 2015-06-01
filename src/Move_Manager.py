@@ -9,36 +9,50 @@ from roslib import message
 
 # movement
 from geometry_msgs.msg import Twist
+from std_msgs.msg import FLoat64
 from consts import *
 
 # NOTE MUST BE import by a ROS NODE
 class Move_Manager(object):
 	def __init__(self):
-		self.tw_pub = rospy.Publisher(TWIST_PUB, Twist)
-		self.rate = rospy.Rate(RATE)
+		self._tw_pub = rospy.Publisher(TWIST_PUB, Twist)
+		self._rate = rospy.Rate(RATE)
+		self._checks = {\
+			"FULL": None,\
+			"MIDDLE": False,\
+			"LEFT": False,\
+			"RIGHT": False\
+		}
+		self._sense_subs = [\
+			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl(info="FULL")\
+			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl(info="LEFT"))\
+			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl(info="RIGHT"))\
+			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl(info="MIDDLE"))\
+		]
+	
+	# generic callback, use info
+	def _pcl(self, data, info=None):
+		if info is None:
+			rospy.loginfo("pcl callback has None as info")
+			return
 
-	# look right, check distance to wall, return left
-	# return True if should/can move there
-	# this is not in Sensor since we have to move the bot to do the checks
+		pcl = data.data
+		if info == "FULL":
+			self._checks[info] = pcl
+		elif info == "LEFT" or info == "RIGHT":
+			self._checks[info] = pcl > MIN_TURN_DIST
+		elif info == "MIDDLE":
+			self._checks[info] = pcl > MIN_FORWARD_DIST
+		else:
+			rospy.loginfo("invalid info argument: " + info)
+	
 	def check(self, direction):
-		result = None
-		dist = None
 		if direction == Direction.RIGHT:
-			self.move(Direction.RIGHT)
-			while dist is None:
-				dist = self.sm.bias_pcl(direction)
-			result = self.min_turn_dist < dist
-			self.move(Direction.LEFT)
+			return self._checks["RIGHT"]
 		elif direction == Direction.LEFT:
-			self.move(Direction.LEFT)
-			while dist is None:
-				dist = self.sm.bias_pcl(direction)
-			result = self.min_turn_dist < dist
-			self.move(Direction.RIGHT)
+			return self._checks["LEFT"]
 		elif direction == Direction.FORWARD:
-			while dist is None:
-				dist = self.sm.bias_pcl(direction)
-			result = self.min_forward_dist < dist
+			return self._checks["MIDDLE"]
 		else:
 			rospy.log("you asked to check backwards?")
 		return result
@@ -73,7 +87,7 @@ class Move_Manager(object):
 			twist.linear.x = x
 			twist.angular.z = z
 			rospy.loginfo("new twist message: " + str(twist))
-			self.tw_pub.publish(twist)
-			self.rate.sleep()
+			self._tw_pub.publish(twist)
+			self._rate.sleep()
 		self.stop()
 		rospy.sleep(DELAY)
