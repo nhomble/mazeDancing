@@ -15,13 +15,16 @@ from Move_Manager  import *
 def update(speech, sensor, move):
 	if move.check(Direction.RIGHT):
 		# oh we don't have the wall
+		speech.speak("right")
 		move.move(Direction.RIGHT)
 	elif move.check(Direction.FORWARD):
 		# can we move forward?
+		move.move("forward")
 		move.move(Directon.FORWARD)
 	else:
 		# either there is a left turn or we hit a dead end
 		# regardless
+		move.move("left")
 		move.move(Direction.LEFT)
 
 # ROS loop
@@ -29,7 +32,6 @@ def main(speech, sensor, move, steps=10):
 	controls = (speech, sensor, move)
 	for i in range(steps):
 		update(*controls)
-		speech.speak("step " + str(i))
 	return 
 
 if __name__ == "__main__":

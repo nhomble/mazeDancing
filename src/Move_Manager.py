@@ -48,6 +48,8 @@ class Move_Manager(object):
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True):
+		# NOTE this should be the only place where we delay after movement
+		time.sleep(self.delay)
 		if direction == Direction.FORWARD:
 			self._send_twist(self.x, 0)
 		elif direction == Direction.BACKWARD:
@@ -56,8 +58,6 @@ class Move_Manager(object):
 			self._turn(direction, hardcode)
 		else:
 			rospy.loginfo("invalid direction to move()")
-		# NOTE this should be the only place where we delay after movement
-		time.sleep(self.delay)
 
 	# halt movement of the turtlebot immediately
 	def stop(self):
