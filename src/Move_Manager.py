@@ -33,13 +33,13 @@ class Move_Manager(object):
 	# this is not in Sensor since we have to move the bot to do the checks
 	def check(self, direction):
 		if direction == Direction.RIGHT:
-			self.right()
+			self.move(Direction.RIGHT)
 			result = self.min_turn_dist < self.sm.bias_pcl(direction)
-			self.left()
+			self.move(Direction.LEFT)
 		elif direction == Direction.LEFT:
-			self.left()
+			self.move(Direction.LEFT)
 			result = self.min_turn_dist < self.sm.bias_pcl(direction)
-			self.left()
+			self.move(Direction.RIGHT)
 		elif direction == Direction.FORWARD:
 			result = self.min_forward_dist < self.sm.bias_pcl(direction)
 		else:

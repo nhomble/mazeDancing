@@ -21,8 +21,8 @@ import numpy as np
 
 class Sensor_Manager(object):
 	def __init__(self):
-		self.node = rospy.init_node('sensor_manager')
-
+		# need to init a node to subscribe 
+		self._node = rospy.init_node('sensor_manager')
 		# ODOM things
 		self._odom_subscriber = rospy.Subscriber('odom', Odometry, self.odom_callback)
 		self.last_odom = None
@@ -35,10 +35,6 @@ class Sensor_Manager(object):
 		self.last_color_image = None
 		self._depth_subscriber = rospy.Subscriber('/camera/depth/image', Image, self.depth_callback)
 		self._color_subscriber = rospy.Subscriber('camera/rgb/image_color', Image, self.color_callback)
-
-		while self.not_init():
-			# spin
-			time.sleep(1)
 	
 	def not_init(self):
 		return  self.last_depth_image is None or \

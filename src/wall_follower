@@ -29,6 +29,7 @@ def main(speech, sensor, move, steps=10):
 	controls = (speech, sensor, move)
 	for i in range(steps):
 		update(*controls)
+		speech.speak("step " + str(i))
 	return 
 
 if __name__ == "__main__":
@@ -37,7 +38,6 @@ if __name__ == "__main__":
 		sensor = Sensor_Manager()
 		move = Move_Manager(sensor, z=1)
 		speech.speak("booting up")
-		rospy.init_node('wall_follower')
 		sys.exit(main(speech, sensor, move))
 	except rospy.ROSInterruptException:
 		pass
