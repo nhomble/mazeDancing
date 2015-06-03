@@ -52,17 +52,21 @@ class Sensor_Manager(object):
 		self.last_pcl = data
 		width = self.last_pcl.width
 		height = self.last_pcl.height
-
 		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
 		# front, left, right, full
 		sums = [0, 0, 0, 0]
 		nums = [0, 0, 0, 0]
 		valids = [\
-			lambda point: True if point[0] > width/3 and \
-			point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False,\
-			lambda point: True if point[0] <= width/2 else False,\
-			lambda point: True if point[0] >= width/2 else False]
+				lambda point: True if point[0] > width/3 and \
+					point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False,\
+				lambda point: True if point[0] <= width/2 else False,\
+				lambda point: True if point[0] >= width/2 else False\
+			]
+		# TODO
+		# (x,y,_) are not what you think..
+		# there is some translation going on
 		for points in data_out:
+			rospy.loginfo(points)
 			if valids[0](points):
 				sums[0] += points[2]
 				nums[0] += 1
