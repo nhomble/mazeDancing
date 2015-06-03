@@ -7,39 +7,22 @@ import sys
 import rospy
 
 # my modules
-from Speech  import *
-from Sensor_Manager  import *
 from Move_Manager  import *
 
-# simple wall following
-def update(speech, sensor, move):
-	if move.check(Direction.RIGHT):
-		# oh we don't have the wall
-		speech.speak("right")
-		move.move(Direction.RIGHT)
-	elif move.check(Direction.FORWARD):
-		# can we move forward?
-		move.move("forward")
-		move.move(Directon.FORWARD)
-	else:
-		# either there is a left turn or we hit a dead end
-		# regardless
-		move.move("left")
-		move.move(Direction.LEFT)
+def checks(move):
+	print(move._checks)
 
 # ROS loop
-def main(speech, sensor, move, steps=10):
-	controls = (speech, sensor, move)
-	for i in range(steps):
-		update(*controls)
+def main(move):
+	while not rospy.is_shutdown():
+		checks(move)
+		rospy.sleep(1)
 	return 
 
 if __name__ == "__main__":
 	try:
-		speech = Speech_Manager()
-		sensor = Sensor_Manager()
-		move = Move_Manager(sensor, z=1)
-		speech.speak("booting up")
-		sys.exit(main(speech, sensor, move))
+		rospy.init_node('wall_follower')
+		move = Move_Manager()
+		sys.exit(main(move))
 	except rospy.ROSInterruptException:
 		pass
