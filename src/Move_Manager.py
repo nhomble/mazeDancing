@@ -3,8 +3,6 @@
 import time
 import math
 
-from functools import partial
-
 # ROS
 import rospy
 from roslib import message
@@ -21,40 +19,52 @@ class Move_Manager(object):
 		self._rate = rospy.Rate(RATE)
 		self._checks = {\
 			"FULL": None,\
-			"MIDDLE": False,\
-			"LEFT": False,\
-			"RIGHT": False\
+			"MIDDLE": None,\
+			"LEFT": None,\
+			"RIGHT": None\
 		}
 		self._sense_subs = [\
-			rospy.Subscriber(PCL_FULL_IO, Float64, partial(self._pcl(info="FULL"))),\
-			rospy.Subscriber(PCL_LEFT_IO, Float64, partial(self._pcl(info="LEFT"))),\
-			rospy.Subscriber(PCL_RIGHT_IO, Float64, partial(self._pcl(info="RIGHT"))),\
-			rospy.Subscriber(PCL_MIDDLE_IO, Float64, partial(self._pcl(info="MIDDLE")))\
+			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl_full),\
+			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl_left),\
+			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
+			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle)\
 		]
 	
-	# generic callback, use info
-	def _pcl(self, info, data=None):
-		if info is None:
-			rospy.loginfo("pcl callback has None as info")
+	def _pcl_left(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
 			return
-
 		pcl = data.data
-		if info == "FULL":
-			self._checks[info] = pcl
-		elif info == "LEFT" or info == "RIGHT":
-			self._checks[info] = pcl > MIN_TURN_DIST
-		elif info == "MIDDLE":
-			self._checks[info] = pcl > MIN_FORWARD_DIST
-		else:
-			rospy.loginfo("invalid info argument: " + info)
+		self._checks["LEFT"] = pcl
+
+	def _pcl_right(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
+			return
+		pcl = data.data
+		self._checks["RIGHT"] = pcl
+
+	def _pcl_middle(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
+			return
+		pcl = data.data
+		self._checks["MIDDLE"] = pcl
+
+	def _pcl_full(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
+			return
+		pcl = data.data
+		self._checks["FULL"] = pcl
 	
 	def check(self, direction):
 		if direction == Direction.RIGHT:
-			return self._checks["RIGHT"]
+			return self._checks["RIGHT"] > MIN_TURN_DIST
 		elif direction == Direction.LEFT:
-			return self._checks["LEFT"]
+			return self._checks["LEFT"] > MIN_TURN_DIST
 		elif direction == Direction.FORWARD:
-			return self._checks["MIDDLE"]
+			return self._checks["MIDDLE"] > MIN_FORWARD_DIST
 		else:
 			rospy.log("you asked to check backwards?")
 		return result
