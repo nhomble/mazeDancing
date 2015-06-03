@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 MIN_FORWARD_DIST = .75
+MAX_FORWARD_DIST = 1.2
 MIN_TURN_DIST = .6
 # taken from ROS mini_max tutorial
 TWIST_X = .15		# .15 m/s
@@ -17,6 +18,11 @@ PCL_FULL_IO = 'pcl/full'
 PCL_RIGHT_IO = 'pcl/right'
 PCL_LEFT_IO = 'pcl/left'
 PCL_MIDDLE_IO = 'pcl/middle'
+
+PCL_X_MIN = -0.35
+PCL_Y_MIN = 0.35
+PCL_X_MAX = 0.1
+PCL_Y_MAX = 1.2
 
 ODOM_SUB = 'odom'
 PCL_SUB = '/camera/depth/points'
