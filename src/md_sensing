@@ -39,28 +39,31 @@ class Sensor_Manager(object):
 		self._depth_subscriber = rospy.Subscriber(DEPTH_SUB, Image, self.depth_callback)
 		self._color_subscriber = rospy.Subscriber(COLOR_SUB, Image, self.color_callback)
 	
-		#pubs
+		# pubs
 		self._full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64)
 		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64)
 		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64)
 		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64)
 
-	# just save data in memory to call later on demand
 	def odom_callback(self, data):
 		self.last_odom = data
 	def pcl_callback(self, data):
 		self.last_pcl = data
 		width = self.last_pcl.width
 		height = self.last_pcl.height
+		middle = (PCL_X_MAX + PCL_X_MIN) / 2
 		data_out = pc2.read_points(self.last_pcl, skip_nans=True)
 		# front, left, right, full
 		sums = [0, 0, 0, 0]
 		nums = [0, 0, 0, 0]
+		good_range = lambda point: True if point[1] > PCL_Y_MIN and point[1] < PCL_Y_MAX else False
 		valids = [\
-				lambda point: True if point[0] > width/3 and \
-					point[0] < 2 * width/3 and point[1] > height/3 and point[2] < 2 * height/3 else False,\
-				lambda point: True if point[0] <= width/2 else False,\
-				lambda point: True if point[0] >= width/2 else False\
+				lambda point: True if point[0] > PCL_X_MIN and point[0] < PCL_X_MAX and \
+					good_range(point) else False,\
+				lambda point: True if point[0] <= middle and\
+					good_range(point) else False,\
+				lambda point: True if point[0] >= middle and\
+					good_range(point) else False\
 			]
 		# TODO
 		# (x,y,_) are not what you think..
