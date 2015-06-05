@@ -58,13 +58,24 @@ class Move_Manager(object):
 		pcl = data.data
 		self._checks["FULL"] = pcl
 	
+	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
+	def nudge(self):
+		goal = (MAX_FORWARD_DIST + MIN_FORWARD_DIST)/2
+		pos = self._checks["MIDDLE"]
+		diff = goal - pos
+		# _send_twist takes 1 second to perform the entire movement
+		# so we should not have to scale diff at all
+		_send_twist(diff, 0)
+
+	# turning is left to the callee!
+	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction):
 		if direction == Direction.RIGHT:
-			return self._checks["RIGHT"] > MIN_TURN_DIST
+			return self._checks["RIGHT"] > MAX_TURN_DIST
 		elif direction == Direction.LEFT:
-			return self._checks["LEFT"] > MIN_TURN_DIST
+			return self._checks["LEFT"] > MAX_TURN_DIST
 		elif direction == Direction.FORWARD:
-			return self._checks["MIDDLE"] > MIN_FORWARD_DIST
+			return self._checks["MIDDLE"] > MAX_FORWARD_DIST
 		else:
 			rospy.log("you asked to check backwards?")
 		return result
