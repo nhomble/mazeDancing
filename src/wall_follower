@@ -9,6 +9,31 @@ import rospy
 # my modules
 from Move_Manager  import *
 
+# take N steps
+# TODO choose goal condition
+def right_wall_follower(move, N=10, stall=4):
+	for _ in range(N):
+		## check right
+		# turn right
+		move.move(Direction.RIGHT)
+		time.sleep(stall)
+		# check the right side of depth cloud
+		if move.check(move.Direction.RIGHT):
+			move.move(Direction.FORWARD)
+			continue
+		# we got a wall, so adjust a little to be at goal distance
+		move.nudge()
+		# reset
+		move.move(Direction.LEFT)
+		time.sleep(stall)
+		## check forward
+		if move.check(Direction.FORWARD):
+			move.move(Direction.FORWARD)
+		else:
+			move.move(Direction.LEFT)
+
+			
+
 def checks(move):
 	print(move._checks)
 
