@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 
-MIN_FORWARD_DIST = .75
-MAX_FORWARD_DIST = 1.2
-MIN_TURN_DIST = .6
+MIN_FORWARD_DIST = .75	# no closer to the wall than this empirically chosen value
+MAX_FORWARD_DIST = 1.2	# no further away to the wall than this empirically chosen value
+MIN_TURN_DIST = .6		# ^ ditto but for turning
+MAX_TURN_DIST = 1.0
 # taken from ROS mini_max tutorial
 TWIST_X = .15		# .15 m/s
 TWIST_Z = 1.57/2	# 45 deg/s * 2 sec = 90 degress
