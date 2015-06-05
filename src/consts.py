@@ -73,3 +73,8 @@ class Direction(object):
 			(1,):(0,)
 		}
 	}
+
+class Maze_Cell(object):
+	UNKNOWN = 1,
+	OPEN = 2,
+	WALL = 3

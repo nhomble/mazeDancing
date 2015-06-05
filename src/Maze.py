@@ -1,21 +1,18 @@
 #!/usr/bin/env python2
 
-from Direction import *
+import numpy
+from consts import *
 
-class Cell(object):
-	UNKNOWN = 1,
-	OPEN = 2,
-	WALL = 3
-
+from a_star import *
 class Maze(object):
 	def __init__(self, n=8):
 		self.orientation = Direction.FORWARD
-		self.maze = [[Cell.UNKNOWN for i in range(n)] for j in range(n)]
+		self.maze = [[Maze_Cell.UNKNOWN for i in range(n)] for j in range(n)]
 		self.pos = (n//2, n//2)
 		self.start = self.pos
-		self.maze[self.start[0]][self.start[1]] = Cell.OPEN
+		self.maze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
 
-		this.path = []
+		self.path = []
 
 	# get new step
 	def step(self):
@@ -54,41 +51,50 @@ class Maze(object):
 		# move
 		self.pos = new_pos
 		# mark internally
-		self.maze[self.pos[0]][self.pos[1]] = Cell.OPEN
+		self.maze[self.pos[0]][self.pos[1]] = Maze_Cell.OPEN
 	
-	# based on _best_path array
-	# format list to suit needs 
+	# return best path from self.start to self.pos
+	# based on self.maze
 	def best_path(self):
-		if len(self.path) == 0:
-			raise Exception("we have not reached goal yet, self.path = []!")
+		# A* algo
+		a_star = AStar()
+		a_star.init_maze(self.maze, self.start, self.pos)
+		a_star.process()
+
+		# get path from algo
+		cells = []
+		cell = a_star.end
+		while cell is not a_star.start:
+			cells.insert(0, cell)
+			cell = cell.parent
+		cells.insert(0, a_star.start)
+		
+		# translate into movements
+		dirs = []
+		last_dir = Direction.FORWARD
+		for cell in cells:
+			continue
 		return None
-
-	# return a series of directions at every node
-	# this is best case!
-	# assign this.path
-	def _best_path(self):
-		# from self.start, do a BFS to get to self.pos (the end position)
-		pass
-
+	
 	# take nxn maze and pad to 2nx2n
 	def _expand_maze(self):
 		n = len(self.maze)
-		padding = [Cell.UNKNOWN for i in range(n//2)]
+		padding = [Maze_Cell.UNKNOWN for i in range(n//2)]
 		new_maze = []
 		# add first n/2 rows
 		for i in range(n//2):
-			new_maze.append([Cell.UNKNOWN for j in range(2*n)])
+			new_maze.append([Maze_Cell.UNKNOWN for j in range(2*n)])
 		for row in self.maze:
 			new_maze.append(padding + row + padding)
 		for i in range(n//2):
-			new_maze.append([Cell.UNKNOWN for j in range(2*n)])
+			new_maze.append([Maze_Cell.UNKNOWN for j in range(2*n)])
 		self.maze = new_maze
 
 	def print_maze(self):
 		for row in self.maze:
 			string = ""
 			for ele in row:
-				if ele == Cell.OPEN:
+				if ele == Maze_Cell.OPEN:
 					string += " "
 				else:
 					string += "X"

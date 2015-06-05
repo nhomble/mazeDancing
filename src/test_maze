@@ -12,7 +12,8 @@ m.turn(Direction.LEFT)
 for i in range(5):
 	m.step()
 m.turn(Direction.LEFT)
-for i in range(5):
+for i in range(3):
 	m.step()
 
 m.print_maze()
+m.best_path()
