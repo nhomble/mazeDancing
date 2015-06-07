@@ -8,6 +8,11 @@ for i in range(5):
 m.turn(Direction.LEFT)
 for i in range(5):
 	m.step()
+m.turn(Direction.RIGHT)
+m.turn(Direction.RIGHT)
+for i in range(15):
+	m.step()
+	
 m.turn(Direction.LEFT)
 for i in range(5):
 	m.step()
