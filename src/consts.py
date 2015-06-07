@@ -43,6 +43,7 @@ class Direction(object):
 	RIGHT = 1,
 	FORWARD = 2,
 	BACKWARD = 3,
+	ERROR = 4,
 	TURN = {
 		# LEFT
 		(0,):{ 
@@ -78,3 +79,21 @@ class Maze_Cell(object):
 	UNKNOWN = 1,
 	OPEN = 2,
 	WALL = 3
+
+CELL_TO_DIR = [
+	[
+		Direction.ERROR,
+		Direction.RIGHT,
+		Direction.LEFT
+	],
+	[
+		Direction.BACKWARD,
+		Direction.ERROR,
+		Direction.ERROR
+	],
+	[
+		Direction.FORWARD,
+		Direction.ERROR,
+		Direction.ERROR
+	]
+]

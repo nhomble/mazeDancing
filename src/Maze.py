@@ -69,12 +69,34 @@ class Maze(object):
 			cell = cell.parent
 		cells.insert(0, a_star.start)
 		
-		# translate into movements
-		dirs = []
-		last_dir = Direction.FORWARD
+		# of these cells, which are actual nodes
+		nodes = []
 		for cell in cells:
-			continue
-		return None
+			out = 0
+			if Maze_Cell.OPEN == self.maze[cell.x-1][cell.y]:
+				out += 1
+			if Maze_Cell.OPEN == self.maze[cell.x+1][cell.y]:
+				out += 1
+			if Maze_Cell.OPEN == self.maze[cell.x][cell.y-1]:
+				out += 1
+			if Maze_Cell.OPEN == self.maze[cell.x][cell.y+1]:
+				out += 1
+			if out > 2:
+				nodes.append(cell)
+
+		ret = []
+		last = (False, None)
+		for cell in cells:
+			# last[1] should be the node
+			# last[2] is how I entered
+			if last[0]:
+				leave_x = cell.x - last[1].x
+				leave_y = cell.y - last[1].y
+				leave_dir = CELL_TO_DIR[leave_x][leave_y]
+				ret.append(leave_dir)
+			last = (cell in nodes, cell)
+
+		return ret
 	
 	# take nxn maze and pad to 2nx2n
 	def _expand_maze(self):
