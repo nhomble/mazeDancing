@@ -60,16 +60,15 @@ class Sensor_Manager(object):
 		valids = [\
 				lambda point: True if point[0] > PCL_X_MIN and point[0] < PCL_X_MAX and \
 					good_range(point) else False,\
-				lambda point: True if point[0] <= middle and\
-					good_range(point) else False,\
 				lambda point: True if point[0] >= middle and\
+					good_range(point) else False,\
+				lambda point: True if point[0] <= middle and\
 					good_range(point) else False\
 			]
-		# TODO
 		# (x,y,_) are not what you think..
 		# there is some translation going on
 		for points in data_out:
-			rospy.loginfo(points)
+			# rospy.loginfo(points)
 			if valids[0](points):
 				sums[0] += points[2]
 				nums[0] += 1
@@ -90,7 +89,7 @@ class Sensor_Manager(object):
 		if nums[1] != 0:
 			self.left_bias_pcl.publish(Float64(sums[1] / nums[1]))
 		if nums[2] != 0:
-			self.right_bias_pcl.publish(Float64(sums[2] / num[2]))
+			self.right_bias_pcl.publish(Float64(sums[2] / nums[2]))
 
 
 	def depth_callback(self, data):
