@@ -23,13 +23,29 @@ class Move_Manager(object):
 			Direction.LEFT: None,\
 			Direction.RIGHT: None\
 		}
+		# TODO
+		# should consider packaging variance and num and depth all together
+		self._last_variance = None
+		self._last_num = None
 		self._sense_subs = [\
 			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl_full),\
 			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl_left),\
 			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
 			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle)\
+			rospy.Subscriber(PCL_NUM, Int64, self._pcl_num)\
+			rospy.SUbscriber(PCL_VARIANCE, Float64, self._pcl_variance)\
 		]
 	
+	def _pcl_variance(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
+		self._last_variance = data.data
+	
+	def _pcl_num(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
+		self._last_num = data.data
+
 	def _pcl_left(self, data):
 		if data is None:
 			rospy.loginfo("data is none")
@@ -61,19 +77,25 @@ class Move_Manager(object):
 	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
 	def nudge(self):
 		goal = (MAX_FORWARD_DIST + MIN_FORWARD_DIST)/2
-		pos = self._checks["MIDDLE"]
+		# NOTE most reliable measurement at the moment
+		pos = self._checks["FULL"]
 		diff = (goal - pos) / TIME
 		# _send_twist takes 1 second to perform the entire movement
 		# so we should not have to scale diff at all
+
+		# boundary conditions
+		diff = min(MAX_NUDGE, diff) if diff > 0 else max(-MAX_NUDGE, diff)
 		rospy.loginfo("nudge: " + str(diff))
 		self._send_twist(diff, 0)
 
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction):
-		# HACK
-		measure = self._checks[direction]
+		# NOTE the most reliable measurement at the moment
+		measure = self._checks["FULL"]
 		direction = Direction.FORWARD
+
+		rospy.loginfo("last variance was {}".format(self._last_variance))
 		rospy.loginfo("{} > {}".format(measure, MIN_FORWARD_DIST))
 		return measure > MIN_FORWARD_DIST if direction == Direction.FORWARD else measure > MIN_TURN_DIST
 	
