@@ -11,37 +11,45 @@ from Move_Manager  import *
 
 # take N steps
 # TODO choose goal condition
-def right_wall_follower(move, N=10, stall=4):
+def right_wall_follower(move, N=3, stall=8):
 	for _ in range(N):
+		rospy.loginfo("check right")
 		## check right
 		# turn right
 		move.move(Direction.RIGHT)
 		time.sleep(stall)
 		# check the right side of depth cloud
-		if move.check(move.Direction.RIGHT):
+		if move.check(Direction.RIGHT):
+			rospy.loginfo("move forward because gap in wall")
 			move.move(Direction.FORWARD)
 			continue
+		rospy.loginfo("nudge")
 		# we got a wall, so adjust a little to be at goal distance
-		move.nudge()
+		#move.nudge()
 		# reset
+		rospy.loginfo("reset left")
 		move.move(Direction.LEFT)
 		time.sleep(stall)
 		## check forward
 		if move.check(Direction.FORWARD):
+			rospy.loginfo("forward")
 			move.move(Direction.FORWARD)
 		else:
+			rospy.loginfo("turn left cause ahead is blocked")
 			move.move(Direction.LEFT)
 
 			
 
 def checks(move):
-	print(move._checks)
+	while True:
+		print(move._checks)
+		print("{} {} {}".format(move.check(Direction.FORWARD), move.check(Direction.LEFT), move.check(Direction.RIGHT)))
+		rospy.Rate(5).sleep()
 
 # ROS loop
 def main(move):
-	while not rospy.is_shutdown():
-		checks(move)
-		rospy.sleep(1)
+	right_wall_follower(move)
+	#checks(move)
 	return 
 
 if __name__ == "__main__":
