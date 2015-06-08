@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
-MIN_FORWARD_DIST = .75	# no closer to the wall than this empirically chosen value
-MAX_FORWARD_DIST = 0.9	# no further away to the wall than this empirically chosen value
+MIN_FORWARD_DIST = .53	# no closer to the wall than this empirically chosen value
+MAX_FORWARD_DIST = 0.8	# no further away to the wall than this empirically chosen value
 MIN_TURN_DIST = .6		# ^ ditto but for turning
 MAX_TURN_DIST = .8
 
@@ -13,6 +13,8 @@ TWIST_X = .15			# .15 m/s
 TWIST_Z = 1.57/TIME		# 45 deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
+MAX_NUDGE = .5
+
 SPEECH_NODE = 'espeak_node'
 SPEECH_IO = 'espeak_sub'
 
@@ -21,11 +23,14 @@ PCL_FULL_IO = 'pcl/full'
 PCL_RIGHT_IO = 'pcl/right'
 PCL_LEFT_IO = 'pcl/left'
 PCL_MIDDLE_IO = 'pcl/middle'
+PCL_VARIANCE = 'pcl/variance'
+PCL_NUM = 'pcl/number'
 
-PCL_X_MIN = -1.0
-PCL_Y_MIN = 0.35
-PCL_X_MAX = 1.0
-PCL_Y_MAX = 1.2
+PCL_X_MIN = -0.75
+PCL_Y_MIN = 0.3
+PCL_X_MAX = 0.75
+PCL_Y_MAX = 0.5
+PCL_INTERVAL = 50
 
 ODOM_SUB = 'odom'
 PCL_SUB = '/camera/depth/points'
