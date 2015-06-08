@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+
 import math
 import time
 import sys
@@ -15,8 +16,7 @@ import point_cloud2 as pc2
 
 import cv2
 import cv2.cv as cv
-from std_msgs.msg import Float64
-from std_msgs.msg import String
+from std_msgs.msg import Float64, Int64, String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import SimpleCV
@@ -44,6 +44,8 @@ class Sensor_Manager(object):
 		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64)
 		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64)
 		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64)
+		self.variance_pcl = rospy.Publisher(PCL_VARIANCE, Float64)
+		self.num_pcl = rospy.Publisher(PCL_NUM, Int64)
 
 	def odom_callback(self, data):
 		self.last_odom = data
@@ -67,7 +69,9 @@ class Sensor_Manager(object):
 			]
 		# (x,y,_) are not what you think..
 		# there is some translation going on
-		for points in data_out:
+		data_out = list(data_out)
+		_sq_sum = 0
+		for points in data_out[::PCL_INTERVAL]:
 			# rospy.loginfo(points)
 			if valids[0](points):
 				sums[0] += points[2]
@@ -80,16 +84,22 @@ class Sensor_Manager(object):
 				nums[2] += 1
 			sums[3] += points[2]
 			nums[3] += 1
+			_sq_sum += math.pow(points[2], 2)
 
+
+		rospy.loginfo("processed {} {} {} {}".format(nums[0], nums[1], nums[2], nums[3]))
 		# no nums should be 0
 		if nums[3] != 0:
-			self._full_pcl_pub.publish(Float64(sums[3] / nums[3]))
+			_avg = sums[3] / nums[3]
+			self._full_pcl_pub.publish(Float64(_avg))
+			self.variance_pcl.publish(Float64(_sq_sum - math.pow(_avg, 2)))
 		if nums[0] != 0:
 			self.middle_bias_pcl.publish(Float64(sums[0] / nums[0]))
 		if nums[1] != 0:
 			self.left_bias_pcl.publish(Float64(sums[1] / nums[1]))
 		if nums[2] != 0:
 			self.right_bias_pcl.publish(Float64(sums[2] / nums[2]))
+		self.num_pcl.publish(Int64(nums[3]))
 
 
 	def depth_callback(self, data):
