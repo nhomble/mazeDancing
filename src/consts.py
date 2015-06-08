@@ -4,6 +4,7 @@ MIN_FORWARD_DIST = .75	# no closer to the wall than this empirically chosen valu
 MAX_FORWARD_DIST = 1.2	# no further away to the wall than this empirically chosen value
 MIN_TURN_DIST = .6		# ^ ditto but for turning
 MAX_TURN_DIST = 1.0
+
 # taken from ROS mini_max tutorial
 TWIST_X = .15		# .15 m/s
 TWIST_Z = 1.57/2	# 45 deg/s * 2 sec = 90 degress
@@ -38,6 +39,7 @@ LEFT		RIGHT
 	BACKWARD
 '''
 
+# python2 enums
 class Direction(object):
 	LEFT = 0,
 	RIGHT = 1,
@@ -75,25 +77,37 @@ class Direction(object):
 		}
 	}
 
+# internal maze representation
 class Maze_Cell(object):
 	UNKNOWN = 1,
 	OPEN = 2,
 	WALL = 3
 
-CELL_TO_DIR = [
-	[
-		Direction.ERROR,
-		Direction.RIGHT,
-		Direction.LEFT
-	],
-	[
-		Direction.BACKWARD,
-		Direction.ERROR,
-		Direction.ERROR
-	],
-	[
-		Direction.FORWARD,
-		Direction.ERROR,
-		Direction.ERROR
+	CELL_TO_DIR = [
+		[
+			Direction.ERROR,
+			Direction.RIGHT,
+			Direction.LEFT
+		],
+		[
+			Direction.BACKWARD,
+			Direction.ERROR,
+			Direction.ERROR
+		],
+		[
+			Direction.FORWARD,
+			Direction.ERROR,
+			Direction.ERROR
+		]
 	]
-]
+	
+# we can be a left or right wall follower
+class Follower(object):
+	LEFT = 1,
+	RIGHT = 2
+
+	# depending on the follower, I will choose the direction accordngly
+	TRANSLATE_FORWARD = {
+		(1,0):Direction.RIGHT,
+		(2,0):Direction.LEFT
+	}
