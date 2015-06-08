@@ -92,7 +92,7 @@ class Maze(object):
 			if last[0]:
 				leave_x = cell.x - last[1].x
 				leave_y = cell.y - last[1].y
-				leave_dir = CELL_TO_DIR[leave_x][leave_y]
+				leave_dir = Maze_Cell.CELL_TO_DIR[leave_x][leave_y]
 				ret.append(leave_dir)
 			last = (cell in nodes, cell)
 
