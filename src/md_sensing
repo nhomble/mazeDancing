@@ -16,7 +16,7 @@ import point_cloud2 as pc2
 
 import cv2
 import cv2.cv as cv
-from std_msgs.msg import Float64, Int64, String
+from std_msgs.msg import Float64, Int64, String, UInt32MultiArray
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import SimpleCV
@@ -40,12 +40,10 @@ class Sensor_Manager(object):
 		self._color_subscriber = rospy.Subscriber(COLOR_SUB, Image, self.color_callback)
 	
 		# pubs
-		self._full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64)
+		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, UInt32MultiArray)
 		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64)
 		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64)
 		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64)
-		self.variance_pcl = rospy.Publisher(PCL_VARIANCE, Float64)
-		self.num_pcl = rospy.Publisher(PCL_NUM, Int64)
 
 	def odom_callback(self, data):
 		self.last_odom = data
@@ -91,15 +89,15 @@ class Sensor_Manager(object):
 		# no nums should be 0
 		if nums[3] != 0:
 			_avg = sums[3] / nums[3]
-			self._full_pcl_pub.publish(Float64(_avg))
-			self.variance_pcl.publish(Float64(_sq_sum - math.pow(_avg, 2)))
+			_variance = _sq_sum - math.pow(_avg, 2)
+			message_array = [_avg, _variance, nums[3]]
+			self.full_pcl_pub.publish(message_array)
 		if nums[0] != 0:
 			self.middle_bias_pcl.publish(Float64(sums[0] / nums[0]))
 		if nums[1] != 0:
 			self.left_bias_pcl.publish(Float64(sums[1] / nums[1]))
 		if nums[2] != 0:
 			self.right_bias_pcl.publish(Float64(sums[2] / nums[2]))
-		self.num_pcl.publish(Int64(nums[3]))
 
 
 	def depth_callback(self, data):

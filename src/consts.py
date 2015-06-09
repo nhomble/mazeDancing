@@ -23,8 +23,8 @@ PCL_FULL_IO = 'pcl/full'
 PCL_RIGHT_IO = 'pcl/right'
 PCL_LEFT_IO = 'pcl/left'
 PCL_MIDDLE_IO = 'pcl/middle'
-PCL_VARIANCE = 'pcl/variance'
-PCL_NUM = 'pcl/number'
+# PCL_VARIANCE = 'pcl/variance'
+# PCL_NUM = 'pcl/number'
 
 PCL_X_MIN = -0.75
 PCL_Y_MIN = 0.3

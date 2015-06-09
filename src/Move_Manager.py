@@ -9,7 +9,7 @@ from roslib import message
 
 # movement
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, UInt32MultiArray
 from consts import *
 
 # NOTE MUST BE import by a ROS NODE
@@ -25,27 +25,13 @@ class Move_Manager(object):
 		}
 		# TODO
 		# should consider packaging variance and num and depth all together
-		self._last_variance = None
-		self._last_num = None
 		self._sense_subs = [\
-			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl_full),\
+			rospy.Subscriber(PCL_FULL_IO, UInt32MultiArray, self._pcl_full),\
 			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl_left),\
 			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
 			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle)\
-			rospy.Subscriber(PCL_NUM, Int64, self._pcl_num)\
-			rospy.SUbscriber(PCL_VARIANCE, Float64, self._pcl_variance)\
 		]
 	
-	def _pcl_variance(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-		self._last_variance = data.data
-	
-	def _pcl_num(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-		self._last_num = data.data
-
 	def _pcl_left(self, data):
 		if data is None:
 			rospy.loginfo("data is none")
@@ -67,6 +53,8 @@ class Move_Manager(object):
 		pcl = data.data
 		self._checks[Direction.FORWARD] = pcl
 
+	# NOTE
+	# misleading since this is an array, not float64
 	def _pcl_full(self, data):
 		if data is None:
 			rospy.loginfo("data is none")
@@ -79,7 +67,7 @@ class Move_Manager(object):
 		goal = (MAX_FORWARD_DIST + MIN_FORWARD_DIST)/2
 		# NOTE most reliable measurement at the moment
 		pos = self._checks["FULL"]
-		diff = (goal - pos) / TIME
+		diff = (goal - pos[0]) / TIME
 		# _send_twist takes 1 second to perform the entire movement
 		# so we should not have to scale diff at all
 
@@ -97,7 +85,7 @@ class Move_Manager(object):
 
 		rospy.loginfo("last variance was {}".format(self._last_variance))
 		rospy.loginfo("{} > {}".format(measure, MIN_FORWARD_DIST))
-		return measure > MIN_FORWARD_DIST if direction == Direction.FORWARD else measure > MIN_TURN_DIST
+		return measure[0] > MIN_FORWARD_DIST if direction == Direction.FORWARD else measure[0] > MIN_TURN_DIST
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True):
