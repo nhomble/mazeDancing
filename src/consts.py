@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
-MIN_FORWARD_DIST = .53	# no closer to the wall than this empirically chosen value
-MAX_FORWARD_DIST = 0.8	# no further away to the wall than this empirically chosen value
+MIN_FORWARD_DIST = .49	# no closer to the wall than this empirically chosen value
+MAX_FORWARD_DIST = 0.6	# no further away to the wall than this empirically chosen value
 MIN_TURN_DIST = .6		# ^ ditto but for turning
 MAX_TURN_DIST = .8
 
@@ -10,7 +10,7 @@ TWIST_NUM = 10
 RATE = 5.0
 TIME = TWIST_NUM / RATE
 TWIST_X = .15			# .15 m/s
-TWIST_Z = 1.57/TIME		# 45 deg/s * 2 sec = 90 degress
+TWIST_Z = 1.62/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
 MAX_NUDGE = .5
@@ -23,8 +23,7 @@ PCL_FULL_IO = 'pcl/full'
 PCL_RIGHT_IO = 'pcl/right'
 PCL_LEFT_IO = 'pcl/left'
 PCL_MIDDLE_IO = 'pcl/middle'
-# PCL_VARIANCE = 'pcl/variance'
-# PCL_NUM = 'pcl/number'
+PCL_VARIANCE = 'pcl/variance'
 
 PCL_X_MIN = -0.75
 PCL_Y_MIN = 0.3

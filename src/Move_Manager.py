@@ -9,7 +9,7 @@ from roslib import message
 
 # movement
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64, UInt32MultiArray
+from std_msgs.msg import Float64
 from consts import *
 
 # maze solving
@@ -26,16 +26,22 @@ class Move_Manager(object):
 			Direction.LEFT: None,\
 			Direction.RIGHT: None\
 		}
-		# TODO
-		# should consider packaging variance and num and depth all together
+		# HACK
+		# multiarrays are trickier than I would like to deal with right now..
+		self._last_variance = None
 		self._sense_subs = [\
-			rospy.Subscriber(PCL_FULL_IO, UInt32MultiArray, self._pcl_full),\
+			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl_full),\
 			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl_left),\
 			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
-			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle)\
+			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle),\
+			rospy.Subscriber(PCL_VARIANCE, Float64, self._pcl_variance)\
 		]
 		self.maze = Maze()
 	
+	def _pcl_variance(self, data):
+		if data is None:
+			rospy.loginfo("data is none")
+		self._last_variance = data.data
 	def _pcl_left(self, data):
 		if data is None:
 			rospy.loginfo("data is none")
@@ -64,6 +70,8 @@ class Move_Manager(object):
 			rospy.loginfo("data is none")
 			return
 		pcl = data.data
+		rospy.loginfo(pcl)
+
 		self._checks["FULL"] = pcl
 	
 	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
@@ -71,7 +79,7 @@ class Move_Manager(object):
 		goal = (MAX_FORWARD_DIST + MIN_FORWARD_DIST)/2
 		# NOTE most reliable measurement at the moment
 		pos = self._checks["FULL"]
-		diff = (goal - pos[0]) / TIME
+		diff = (goal - pos) / TIME
 		# _send_twist takes 1 second to perform the entire movement
 		# so we should not have to scale diff at all
 
@@ -86,10 +94,8 @@ class Move_Manager(object):
 		# NOTE the most reliable measurement at the moment
 		measure = self._checks["FULL"]
 		direction = Direction.FORWARD
-
-		rospy.loginfo("last variance was {}".format(self._last_variance))
-		rospy.loginfo("{} > {}".format(measure, MIN_FORWARD_DIST))
-		return measure[0] > MIN_FORWARD_DIST if direction == Direction.FORWARD else measure[0] > MIN_TURN_DIST
+		rospy.loginfo("{} :: {} > {}".format(self._last_variance, measure, MAX_FORWARD_DIST))
+		return measure > MAX_FORWARD_DIST if direction == Direction.FORWARD else measure > MAX_TURN_DIST
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True):

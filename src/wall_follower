@@ -37,7 +37,7 @@ def right_wall_follower(move, maze, N=3, stall=8):
 		else:
 			rospy.loginfo("turn left cause ahead is blocked")
 			move.move(Direction.LEFT)
-
+	move.maze.print_maze()
 			
 
 def checks(move):
@@ -49,6 +49,7 @@ def checks(move):
 # ROS loop
 def main():
 	move = Move_Manager()
+	maze = Maze()
 	right_wall_follower(move, maze)
 	#checks(move)
 	return 

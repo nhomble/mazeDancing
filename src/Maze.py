@@ -4,6 +4,7 @@ import numpy
 from consts import *
 
 from a_star import *
+
 class Maze(object):
 	def __init__(self, n=8):
 		self.orientation = Direction.FORWARD

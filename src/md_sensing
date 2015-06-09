@@ -16,7 +16,7 @@ import point_cloud2 as pc2
 
 import cv2
 import cv2.cv as cv
-from std_msgs.msg import Float64, Int64, String, UInt32MultiArray
+from std_msgs.msg import Float64, Int64, String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import SimpleCV
@@ -40,7 +40,8 @@ class Sensor_Manager(object):
 		self._color_subscriber = rospy.Subscriber(COLOR_SUB, Image, self.color_callback)
 	
 		# pubs
-		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, UInt32MultiArray)
+		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64)
+		self.variance_full_pub = rospy.Publisher(PCL_VARIANCE, Float64)
 		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64)
 		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64)
 		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64)
@@ -89,9 +90,9 @@ class Sensor_Manager(object):
 		# no nums should be 0
 		if nums[3] != 0:
 			_avg = sums[3] / nums[3]
-			_variance = _sq_sum - math.pow(_avg, 2)
-			message_array = [_avg, _variance, nums[3]]
-			self.full_pcl_pub.publish(message_array)
+			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[3]))/(nums[3]-1)
+			self.full_pcl_pub.publish(_avg)
+			self.variance_full_pub.publish(_variance)
 		if nums[0] != 0:
 			self.middle_bias_pcl.publish(Float64(sums[0] / nums[0]))
 		if nums[1] != 0:
