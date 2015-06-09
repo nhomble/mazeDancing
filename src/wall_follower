@@ -11,7 +11,7 @@ from Move_Manager  import *
 
 # take N steps
 # TODO choose goal condition
-def right_wall_follower(move, N=3, stall=8):
+def right_wall_follower(move, maze, N=3, stall=8):
 	for _ in range(N):
 		rospy.loginfo("check right")
 		## check right
@@ -47,15 +47,15 @@ def checks(move):
 		rospy.Rate(5).sleep()
 
 # ROS loop
-def main(move):
-	right_wall_follower(move)
+def main():
+	move = Move_Manager()
+	right_wall_follower(move, maze)
 	#checks(move)
 	return 
 
 if __name__ == "__main__":
 	try:
 		rospy.init_node('wall_follower')
-		move = Move_Manager()
-		sys.exit(main(move))
+		sys.exit(main())
 	except rospy.ROSInterruptException:
 		pass
