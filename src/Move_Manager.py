@@ -12,6 +12,9 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64, UInt32MultiArray
 from consts import *
 
+# maze solving
+from Maze import Maze
+
 # NOTE MUST BE import by a ROS NODE
 class Move_Manager(object):
 	def __init__(self):
@@ -31,6 +34,7 @@ class Move_Manager(object):
 			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
 			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle)\
 		]
+		self.maze = Maze()
 	
 	def _pcl_left(self, data):
 		if data is None:
@@ -92,10 +96,13 @@ class Move_Manager(object):
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
 			self._send_twist(TWIST_X, 0)
+			self.maze.step()
 		elif direction == Direction.BACKWARD:
 			self._send_twist(-TWIST_X, 0)
+			self.maze.step()
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
 			self._turn(direction, hardcode)
+			self.maze.turn(direction)
 		else:
 			rospy.loginfo("invalid direction to move() " + str(direction))
 
