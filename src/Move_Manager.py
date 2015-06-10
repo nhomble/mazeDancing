@@ -11,6 +11,7 @@ from roslib import message
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64
 from consts import *
+from create_node.msg import TurtlebotSensorState
 
 # maze solving
 from Maze import Maze
@@ -34,9 +35,14 @@ class Move_Manager(object):
 			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl_left),\
 			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
 			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle),\
-			rospy.Subscriber(PCL_VARIANCE, Float64, self._pcl_variance)\
+			rospy.Subscriber(PCL_VARIANCE, Float64, self._pcl_variance),\
+			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision)\
 		]
 		self.maze = Maze()
+	
+	def _collision(self, data):
+		collisions = data.bumps_wheeldrops
+		rospy.loginfo("collision: " + collisions)
 	
 	def _pcl_variance(self, data):
 		if data is None:
@@ -76,10 +82,9 @@ class Move_Manager(object):
 	
 	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
 	def nudge(self):
-		goal = (MAX_FORWARD_DIST + MIN_FORWARD_DIST)/2
 		# NOTE most reliable measurement at the moment
 		pos = self._checks["FULL"]
-		diff = (goal - pos) / TIME
+		diff = (GOAL_DIST - pos) / TIME
 		# _send_twist takes 1 second to perform the entire movement
 		# so we should not have to scale diff at all
 
@@ -94,7 +99,11 @@ class Move_Manager(object):
 		# NOTE the most reliable measurement at the moment
 		measure = self._checks["FULL"]
 		direction = Direction.FORWARD
-		rospy.loginfo("{} :: {} > {}".format(self._last_variance, measure, MAX_FORWARD_DIST))
+		rospy.loginfo("right {} variance {} :: {} > {}".format(self._checks["RIGHT"], self._last_variance, measure, MAX_FORWARD_DIST))
+		if measure > CHECK_OPEN:
+			return True
+		if self._last_variance > MAX_VARIANCE:
+			return False
 		return measure > MAX_FORWARD_DIST if direction == Direction.FORWARD else measure > MAX_TURN_DIST
 	
 	# we always turn orthogonally so we won't ask for z input
