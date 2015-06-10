@@ -1,0 +1,11 @@
+determine symbols for tracking (just like bee recognition)
+	start
+	end
+	points on robot
+use side of cloud to make sure we are not stuck
+	all should be arrays of [average, variance]
+bumper sensors should also be used for completeness
+	if hit wall
+	go back
+	turn left
+	go forward (if possible)
