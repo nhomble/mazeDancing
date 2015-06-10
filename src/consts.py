@@ -124,7 +124,10 @@ class Tag(object):
 	RIGHT = 4,
 	LEFT = 5,
 	BACK = 6
-
+	@staticmethod
+	def translate_id(num):
+		return (num,)
+	
 # translate tag_id into orientations
 # translate orientations into directions
 #			back
@@ -135,10 +138,6 @@ class Tag(object):
 #		FRONT OF BOT
 #			front
 class Language(object):
-	@staticmethod
-	def translate_id(num):
-		return (num,)
-	
 	# worker view
 	# poses come in two positions
 	# detect the rotation done
