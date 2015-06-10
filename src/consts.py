@@ -1,19 +1,20 @@
 #!/usr/bin/env python2
 
-MIN_FORWARD_DIST = .49	# no closer to the wall than this empirically chosen value
-MAX_FORWARD_DIST = 0.6	# no further away to the wall than this empirically chosen value
-MIN_TURN_DIST = .6		# ^ ditto but for turning
-MAX_TURN_DIST = .8
+MAX_FORWARD_DIST = 0.72	# no further away to the wall than this empirically chosen value
+GOAL_DIST = .5
+
+CHECK_OPEN = 2.0
+MAX_VARIANCE = .5
 
 # taken from ROS mini_max tutorial
 TWIST_NUM = 10		
 RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .15			# .15 m/s
-TWIST_Z = 1.62/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
+TWIST_X = .2			# .15 m/s
+TWIST_Z = 1.70/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
-MAX_NUDGE = .5
+MAX_NUDGE = .75
 
 SPEECH_NODE = 'espeak_node'
 SPEECH_IO = 'espeak_sub'
