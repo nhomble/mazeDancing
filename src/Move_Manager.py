@@ -40,6 +40,9 @@ class Move_Manager(object):
 		]
 		self.maze = Maze()
 	
+	# 1: right
+	# 2: left
+	# 3: both
 	def _collision(self, data):
 		collisions = data.bumps_wheeldrops
 		rospy.loginfo("collision: " + collisions)
