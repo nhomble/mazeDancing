@@ -115,7 +115,7 @@ class Sensor_Manager(object):
 def _create_message_array(avg, var, num):
 	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
 	dim = MultiArrayDimension()
-	dim.label = "average and variance"
+	dim.label = "average and variance and number"
 	dim.size = 3
 	dim.stride = 1 
 	layout = MultiArrayLayout()
