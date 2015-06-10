@@ -11,7 +11,7 @@ from Move_Manager  import *
 
 # take N steps
 # TODO choose goal condition
-def right_wall_follower(move, maze, N=3, stall=8):
+def right_wall_follower(move, maze, N=6, stall=8):
 	for _ in range(N):
 		rospy.loginfo("check right")
 		## check right
