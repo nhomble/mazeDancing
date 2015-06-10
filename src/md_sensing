@@ -94,8 +94,7 @@ class Sensor_Manager(object):
 		if nums[3] != 0:
 			_avg = sums[3] / nums[3]
 			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[3]))/(nums[3]-1)
-			self.full_pcl_pub.publish(_avg)
-			self.variance_full_pub.publish(_variance)
+			self.full_pcl_pub.publish(_create_message_array(_avg, _variance))
 		if nums[0] != 0:
 			self.middle_bias_pcl.publish(Float64(sums[0] / nums[0]))
 		if nums[1] != 0:
@@ -108,6 +107,20 @@ class Sensor_Manager(object):
 		self.last_depth_image = data
 	def color_callback(self, data):
 		self.last_color_image = data
+	
+def _create_message_array(avg, var):
+	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
+	dim = MultiArrayDimension()
+	dim.label = "average and variance"
+	dim.size = 3
+	dim.stride = 1 
+	layout = MultiArrayLayout()
+	layout.offset = 0
+	layout.dims = [dim]
+	message = Float64MultiArray()
+	message.data = [avg, var]
+	message.layout = layout
+	return message
 		
 def main():
 	manager = Sensor_Manager()
