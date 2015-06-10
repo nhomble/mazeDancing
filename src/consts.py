@@ -110,10 +110,75 @@ class Maze_Cell(object):
 # we can be a left or right wall follower
 class Follower(object):
 	LEFT = 1,
-	RIGHT = 2
+	RIGHT = 2,
+	BOTH = 3
 
-	# depending on the follower, I will choose the direction accordngly
-	TRANSLATE_FORWARD = {
-		(1,0):Direction.RIGHT,
-		(2,0):Direction.LEFT
+class Turn(object):
+	CLOCKWISE = 1,
+	COUNTER = 2
+
+class Tag(object):
+	START = 1,
+	GOAL = 2,
+	FRONT = 3,
+	RIGHT = 4,
+	LEFT = 5,
+	BACK = 6
+
+# translate tag_id into orientations
+# translate orientations into directions
+#			back
+#		    KINECT 
+#
+#   right			left 
+#
+#		FRONT OF BOT
+#			front
+class Language(object):
+	@staticmethod
+	def translate_id(num):
+		return (num,)
+	
+	# worker view
+	# poses come in two positions
+	# detect the rotation done
+	ID_TO_CLOCK = {
+		Tag.FRONT: {
+			Tag.LEFT: Turn.CLOCKWISE,
+			Tag.RIGHT: Turn.COUNTER
+		},
+		Tag.RIGHT: {
+			Tag.FRONT: Turn.CLOCKWISE,
+			Tag.BACK: Turn.COUNTER
+		},
+		Tag.LEFT: {
+			Tag.BACK: Turn.CLOCKWISE,
+			Tag.FRONT: Turn.COUNTER
+		},
+		Tag.BACK: {
+			Tag.RIGHT: Turn.CLOCKWISE,
+			Tag.LEFT: Turn.COUNTER
+		}
+	}
+
+	# worker view
+	# translate turning to actual movement
+	CLOCK_TO_DIR = {
+		Turn.CLOCKWISE: {
+			Turn.CLOCKWISE: Direction.LEFT,
+			Turn.COUNTER: Direction.RIGHT
+		},
+		Turn.COUNTER: {
+			Turn.CLOCKWISE: Direction.FORWARD,
+			Turn.COUNTER: None					# means we are done communication
+		}
+	}
+
+	# scout view
+	# translate movement to clock
+	DIR_TO_CLOCK = {
+		Direction.LEFT: (Turn.CLOCKWISE, Turn.CLOCKWISE),
+		Direction.RIGHT: (Turn.CLOCKWISE, Turn.COUNTER),
+		Direction.FORWARD: (Turn.COUNTER, Turn.CLOCKWISE),
+		None: (Turn.COUNTER, Turn.COUNTER)
 	}
