@@ -1,11 +1,6 @@
-determine symbols for tracking (just like bee recognition)
-	start
-	end
-	points on robot
-use side of cloud to make sure we are not stuck
-	all should be arrays of [average, variance]
-bumper sensors should also be used for completeness
-	if hit wall
-	go back
-	turn left
-	go forward (if possible)
+args:
+individualMarkers 4.4 .08 .2 '/camera/depth_registered/points' '/camera/depth/camera_info' base_link
+x: go up and down, increase with height
+y: go left and right, increase to the left
+orientation: x is good
+id: discern different tags
