@@ -35,18 +35,15 @@ class Sensor_Manager(object):
 		self.last_pcl = None
 
 		# Images
-		self.last_depth_image = None
 		self.last_color_image = None
-		self._depth_subscriber = rospy.Subscriber(DEPTH_SUB, Image, self.depth_callback)
 		self._color_subscriber = rospy.Subscriber(COLOR_SUB, Image, self.color_callback)
 	
 		# pubs
-		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64)
-		self.variance_full_pub = rospy.Publisher(PCL_VARIANCE, Float64)
-		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64)
-		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64)
-		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64)
-		self.test = rospy.Publisher('test', Float64MultiArray)
+		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64MultiArray)
+		self.variance_full_pub = rospy.Publisher(PCL_VARIANCE, Float64MultiArray)
+		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64MultiArray)
+		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64MultiArray)
+		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64MultiArray)
 
 	def odom_callback(self, data):
 		self.last_odom = data
@@ -60,6 +57,7 @@ class Sensor_Manager(object):
 		# front, left, right, full
 		sums = [0, 0, 0, 0]
 		nums = [0, 0, 0, 0]
+		sq_sums = [0, 0, 0, 0]
 		good_range = lambda point: True if point[1] > PCL_Y_MIN and point[1] < PCL_Y_MAX else False
 		valids = [\
 				lambda point: True if point[0] > PCL_X_MIN and point[0] < PCL_X_MAX and \
@@ -78,47 +76,53 @@ class Sensor_Manager(object):
 			if valids[0](points):
 				sums[0] += points[2]
 				nums[0] += 1
+				sq_sums[0] += math.pow(points[2], 2)
 			if valids[1](points):
 				sums[1] += points[2]
 				nums[1] += 1
+				sq_sums[0] += math.pow(points[2], 2)
 			if valids[2](points):
 				sums[2] += points[2]
 				nums[2] += 1
+				sq_sums[0] += math.pow(points[2], 2)
 			sums[3] += points[2]
 			nums[3] += 1
-			_sq_sum += math.pow(points[2], 2)
+			sq_sums[3] += math.pow(points[2], 2)
 
 
-		rospy.loginfo("processed {} {} {} {}".format(nums[0], nums[1], nums[2], nums[3]))
+		rospy.loginfo("processed points {} {} {} {}".format(nums[0], nums[1], nums[2], nums[3]))
 		# no nums should be 0
 		if nums[3] != 0:
 			_avg = sums[3] / nums[3]
 			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[3]))/(nums[3]-1)
-			self.full_pcl_pub.publish(_create_message_array(_avg, _variance))
+			self.full_pcl_pub.publish(_create_message_array(_avg, _variance, nums[3]))
 		if nums[0] != 0:
-			self.middle_bias_pcl.publish(Float64(sums[0] / nums[0]))
+			_avg = sums[0] / nums[0]
+			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[0]))/(nums[0]-1)
+			self.middle_bias_pcl.publish(_create_message_array(_avg, _variance, nums[0]))
 		if nums[1] != 0:
-			self.left_bias_pcl.publish(Float64(sums[1] / nums[1]))
+			_avg = sums[1] / nums[1]
+			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[1]))/(nums[1]-1)
+			self.left_bias_pcl.publish(_create_message_array(_avg, _variance, nums[1]))
 		if nums[2] != 0:
-			self.right_bias_pcl.publish(Float64(sums[2] / nums[2]))
+			_avg = sums[2] / nums[2]
+			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[2]))/(nums[2]-1)
+			self.right_bias_pcl.publish(_create_message_array(_avg, _variance, nums[2]))
 
-
-	def depth_callback(self, data):
-		self.last_depth_image = data
 	def color_callback(self, data):
 		self.last_color_image = data
 	
-def _create_message_array(avg, var):
+def _create_message_array(avg, var, num):
 	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
 	dim = MultiArrayDimension()
 	dim.label = "average and variance"
 	dim.size = 3
 	dim.stride = 1 
 	layout = MultiArrayLayout()
-	layout.offset = 0
-	layout.dims = [dim]
+	layout.data_offset = 0
+	layout.dim = [dim]
 	message = Float64MultiArray()
-	message.data = [avg, var]
+	message.data = [avg, var, num]
 	message.layout = layout
 	return message
 		
