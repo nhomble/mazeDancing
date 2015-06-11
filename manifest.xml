@@ -13,6 +13,7 @@
   <depend package="openni_camera"/>
   <depend package="turtlebot_bringup"/>
   <depend package="cmd_vel_mux"/>
+  <depend package="ar_track_alvar"/>
 
 </package>
 
