@@ -14,15 +14,13 @@ def fixed_path(move):
 	path = [Direction.LEFT, Direction.RIGHT, Direction.FORWARD]
 	do_dance(path, move)
 
-def spit_dirs():
-	turns = [Turn.CLOCKWISE, Turn.CLOCKWISE, Turn.CLOCKWISE, Turn.COUNTER, Turn.COUNTER, Turn.CLOCKWISE]
-	dirs = get_directions(turns)
-	print(dirs)
+def detect_path():
+	print(interpret_dance())
 
 # ROS loop
 def main(move):
 	# fixed_path(move)
-	spit_dirs()
+	detect_path()
 	return 
 
 if __name__ == "__main__":
