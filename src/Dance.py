@@ -52,7 +52,7 @@ def _check_is_done(tags):
 	global _dirs
 	global _turns
 	_turns = _get_turns(tags)
-	_dirs = _get_directions(turns)
+	_dirs = _get_directions(_turns)
 	return True if _dirs[-1] is None else False
 
 def _tag_callback(data):
@@ -89,6 +89,7 @@ def interpret_dance():
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback)
 	while not _is_done and not rospy.is_shutdown():
 		rospy.Rate(DELAY).sleep()
+	sub.unregister()
 	return _dirs
 
 '''
