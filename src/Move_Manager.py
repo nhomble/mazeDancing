@@ -4,8 +4,8 @@ import time
 import math
 
 # ROS
+import roslib; roslib.load_manifest('mazeDancing')
 import rospy
-from roslib import message
 
 # movement
 from geometry_msgs.msg import Twist
@@ -45,7 +45,9 @@ class Move_Manager(object):
 	# 3: both
 	def _collision(self, data):
 		collisions = data.bumps_wheeldrops
-		rospy.loginfo("collision: " + collisions)
+		if collisions == 0:
+			return
+		rospy.loginfo("collision: " + str(collisions))
 	
 	def _pcl_variance(self, data):
 		if data is None:
@@ -111,6 +113,12 @@ class Move_Manager(object):
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True):
+		if direction == Turn.CLOCKWISE:
+			direction = Direction.RIGHT
+		if direction == Turn.COUNTER:
+			direction = Direction.LEFT
+
+
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
 			self._send_twist(TWIST_X, 0)
