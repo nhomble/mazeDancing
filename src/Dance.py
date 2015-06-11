@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 
+import roslib; roslib.load_manifest('mazeDancing')
 from consts import *
 import time
 import rospy
-from ar_track_alvar.msg import AlvarMarkers
+from ar_track_alvar.msg import *
 
 '''
 SCOUT
