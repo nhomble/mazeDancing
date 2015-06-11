@@ -16,7 +16,7 @@ def do_dance(directions, move):
 	for d in directions:
 		clock = Language.DIR_TO_CLOCK[d]
 		move.move(clock[0])
-		time.sleep(2)
+		time.sleep(3)
 		move.move(clock[1])
 
 '''
@@ -88,9 +88,6 @@ def interpret_dance():
 	_detected_turns = []
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback)
 	while not _is_done and not rospy.is_shutdown():
-		print(_detected_tags)
-		print(_turns)
-		print(_dirs)
 		rospy.Rate(DELAY).sleep()
 	return _dirs
 

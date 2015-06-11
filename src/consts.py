@@ -11,7 +11,7 @@ TWIST_NUM = 10
 RATE = 5.0
 TIME = TWIST_NUM / RATE
 TWIST_X = .2			# .15 m/s
-TWIST_Z = 1.70/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
+TWIST_Z = 1.75/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
 MAX_NUDGE = .75
