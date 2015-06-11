@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import roslib; roslib.load_manifest('mazeDancing')
+import rospy
 from consts import *
 import time
 import rospy
@@ -17,7 +18,7 @@ def do_dance(directions, move):
 	for d in directions:
 		clock = Language.DIR_TO_CLOCK[d]
 		move.move(clock[0])
-		time.sleep(3)
+		rospy.sleep(DANCE_DELAY)
 		move.move(clock[1])
 
 '''

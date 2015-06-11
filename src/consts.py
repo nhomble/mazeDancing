@@ -14,6 +14,8 @@ TWIST_X = .2			# .15 m/s
 TWIST_Z = 1.75/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
+DANCE_DELAY = 3
+
 MAX_NUDGE = .75
 
 SPEECH_NODE = 'espeak_node'
