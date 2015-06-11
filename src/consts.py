@@ -123,7 +123,8 @@ class Tag(object):
 	FRONT = 3,
 	RIGHT = 4,
 	LEFT = 5,
-	BACK = 6
+	BACK = 6,
+	WORKER = 7				# allow the scout robot to detect worker robot
 	@staticmethod
 	def translate_id(num):
 		return (num,)
