@@ -27,29 +27,25 @@ class Sensor_Manager(object):
 	def __init__(self):
 		# need to init a node to subscribe 
 		self._node = rospy.init_node(SENSOR_NODE)
-		# ODOM things
-		self._odom_subscriber = rospy.Subscriber(ODOM_SUB, Odometry, self.odom_callback)
-		self.last_odom = None
 		# PCL things
 		self._pcl_subscriber = rospy.Subscriber(PCL_SUB, PointCloud2, self.pcl_callback)
 		self.last_pcl = None
 
-		# Images
-		self.last_color_image = None
-		self._color_subscriber = rospy.Subscriber(COLOR_SUB, Image, self.color_callback)
-	
 		# pubs
 		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64MultiArray)
 		self.variance_full_pub = rospy.Publisher(PCL_VARIANCE, Float64MultiArray)
 		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64MultiArray)
 		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64MultiArray)
 		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64MultiArray)
+		self._throttle = 0
 
-	def odom_callback(self, data):
-		self.last_odom = data
 	def pcl_callback(self, data):
-
-		self.last_pcl = data
+		if self._throttle == 0:
+			self.last_pcl = data
+			self._throttle += 1
+		else:
+			self._throttle = (self._throttle + 1) % 3
+			return
 		width = self.last_pcl.width
 		height = self.last_pcl.height
 		middle = (PCL_X_MAX + PCL_X_MIN) / 2
@@ -58,6 +54,7 @@ class Sensor_Manager(object):
 		sums = [0, 0, 0, 0]
 		nums = [0, 0, 0, 0]
 		sq_sums = [0, 0, 0, 0]
+		within = [0, 0, 0, 0]
 		good_range = lambda point: True if point[1] > PCL_Y_MIN and point[1] < PCL_Y_MAX else False
 		valids = [\
 				lambda point: True if point[0] > PCL_X_MIN and point[0] < PCL_X_MAX and \
@@ -70,59 +67,60 @@ class Sensor_Manager(object):
 		# (x,y,_) are not what you think..
 		# there is some translation going on
 		data_out = list(data_out)
-		_sq_sum = 0
 		for points in data_out[::PCL_INTERVAL]:
 			# rospy.loginfo(points)
 			if valids[0](points):
 				sums[0] += points[2]
 				nums[0] += 1
 				sq_sums[0] += math.pow(points[2], 2)
+				within[0] += 1 if points[2] < MAX_DIST else 0
 			if valids[1](points):
 				sums[1] += points[2]
 				nums[1] += 1
-				sq_sums[0] += math.pow(points[2], 2)
+				sq_sums[1] += math.pow(points[2], 2)
+				within[1] += 1 if points[2] < MAX_DIST else 0
 			if valids[2](points):
 				sums[2] += points[2]
 				nums[2] += 1
-				sq_sums[0] += math.pow(points[2], 2)
+				sq_sums[2] += math.pow(points[2], 2)
+				within[2] += 1 if points[2] < MAX_DIST else 0
 			sums[3] += points[2]
 			nums[3] += 1
 			sq_sums[3] += math.pow(points[2], 2)
+			within[3] += 1 if points[2] < MAX_DIST else 0
 
 
 		rospy.loginfo("processed points {} {} {} {}".format(nums[0], nums[1], nums[2], nums[3]))
+		rospy.loginfo("within: {} {} {} {}".format(within[0], within[1], within[2], within[3]))
 		# no nums should be 0
 		if nums[3] != 0:
 			_avg = sums[3] / nums[3]
-			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[3]))/(nums[3]-1)
-			self.full_pcl_pub.publish(_create_message_array(_avg, _variance, nums[3]))
+			_variance = (sq_sums[3] - (math.pow(_avg, 2)/nums[3]))/(nums[3]-1)
+			self.full_pcl_pub.publish(_create_message_array(_avg, math.sqrt(_variance), nums[3], within[3]))
 		if nums[0] != 0:
 			_avg = sums[0] / nums[0]
-			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[0]))/(nums[0]-1)
-			self.middle_bias_pcl.publish(_create_message_array(_avg, _variance, nums[0]))
+			_variance = (sq_sums[0] - (math.pow(_avg, 2)/nums[0]))/(nums[0]-1)
+			self.middle_bias_pcl.publish(_create_message_array(_avg, math.sqrt(_variance), nums[0], within[0]))
 		if nums[1] != 0:
 			_avg = sums[1] / nums[1]
-			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[1]))/(nums[1]-1)
-			self.left_bias_pcl.publish(_create_message_array(_avg, _variance, nums[1]))
+			_variance = (sq_sums[1] - (math.pow(_avg, 2)/nums[1]))/(nums[1]-1)
+			self.left_bias_pcl.publish(_create_message_array(_avg, math.sqrt(_variance), nums[1], within[1]))
 		if nums[2] != 0:
 			_avg = sums[2] / nums[2]
-			_variance = (_sq_sum - (math.pow(_avg, 2)/nums[2]))/(nums[2]-1)
-			self.right_bias_pcl.publish(_create_message_array(_avg, _variance, nums[2]))
+			_variance = (sq_sums[2] - (math.pow(_avg, 2)/nums[2]))/(nums[2]-1)
+			self.right_bias_pcl.publish(_create_message_array(_avg, math.sqrt(_variance), nums[2], within[2]))
 
-	def color_callback(self, data):
-		self.last_color_image = data
-	
-def _create_message_array(avg, var, num):
+def _create_message_array(avg, var, num, wi):
 	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
 	dim = MultiArrayDimension()
 	dim.label = "average and variance and number"
-	dim.size = 3
+	dim.size = 4
 	dim.stride = 1 
 	layout = MultiArrayLayout()
 	layout.data_offset = 0
 	layout.dim = [dim]
 	message = Float64MultiArray()
-	message.data = [avg, var, num]
+	message.data = [avg, var, num, wi]
 	message.layout = layout
 	return message
 		

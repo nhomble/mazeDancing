@@ -35,6 +35,7 @@ class Move_Manager(object):
 			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision)\
 		]
 		self.maze = Maze()
+		self.fix_bumper = (False, False)
 	
 	# 1: right
 	# 2: left
@@ -106,7 +107,7 @@ class Move_Manager(object):
 			return False
 	
 	# we always turn orthogonally so we won't ask for z input
-	def move(self, direction, hardcode=True):
+	def move(self, direction, hardcode=True, scale=1):
 		if direction == Turn.CLOCKWISE:
 			direction = Direction.RIGHT
 		if direction == Turn.COUNTER:
@@ -115,10 +116,10 @@ class Move_Manager(object):
 
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
-			self._send_twist(TWIST_X, 0)
+			self._send_twist(TWIST_X/scale, 0)
 			self.maze.step()
 		elif direction == Direction.BACKWARD:
-			self._send_twist(-TWIST_X, 0)
+			self._send_twist(-TWIST_X/scale, 0)
 			self.maze.step()
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
 			self._turn(direction, hardcode)
@@ -147,6 +148,7 @@ class Move_Manager(object):
 			self._rate.sleep()
 		self.stop()
 		rospy.sleep(DELAY)
+	
 def _check_dir(measure):
 	# TODO
 	# not sure how to handle this
@@ -154,9 +156,9 @@ def _check_dir(measure):
 		return True
 	if measure[0] > CHECK_OPEN:
 		return True
-	elif measure[1] > MAX_VARIANCE:
+	elif measure[1] > MAX_STD_DEV:
 		return False
-	elif measure[2] < MIN_POINTS:
+	elif measure[3]/measure[2] >= MAX_WITHIN_PERC:
 		return False
 	else:
 		return measure[0] > MAX_DIST
