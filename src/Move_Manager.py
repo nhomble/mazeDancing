@@ -153,12 +153,20 @@ def _check_dir(measure):
 	# TODO
 	# not sure how to handle this
 	if measure is None:
+		rospy.loginfo("none")
 		return True
 	if measure[0] > CHECK_OPEN:
+		rospy.loginfo("open")
 		return True
 	elif measure[1] > MAX_STD_DEV:
+		rospy.loginfo("std dev")
+		return False
+	elif measure[2] < MIN_POINTS:
+		rospy.loginfo("points")
 		return False
 	elif measure[3]/measure[2] >= MAX_WITHIN_PERC:
+		rospy.loginfo("perc")
 		return False
 	else:
+		rospy.loginfo("reg")
 		return measure[0] > MAX_DIST

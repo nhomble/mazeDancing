@@ -1,16 +1,17 @@
 #!/usr/bin/env python2
 
-MAX_DIST = 1.2		# no further away to the wall than this empirically chosen value
+MAX_DIST = .90		# no further away to the wall than this empirically chosen value
 CHECK_OPEN = 2.0
 MAX_STD_DEV = 3.0
-MAX_WITHIN_PERC = .90
+MAX_WITHIN_PERC = .95
+MIN_POINTS = 50
 
 # taken from ROS mini_max tutorial
 TWIST_NUM = 10		
 RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .5			# .15 m/s
-TWIST_Z = 1.75/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
+TWIST_X = .375			# .15 m/s
+TWIST_Z = 1.70/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
 DANCE_DELAY = 3
