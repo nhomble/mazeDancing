@@ -1,8 +1,7 @@
 #!/usr/bin/env python2
 
-MAX_FORWARD_DIST = 0.72	# no further away to the wall than this empirically chosen value
-GOAL_DIST = .5
-
+MAX_DIST = 1.2		# no further away to the wall than this empirically chosen value
+MIN_POINTS = 500
 CHECK_OPEN = 2.0
 MAX_VARIANCE = .5
 
@@ -28,9 +27,9 @@ PCL_LEFT_IO = 'pcl/left'
 PCL_MIDDLE_IO = 'pcl/middle'
 PCL_VARIANCE = 'pcl/variance'
 
-PCL_X_MIN = -0.75
+PCL_X_MIN = -1.0
 PCL_Y_MIN = 0.3
-PCL_X_MAX = 0.75
+PCL_X_MAX = 1.0
 PCL_Y_MAX = 0.5
 PCL_INTERVAL = 50
 

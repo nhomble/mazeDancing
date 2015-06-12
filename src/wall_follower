@@ -4,14 +4,17 @@ import time
 import sys
 
 # ROS specifoc
+import roslib; roslib.load_manifest('mazeDancing')
 import rospy
+from std_msgs.msg import String
 
 # my modules
 from Move_Manager  import *
 
 # take N steps
 # TODO choose goal condition
-def right_wall_follower(move, maze, N=6, stall=8):
+def right_wall_follower(move, maze, speech, N=6, stall=8):
+	speech.publish("start")
 	for _ in range(N):
 		rospy.loginfo("check right")
 		## check right
@@ -48,9 +51,10 @@ def checks(move):
 
 # ROS loop
 def main():
+	speech = rospy.Publisher(SPEECH_IO, String)
 	move = Move_Manager()
 	maze = Maze()
-	right_wall_follower(move, maze)
+	right_wall_follower(move, maze, speech)
 	#checks(move)
 	return 
 

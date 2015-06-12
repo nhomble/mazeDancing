@@ -9,7 +9,7 @@ import rospy
 
 # movement
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64MultiArray
 from consts import *
 from create_node.msg import TurtlebotSensorState
 
@@ -27,15 +27,11 @@ class Move_Manager(object):
 			Direction.LEFT: None,\
 			Direction.RIGHT: None\
 		}
-		# HACK
-		# multiarrays are trickier than I would like to deal with right now..
-		self._last_variance = None
 		self._sense_subs = [\
-			rospy.Subscriber(PCL_FULL_IO, Float64, self._pcl_full),\
-			rospy.Subscriber(PCL_LEFT_IO, Float64, self._pcl_left),\
-			rospy.Subscriber(PCL_RIGHT_IO, Float64, self._pcl_right),\
-			rospy.Subscriber(PCL_MIDDLE_IO, Float64, self._pcl_middle),\
-			rospy.Subscriber(PCL_VARIANCE, Float64, self._pcl_variance),\
+			rospy.Subscriber(PCL_FULL_IO, Float64MultiArray, self._pcl_full),\
+			rospy.Subscriber(PCL_LEFT_IO, Float64MultiArray, self._pcl_left),\
+			rospy.Subscriber(PCL_RIGHT_IO, Float64MultiArray, self._pcl_right),\
+			rospy.Subscriber(PCL_MIDDLE_IO, Float64MultiArray, self._pcl_middle),\
 			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision)\
 		]
 		self.maze = Maze()
@@ -49,10 +45,6 @@ class Move_Manager(object):
 			return
 		rospy.loginfo("collision: " + str(collisions))
 	
-	def _pcl_variance(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-		self._last_variance = data.data
 	def _pcl_left(self, data):
 		if data is None:
 			rospy.loginfo("data is none")
@@ -74,19 +66,19 @@ class Move_Manager(object):
 		pcl = data.data
 		self._checks[Direction.FORWARD] = pcl
 
-	# NOTE
-	# misleading since this is an array, not float64
 	def _pcl_full(self, data):
 		if data is None:
 			rospy.loginfo("data is none")
 			return
 		pcl = data.data
-		rospy.loginfo(pcl)
 
 		self._checks["FULL"] = pcl
 	
+	# TODO
+	# broken
 	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
 	def nudge(self):
+		return
 		# NOTE most reliable measurement at the moment
 		pos = self._checks["FULL"]
 		diff = (GOAL_DIST - pos) / TIME
@@ -101,15 +93,17 @@ class Move_Manager(object):
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction):
-		# NOTE the most reliable measurement at the moment
 		measure = self._checks["FULL"]
-		direction = Direction.FORWARD
-		rospy.loginfo("right {} variance {} :: {} > {}".format(self._checks["RIGHT"], self._last_variance, measure, MAX_FORWARD_DIST))
-		if measure > CHECK_OPEN:
-			return True
-		if self._last_variance > MAX_VARIANCE:
+		rospy.loginfo(measure)
+		if _check_dir(measure):
+			if direction == Direction.RIGHT or direction == Direction.LEFT:
+				measure = self._checks[direction]
+				rospy.loginfo(measure)
+				return _check_dir(measure)
+			else:
+				return True
+		else:
 			return False
-		return measure > MAX_FORWARD_DIST if direction == Direction.FORWARD else measure > MAX_TURN_DIST
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True):
@@ -153,3 +147,16 @@ class Move_Manager(object):
 			self._rate.sleep()
 		self.stop()
 		rospy.sleep(DELAY)
+def _check_dir(measure):
+	# TODO
+	# not sure how to handle this
+	if measure is None:
+		return True
+	if measure[0] > CHECK_OPEN:
+		return True
+	elif measure[1] > MAX_VARIANCE:
+		return False
+	elif measure[2] < MIN_POINTS:
+		return False
+	else:
+		return measure[0] > MAX_DIST
