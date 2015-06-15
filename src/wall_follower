@@ -12,17 +12,19 @@ from std_msgs.msg import String
 from Move_Manager  import *
 
 # take N steps
-# TODO choose goal condition
-def right_wall_follower(move, maze, speech, N=5, stall=5):
+def right_wall_follower(move, maze, speech, N=7, stall=5):
 	speech.publish("start")
 	for _ in range(N):
+		speech.publish(str(_))
 		rospy.loginfo("check right")
 		## check right
 		# turn right
+		speech.publish("check right")
 		move.move(Direction.RIGHT)
 		time.sleep(stall)
 		# check the right side of depth cloud
 		if move.check(Direction.RIGHT):
+			speech.publish("its open")
 			rospy.loginfo("move forward because gap in wall")
 			move.move(Direction.FORWARD)
 			continue
@@ -30,10 +32,12 @@ def right_wall_follower(move, maze, speech, N=5, stall=5):
 		# we got a wall, so adjust a little to be at goal distance
 		#move.nudge()
 		# reset
+		speech.publish("reset left")
 		rospy.loginfo("reset left")
 		move.move(Direction.LEFT)
 		time.sleep(stall)
 		## check forward
+		speech.publish("check forward")
 		if move.check(Direction.FORWARD):
 			rospy.loginfo("forward")
 			move.move(Direction.FORWARD)
