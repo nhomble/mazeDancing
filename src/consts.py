@@ -108,6 +108,32 @@ class Maze_Cell(object):
 			Direction.ERROR
 		]
 	]
+	DIR_TO_TURN = {
+		Direction.LEFT: {
+			Direction.LEFT: Direction.BACKWARD,
+			Direction.RIGHT: Direction.FORWARD,
+			Direction.FORWARD: Direction.LEFT,
+			Direction.BACKWARD: Direction.RIGHT
+		},
+		Direction.RIGHT: {
+			Direction.LEFT: Direction.FORWARD,
+			Direction.RIGHT: Direction.BACKWARD,
+			Direction.FORWARD: Direction.RIGHT,
+			Direction.BACKWARD: Direction.LEFT
+		},
+		Direction.FORWARD: {
+			Direction.LEFT: Direction.RIGHT,
+			Direction.RIGHT: Direction.LEFT,
+			Direction.FORWARD: Direction.BACKWARD,
+			Direction.BACKWARD: Direction.FORWARD
+		},
+		Direction.BACKWARD: {
+			Direction.LEFT: Direction.LEFT,
+			Direction.RIGHT: Direction.RIGHT,
+			Direction.FORWARD: Direction.FORWARD,
+			Direction.BACKWARD: Direction.BACKWARD
+		}
+	}
 	
 # we can be a left or right wall follower
 class Follower(object):
