@@ -2,7 +2,7 @@
 
 MAX_DIST = .90		# no further away to the wall than this empirically chosen value
 CHECK_OPEN = 2.0
-MAX_STD_DEV = 2.5
+MAX_STD_DEV = 2.75
 MAX_WITHIN_PERC = .95
 MIN_POINTS = 50
 

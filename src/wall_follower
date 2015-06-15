@@ -45,6 +45,8 @@ def right_wall_follower(move, maze, speech, N=7, stall=5):
 			rospy.loginfo("turn left cause ahead is blocked")
 			move.move(Direction.LEFT)
 	move.maze.print_maze()
+	path, _ = move.maze.best_path()
+	print(path)
 			
 
 def checks(move):
