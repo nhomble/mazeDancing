@@ -136,8 +136,11 @@ def _extract_path(cells, maze):
 			enter_y = last[1].y - last[2].y
 			leave_dir = Maze_Cell.CELL_TO_DIR[leave_x][leave_y]
 			enter_dir = Maze_Cell.CELL_TO_DIR[enter_x][enter_y]
+			print(leave_dir)
+			print(enter_dir)
 			direction = Maze_Cell.DIR_TO_TURN[enter_dir][leave_dir]
 			ret.append(direction)
 		last = (cell in nodes, cell, last[1])
+	print("++")
 
 	return ret
