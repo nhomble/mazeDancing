@@ -3,23 +3,15 @@
 from Maze import *
 
 m = Maze()
-for i in range(5):
-	m.step()
-m.turn(Direction.LEFT)
-for i in range(5):
-	m.step()
+m.step()
 m.turn(Direction.RIGHT)
+m.step()
+m.step()
+m.turn(Direction.LEFT)
+m.turn(Direction.LEFT)
+m.step()
 m.turn(Direction.RIGHT)
-for i in range(15):
-	m.step()
-	
-m.turn(Direction.LEFT)
-for i in range(5):
-	m.step()
-m.turn(Direction.LEFT)
-for i in range(3):
-	m.step()
-
+m.step()
 m.print_maze()
 sc, wo = m.best_path()
 print(sc)
