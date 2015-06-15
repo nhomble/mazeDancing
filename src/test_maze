@@ -21,4 +21,6 @@ for i in range(3):
 	m.step()
 
 m.print_maze()
-m.best_path()
+sc, wo = m.best_path()
+print(sc)
+print(wo)
