@@ -2,7 +2,7 @@
 
 MAX_DIST = .90		# no further away to the wall than this empirically chosen value
 CHECK_OPEN = 2.0
-MAX_STD_DEV = 2.0
+MAX_STD_DEV = 2.5
 MAX_WITHIN_PERC = .95
 MIN_POINTS = 50
 
@@ -10,7 +10,7 @@ MIN_POINTS = 50
 TWIST_NUM = 10		
 RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .375			# .15 m/s
+TWIST_X = .370			# .15 m/s
 TWIST_Z = 1.70/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
 DELAY = 1				# hard 1 second delay
 
