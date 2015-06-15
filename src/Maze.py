@@ -61,44 +61,8 @@ class Maze(object):
 		a_star = AStar()
 		a_star.init_maze(self.maze, self.start, self.pos)
 		a_star.process()
+		return _best_scout_path(a_star, self.maze), _best_worker_path(a_star, self.maze)
 
-		# get path from algo
-		cells = []
-		cell = a_star.end
-		while cell is not a_star.start:
-			cells.insert(0, cell)
-			cell = cell.parent
-		cells.insert(0, a_star.start)
-		
-		# of these cells, which are actual nodes
-		nodes = []
-		for cell in cells:
-			out = 0
-			if Maze_Cell.OPEN == self.maze[cell.x-1][cell.y]:
-				out += 1
-			if Maze_Cell.OPEN == self.maze[cell.x+1][cell.y]:
-				out += 1
-			if Maze_Cell.OPEN == self.maze[cell.x][cell.y-1]:
-				out += 1
-			if Maze_Cell.OPEN == self.maze[cell.x][cell.y+1]:
-				out += 1
-			if out > 2:
-				nodes.append(cell)
-
-		ret = []
-		last = (False, None)
-		for cell in cells:
-			# last[1] should be the node
-			# last[2] is how I entered
-			if last[0]:
-				leave_x = cell.x - last[1].x
-				leave_y = cell.y - last[1].y
-				leave_dir = Maze_Cell.CELL_TO_DIR[leave_x][leave_y]
-				ret.append(leave_dir)
-			last = (cell in nodes, cell)
-
-		return ret
-	
 	# take nxn maze and pad to 2nx2n
 	def _expand_maze(self):
 		n = len(self.maze)
@@ -122,3 +86,58 @@ class Maze(object):
 				else:
 					string += "X"
 			print(string)
+
+	
+def _best_scout_path(a_star, maze):
+	cells = []
+	cell = a_star.end
+	while cell is not a_star.start:
+		cells.append(cell)
+		cell = cell.parent
+	cells.append(cell)
+	return _extract_path(cells, maze)
+	
+def _best_worker_path(a_star, maze):
+	# get path from algo
+	cells = []
+	cell = a_star.end
+	while cell is not a_star.start:
+		cells.insert(0, cell)
+		cell = cell.parent
+	cells.insert(0, a_star.start)
+	return _extract_path(cells, maze)
+
+def _extract_path(cells, maze):
+	# of these cells, which are actual nodes
+	nodes = []
+	for cell in cells:
+		out = 0
+		if Maze_Cell.OPEN == maze[cell.x-1][cell.y]:
+			out += 1
+		if Maze_Cell.OPEN == maze[cell.x+1][cell.y]:
+			out += 1
+		if Maze_Cell.OPEN == maze[cell.x][cell.y-1]:
+			out += 1
+		if Maze_Cell.OPEN == maze[cell.x][cell.y+1]:
+			out += 1
+		if out > 2:
+			nodes.append(cell)
+
+	ret = []
+	last = (False, None, None)
+	for cell in cells:
+		# cell is how I left
+		# last[1] is the node's position
+		# last[2] is how I entered
+		if last[0]:
+			leave_x = cell.x - last[1].x
+			leave_y = cell.y - last[1].y
+			enter_x = last[1].x - last[2].x
+			enter_y = last[1].y - last[2].y
+			leave_dir = Maze_Cell.CELL_TO_DIR[leave_x][leave_y]
+			enter_dir = Maze_Cell.CELL_TO_DIR[enter_x][enter_y]
+			direction = Maze_Cell.DIR_TO_TURN[enter_dir][leave_dir]
+			ret.append(direction)
+		last = (cell in nodes, cell, last[1])
+
+	return ret
