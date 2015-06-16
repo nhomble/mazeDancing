@@ -17,6 +17,8 @@ class Cell(object):
         self.g = 0
         self.h = 0
         self.f = 0
+    def __str__(self):
+        return "(" + str(self.x) + "," + str(self.y) + ")"
 
 class AStar(object):
     def __init__(self):
@@ -96,7 +98,6 @@ class AStar(object):
         cell = self.end
         while cell.parent is not self.start:
             cell = cell.parent
-            print 'path: cell: %d,%d' % (cell.x, cell.y)
 
     def compare(self, cell1, cell2):
         """
