@@ -7,6 +7,17 @@ from consts import *
 print("LEFT == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.FORWARD]))
 print("RIGHT == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.BACKWARD]))
 print("FORWARD == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.RIGHT]))
+print("==")
+
+m = Maze()
+m.step()
+print("FORWARD == " + str(m.orientation))
+m.turn(Direction.RIGHT)
+print("RIGHT == " + str(m.orientation))
+m.turn(Direction.RIGHT)
+print("BACKWARD == " + str(m.orientation))
+m.turn(Direction.RIGHT)
+print("LEFT == " + str(m.orientation))
 
 m = Maze()
 m.step()
