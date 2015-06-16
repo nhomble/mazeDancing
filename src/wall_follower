@@ -29,24 +29,22 @@ def wall_follower(move, maze, speech, stall=5):
 		time.sleep(stall)
 		if move.check(Direction.LEFT):
 			speech.publish("LEFT IS OPEN")
-			maze.mark_ahead()
+			move.maze.mark_ahead()
 		speech.publish("check ahead")
 		move.move(Direction.RIGHT)
 		time.sleep(stall)
 		if move.check(Direction.FORWARD):
 			speech.publish("FORWARD IS OPEN")
-			maze.mark_ahead()
+			move.maze.mark_ahead()
 		speech.publish("check right")
 		move.move(Direction.RIGHT)
 		time.sleep(stall)
 		if move.check(Direction.RIGHT):
 			speech.publish("RIGHT IS OPEN")
-			print(maze.orientation)
-			maze.mark_ahead()
-		maze.print_maze()
+			move.maze.mark_ahead()
+		move.maze.print_maze()
 		speech.publish("now follow right wall")
-		d = maze.next_pos()
-		print("+++++++++++++++++" + str(d))
+		d = move.maze.next_pos()
 		if d == Direction.RIGHT:
 			speech.publish("going right")
 			move.move(Direction.FORWARD)
@@ -65,8 +63,6 @@ def wall_follower(move, maze, speech, stall=5):
 			move.move(Direction.FORWARD)
 	sub.unregister()
 	speech.publish("now backtrack")
-	maze.print_maze()
-	
 
 # take N steps
 def right_wall_follower(move, maze, speech, N=7, stall=5):

@@ -30,17 +30,20 @@ class Maze(object):
 		# update based on new point
 		self._update_maze(new_pos)
 	
-	# we don't step, we just see that it is open
-	# HACK, we are just going to step and go back
 	def mark_ahead(self):
-		_old = self.pos
-		self.step()
-		self.pos = _old
-	
+		_pos = None
+		if self.orientation == Direction.LEFT:
+			_pos = (self.pos[0], self.pos[1] - 1)
+		elif self.orientation == Direction.RIGHT:
+			_pos = (self.pos[0], self.pos[1] + 1)
+		elif self.orientation == Direction.FORWARD:
+			_pos = (self.pos[0] - 1, self.pos[1])
+		elif self.orientation == Direction.BACKWARD:
+			_pos = (self.pos[0] + 1, self.pos[1])
+		self.maze[_pos[0]][_pos[1]] = Maze_Cell.OPEN	
+
 	def next_pos(self, t=Follower.RIGHT):
 		self.print_maze()
-		print(str(self.pos))
-		print(self.maze[self.pos[0]][self.pos[1]-1] == Maze_Cell.OPEN)
 		if t == Follower.RIGHT:
 			if self.maze[self.pos[0]][self.pos[1] + 1] == Maze_Cell.OPEN:
 				return Direction.RIGHT
