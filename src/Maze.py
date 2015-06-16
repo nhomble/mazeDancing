@@ -38,12 +38,15 @@ class Maze(object):
 		self.pos = _old
 	
 	def next_pos(self, t=Follower.RIGHT):
+		self.print_maze()
+		print(str(self.pos))
+		print(self.maze[self.pos[0]][self.pos[1]-1] == Maze_Cell.OPEN)
 		if t == Follower.RIGHT:
-			if maze[self.pos[0] + 1][self.pos[1]] == Maze_Cell.OPEN:
+			if self.maze[self.pos[0]][self.pos[1] + 1] == Maze_Cell.OPEN:
 				return Direction.RIGHT
-			elif maze[self.pos[0]][self.pos[1] + 1] == Maze_Cell.OPEN:
+			elif self.maze[self.pos[0] - 1][self.pos[1]] == Maze_Cell.OPEN:
 				return Direction.FORWARD
-			elif maze[self.pos[0] - 1][self.pos[1]] == Maze_Cell.OPEN:
+			elif self.maze[self.pos[0]][self.pos[1] - 1] == Maze_Cell.OPEN:
 				return Direction.LEFT
 			else:
 				return Direction.BACKWARD

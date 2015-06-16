@@ -7,17 +7,18 @@ import sys
 import roslib; roslib.load_manifest('mazeDancing')
 import rospy
 from std_msgs.msg import String
+from ar_track_alvar.msg import *
 
 # my modules
 from Move_Manager  import *
 
 done = False
-def tag_callback(data):
+def _tag_callback(data):
 	global done
 	if len(data.markers) > 0 and data.markers[0].id == 2:
 		done = True
 
-def wall_follower(move, maze, speech, stall=4):
+def wall_follower(move, maze, speech, stall=5):
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback)
 	speech.publish("start")
 	while not done:
@@ -25,28 +26,41 @@ def wall_follower(move, maze, speech, stall=4):
 		speech.publish("")
 		speech.publish("check left")
 		move.move(Direction.LEFT)
+		time.sleep(stall)
 		if move.check(Direction.LEFT):
+			speech.publish("LEFT IS OPEN")
 			maze.mark_ahead()
 		speech.publish("check ahead")
 		move.move(Direction.RIGHT)
+		time.sleep(stall)
 		if move.check(Direction.FORWARD):
+			speech.publish("FORWARD IS OPEN")
 			maze.mark_ahead()
 		speech.publish("check right")
 		move.move(Direction.RIGHT)
+		time.sleep(stall)
 		if move.check(Direction.RIGHT):
+			speech.publish("RIGHT IS OPEN")
+			print(maze.orientation)
 			maze.mark_ahead()
+		maze.print_maze()
 		speech.publish("now follow right wall")
 		d = maze.next_pos()
+		print("+++++++++++++++++" + str(d))
 		if d == Direction.RIGHT:
+			speech.publish("going right")
 			move.move(Direction.FORWARD)
 		elif d == Direction.FORWARD:
+			speech.publish("going forward")
 			move.move(Direction.LEFT)
 			move.move(Direction.FORWARD)
 		elif d == Direction.LEFT:
+			speech.publish("going left")
 			move.move(Direction.LEFT)
 			move.move(Direction.LEFT)
 			move.move(Direction.FORWARD)
 		elif d == Direction.BACKWARD:
+			speech.publish("going backward")
 			move.move(Direction.RIGHT)
 			move.move(Direction.FORWARD)
 	sub.unregister()
@@ -103,7 +117,7 @@ def main():
 	speech = rospy.Publisher(SPEECH_IO, String)
 	move = Move_Manager()
 	maze = Maze()
-	right_wall_follower(move, maze, speech)
+	wall_follower(move, maze, speech)
 	#checks(move)
 	return 
 
