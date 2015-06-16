@@ -1,6 +1,12 @@
 #!/usr/bin/env python2
 
+import sys
 from Maze import *
+from consts import *
+
+print("LEFT == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.FORWARD]))
+print("RIGHT == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.BACKWARD]))
+print("FORWARD == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.RIGHT]))
 
 m = Maze()
 m.step()
