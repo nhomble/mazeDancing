@@ -11,6 +11,49 @@ from std_msgs.msg import String
 # my modules
 from Move_Manager  import *
 
+done = False
+def tag_callback(data):
+	global done
+	if len(data.markers) > 0 and data.markers[0].id == 2:
+		done = True
+
+def wall_follower(move, maze, speech, stall=4):
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback)
+	speech.publish("start")
+	while not done:
+		speech.publish("find nodes")
+		speech.publish("")
+		speech.publish("check left")
+		move.move(Direction.LEFT)
+		if move.check(Direction.LEFT):
+			maze.mark_ahead()
+		speech.publish("check ahead")
+		move.move(Direction.RIGHT)
+		if move.check(Direction.FORWARD):
+			maze.mark_ahead()
+		speech.publish("check right")
+		move.move(Direction.RIGHT)
+		if move.check(Direction.RIGHT):
+			maze.mark_ahead()
+		speech.publish("now follow right wall")
+		d = maze.next_pos()
+		if d == Direction.RIGHT:
+			move.move(Direction.FORWARD)
+		elif d == Direction.FORWARD:
+			move.move(Direction.LEFT)
+			move.move(Direction.FORWARD)
+		elif d == Direction.LEFT:
+			move.move(Direction.LEFT)
+			move.move(Direction.LEFT)
+			move.move(Direction.FORWARD)
+		elif d == Direction.BACKWARD:
+			move.move(Direction.RIGHT)
+			move.move(Direction.FORWARD)
+	sub.unregister()
+	speech.publish("now backtrack")
+	maze.print_maze()
+	
+
 # take N steps
 def right_wall_follower(move, maze, speech, N=7, stall=5):
 	speech.publish("start")
