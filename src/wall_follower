@@ -13,13 +13,19 @@ from ar_track_alvar.msg import *
 from Move_Manager  import *
 
 done = False
-def _tag_callback(data):
+def _tag_callback_end(data):
 	global done
 	if len(data.markers) > 0 and data.markers[0].id == 2:
 		done = True
 
+def _tag_callbak_start(data):
+	global done
+	if len(data.markers) > 0 and data.markers[0].id == 1:
+		done = True
+
 def wall_follower(move, maze, speech, stall=5):
-	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback)
+	global done
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
 	while not done:
 		speech.publish("find nodes")
@@ -44,25 +50,94 @@ def wall_follower(move, maze, speech, stall=5):
 			move.maze.mark_ahead()
 		move.maze.print_maze()
 		speech.publish("now follow right wall")
+		move.move(Direction.LEFT)
 		d = move.maze.next_pos()
 		if d == Direction.RIGHT:
 			speech.publish("going right")
+			move.move(Direction.RIGHT)
 			move.move(Direction.FORWARD)
+			move.move(Direction.LEFT)
 		elif d == Direction.FORWARD:
 			speech.publish("going forward")
-			move.move(Direction.LEFT)
 			move.move(Direction.FORWARD)
 		elif d == Direction.LEFT:
 			speech.publish("going left")
 			move.move(Direction.LEFT)
-			move.move(Direction.LEFT)
 			move.move(Direction.FORWARD)
+			move.move(Direction.RIGHT)
 		elif d == Direction.BACKWARD:
 			speech.publish("going backward")
 			move.move(Direction.RIGHT)
+			move.move(Direction.RIGHT)
 			move.move(Direction.FORWARD)
-	sub.unregister()
+			move.move(Direction.RIGHT)
+			move.move(Direction.RIGHT)
 	speech.publish("now backtrack")
+	sub.unregister()
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_start)
+	done = False
+	step = 0
+	path, worker = move.maze.best_path()
+	while not done:
+		options = 0
+		coor = [False, False, False]
+		move.move(Direction.LEFT)
+		time.sleep(stall)
+		if move.check(Direction.LEFT):
+			options += 1
+			coor[0] = True
+		move.move(Direction.RIGHT)
+		time.sleep(stall)
+		if move.check(Direction.FORWARD):
+			options += 1
+			coor[1] = True
+		move.move(Direction.RIGHT)
+		time.sleep(stall)
+		if move.check(Direction.RIGHT):
+			options += 1
+			coor[2] = True
+
+		move.movve(Direction.LEFT)
+		if options > 1:
+			d = path[step]
+			step += 1
+		else:
+			if coor[2]:
+				d = Direction.RIGHT
+			elif coor[1]:
+				d = Direction.FORWARD
+			elif coor[0]:
+				d = Direction.LEFT
+
+		if d == Direction.RIGHT:
+			speech.publish("going right")
+			move.move(Direction.RIGHT)
+			move.move(Direction.FORWARD)
+			move.move(Direction.LEFT)
+		elif d == Direction.FORWARD:
+			speech.publish("going forward")
+			move.move(Direction.FORWARD)
+		elif d == Direction.LEFT:
+			speech.publish("going left")
+			move.move(Direction.LEFT)
+			move.move(Direction.FORWARD)
+			move.move(Direction.RIGHT)
+		elif d == Direction.BACKWARD:
+			speech.publish("going backward")
+			move.move(Direction.RIGHT)
+			move.move(Direction.RIGHT)
+			move.move(Direction.FORWARD)
+			move.move(Direction.RIGHT)
+			move.move(Direction.RIGHT)
+
+
+	# turn right to the other robot
+	move.move(Direction.RIGHT)
+	do_dance(worker, move)
+	move.move(Direction.LEFT)
+	move.move(Direction.LEFT)
+	move.move(Direction.FORWARD)
+	move.move(Direction.FORWARD)
 
 # take N steps
 def right_wall_follower(move, maze, speech, N=7, stall=5):

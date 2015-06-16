@@ -40,19 +40,28 @@ class Maze(object):
 			_pos = (self.pos[0] - 1, self.pos[1])
 		elif self.orientation == Direction.BACKWARD:
 			_pos = (self.pos[0] + 1, self.pos[1])
+
+		if not self._new_pos_is_valid(*_pos):
+			self._expand_maze()
+			n = len(self.maze)//2
+			_pos = (_pos[0] + n//2, _pos[1] + n//2)
+			self.start = (self.start[0] + n//2, self.start[1] + n//2)
+
+
 		self.maze[_pos[0]][_pos[1]] = Maze_Cell.OPEN	
 
 	def next_pos(self, t=Follower.RIGHT):
 		self.print_maze()
 		if t == Follower.RIGHT:
 			if self.maze[self.pos[0]][self.pos[1] + 1] == Maze_Cell.OPEN:
-				return Direction.RIGHT
+				leave_dir = Direction.RIGHT
 			elif self.maze[self.pos[0] - 1][self.pos[1]] == Maze_Cell.OPEN:
-				return Direction.FORWARD
+				leave_dir = Direction.FORWARD
 			elif self.maze[self.pos[0]][self.pos[1] - 1] == Maze_Cell.OPEN:
-				return Direction.LEFT
+				leave_dir = Direction.LEFT
 			else:
-				return Direction.BACKWARD
+				leave_dir = Direction.BACKWARD
+			return leave_dir
 
 	# update orientation
 	def turn(self, direction):
