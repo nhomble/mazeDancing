@@ -98,13 +98,27 @@ def _best_scout_path(a_star, maze):
 	return _extract_path(cells, maze)
 	
 def _best_worker_path(a_star, maze):
+	# HACK
+	scout = _best_scout_path(a_star, maze)
+	_rev = scout[::-1]
+	ret = []
+	for d in _rev:
+		if d == Direction.RIGHT:
+			ret.append(Direction.LEFT)
+		elif d == Direction.LEFT:
+			ret.append(Direction.RIGHT)
+		elif d == Direction.FORWARD:
+			ret.append(Direction.BACKWARD)
+		else:
+			ret.append(Direction.FORWARD)
+	return ret
 	# get path from algo
 	cells = []
 	cell = a_star.end
 	while cell is not a_star.start:
 		cells.insert(0, cell)
 		cell = cell.parent
-	cells.insert(0, a_star.start)
+	cells.insert(0, cell)
 	return _extract_path(cells, maze)
 
 def _extract_path(cells, maze):
@@ -122,7 +136,6 @@ def _extract_path(cells, maze):
 			out += 1
 		if out > 2:
 			nodes.append(cell)
-
 	ret = []
 	last = (False, None, None)
 	for cell in cells:
@@ -130,17 +143,17 @@ def _extract_path(cells, maze):
 		# last[1] is the node's position
 		# last[2] is how I entered
 		if last[0]:
-			leave_x = cell.x - last[1].x
-			leave_y = cell.y - last[1].y
-			enter_x = last[1].x - last[2].x
-			enter_y = last[1].y - last[2].y
+			# NOTE
+			# coordinates are mixed up
+			leave_x = cell.y - last[1].y
+			leave_y = cell.x - last[1].x
+			enter_x = last[1].y - last[2].y
+			enter_y = last[1].x - last[2].x
+
 			leave_dir = Maze_Cell.CELL_TO_DIR[leave_x][leave_y]
 			enter_dir = Maze_Cell.CELL_TO_DIR[enter_x][enter_y]
-			print(leave_dir)
-			print(enter_dir)
 			direction = Maze_Cell.DIR_TO_TURN[enter_dir][leave_dir]
 			ret.append(direction)
 		last = (cell in nodes, cell, last[1])
-	print("++")
 
 	return ret
