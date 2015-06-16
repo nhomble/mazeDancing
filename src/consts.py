@@ -53,7 +53,7 @@ class Direction(object):
 	RIGHT = 1,
 	FORWARD = 2,
 	BACKWARD = 3,
-	ERROR = 4,
+	ERROR = 4
 	TURN = {
 		# LEFT
 		(0,):{ 
@@ -84,6 +84,13 @@ class Direction(object):
 			(1,):(0,)
 		}
 	}
+	to_string = {
+		(0,): "LEFT",
+		(1,): "RIGHT",
+		(2,): "FORWARD",
+		(3,): "BACKWARD",
+		(4,): "ERROR"
+	}
 
 # internal maze representation
 class Maze_Cell(object):
@@ -93,19 +100,19 @@ class Maze_Cell(object):
 
 	CELL_TO_DIR = [
 		[
-			Direction.ERROR,
-			Direction.RIGHT,
-			Direction.LEFT
+			Direction.ERROR, 	# 0, 0
+			Direction.FORWARD,	# 0, 1
+			Direction.BACKWARD	# 0, -1
 		],
 		[
-			Direction.BACKWARD,
-			Direction.ERROR,
-			Direction.ERROR
+			Direction.RIGHT,	# 1, 0
+			Direction.ERROR,	# 1, 1
+			Direction.ERROR		# 1, -1
 		],
 		[
-			Direction.FORWARD,
-			Direction.ERROR,
-			Direction.ERROR
+			Direction.LEFT,		# -1, 0
+			Direction.ERROR,	# -1, 1
+			Direction.ERROR		# -1, -1
 		]
 	]
 	DIR_TO_TURN = {
