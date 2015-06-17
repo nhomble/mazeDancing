@@ -11,6 +11,7 @@ from ar_track_alvar.msg import *
 
 # my modules
 from Move_Manager  import *
+from Dance import *
 
 done = False
 def _tag_callback_end(data):
@@ -18,7 +19,7 @@ def _tag_callback_end(data):
 	if len(data.markers) > 0 and data.markers[0].id == 2:
 		done = True
 
-def _tag_callbak_start(data):
+def _tag_callback_start(data):
 	global done
 	if len(data.markers) > 0 and data.markers[0].id == 1:
 		done = True
@@ -84,10 +85,12 @@ def wall_follower(move, maze, speech, stall=5):
 		move.move(Direction.LEFT)
 
 		d = _get_directions(openings)
-		print("going to: " + str(d))
-		_do_move(d, move, speech)
+		if not done:
+			_do_move(d, move, speech)
 
 	speech.publish("now backtrack")
+	move.move(Direction.LEFT)
+	move.move(Direction.LEFT)
 	sub.unregister()
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_start)
 	done = False
@@ -108,6 +111,10 @@ def wall_follower(move, maze, speech, stall=5):
 
 		# node
 		if options > 1:
+			# HACK
+			if step >= len(path):
+				done = True
+				continue
 			d = path[step]
 			step += 1
 		else:

@@ -7,11 +7,11 @@ MAX_WITHIN_PERC = .95
 MIN_POINTS = 75
 
 # taken from ROS mini_max tutorial
-TWIST_NUM = 10		
+TWIST_NUM = 20		
 RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .370			# .15 m/s
-TWIST_Z = 1.70/TIME		# 45 (+ eps) deg/s * 2 sec = 90 degress
+TWIST_X = .120			# .12 m/s
+TWIST_Z = 2/TIME		
 DELAY = 1				# hard 1 second delay
 
 DANCE_DELAY = 3

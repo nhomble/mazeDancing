@@ -13,10 +13,8 @@ from consts import *
 
 # ROS loop
 def main(move):
-	move.move(Direction.FORWARD)
-	move.move(Direction.FORWARD)
+	move.move(Direction.LEFT)
 	move.move(Direction.RIGHT)
-	move.move(Direction.FORWARD)
 	time.sleep(5)
 
 if __name__ == "__main__":
