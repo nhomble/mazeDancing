@@ -19,8 +19,9 @@ def detect_path():
 
 # ROS loop
 def main(move):
-	fixed_path(move)
-	# detect_path()
+	# fixed_path(move)
+	detect_path()
+	time.sleep(2)
 	return 
 
 if __name__ == "__main__":
