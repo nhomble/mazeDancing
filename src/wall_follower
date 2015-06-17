@@ -23,55 +23,62 @@ def _tag_callbak_start(data):
 	if len(data.markers) > 0 and data.markers[0].id == 1:
 		done = True
 
+def _get_directions(openings):
+	if openings[2]:
+		return Direction.RIGHT
+	elif openings[1]:
+		return Direction.FORWARD
+	elif openings[0]:
+		return Direction.LEFT
+
+def _do_move(d, move, speech):
+	if d == Direction.RIGHT:
+		move.move(d)
+		move.move(Direction.FORWARD)
+	elif d == Direction.FORWARD:
+		move.move(d)
+	elif d == Direction.LEFT:
+		move.move(d)
+		move.move(Direction.FORWARD)
+
+def _tuch(direction, move, stall):
+	if direction == Direction.LEFT or direction == Direction.RIGHT:
+		move.move(direction)
+	time.sleep(stall)
+	return move.check(direction)
+
 def wall_follower(move, maze, speech, stall=5):
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
 	while not done:
+		openings = [False, False, False]
 		speech.publish("find nodes")
 		speech.publish("")
 		speech.publish("check left")
-		move.move(Direction.LEFT)
-		time.sleep(stall)
-		if move.check(Direction.LEFT):
+		if _tuch(Direction.LEFT, move, stall):
 			speech.publish("LEFT IS OPEN")
 			move.maze.mark_ahead()
+			openings[0] = True
+
 		speech.publish("check ahead")
-		move.move(Direction.RIGHT)
-		time.sleep(stall)
-		if move.check(Direction.FORWARD):
+		if _tuch(Direction.FORWARD, move, stall):
 			speech.publish("FORWARD IS OPEN")
 			move.maze.mark_ahead()
+			openings[1] = True
+
 		speech.publish("check right")
-		move.move(Direction.RIGHT)
-		time.sleep(stall)
-		if move.check(Direction.RIGHT):
+		if _tuch(Direction.RIGHT, move, stall):
 			speech.publish("RIGHT IS OPEN")
 			move.maze.mark_ahead()
-		move.maze.print_maze()
+			openings[2] = True
+
 		speech.publish("now follow right wall")
 		move.move(Direction.LEFT)
-		d = move.maze.next_pos()
-		if d == Direction.RIGHT:
-			speech.publish("going right")
-			move.move(Direction.RIGHT)
-			move.move(Direction.FORWARD)
-			move.move(Direction.LEFT)
-		elif d == Direction.FORWARD:
-			speech.publish("going forward")
-			move.move(Direction.FORWARD)
-		elif d == Direction.LEFT:
-			speech.publish("going left")
-			move.move(Direction.LEFT)
-			move.move(Direction.FORWARD)
-			move.move(Direction.RIGHT)
-		elif d == Direction.BACKWARD:
-			speech.publish("going backward")
-			move.move(Direction.RIGHT)
-			move.move(Direction.RIGHT)
-			move.move(Direction.FORWARD)
-			move.move(Direction.RIGHT)
-			move.move(Direction.RIGHT)
+
+		d = _get_directions(openings)
+		_do_move(d, move, speech)
+
 	speech.publish("now backtrack")
 	sub.unregister()
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_start)
@@ -81,61 +88,32 @@ def wall_follower(move, maze, speech, stall=5):
 	while not done:
 		options = 0
 		coor = [False, False, False]
-		move.move(Direction.LEFT)
-		time.sleep(stall)
-		if move.check(Direction.LEFT):
+		if _tuch(Direction.LEFT, move, stall):
 			options += 1
 			coor[0] = True
-		move.move(Direction.RIGHT)
-		time.sleep(stall)
-		if move.check(Direction.FORWARD):
+		if _tuch(Direction.FORWARD, move, stall):
 			options += 1
 			coor[1] = True
-		move.move(Direction.RIGHT)
-		time.sleep(stall)
-		if move.check(Direction.RIGHT):
+		if _tuch(Direction.RIGHT, move, stall):
 			options += 1
 			coor[2] = True
 
-		move.movve(Direction.LEFT)
+		# node
 		if options > 1:
 			d = path[step]
 			step += 1
 		else:
-			if coor[2]:
-				d = Direction.RIGHT
-			elif coor[1]:
-				d = Direction.FORWARD
-			elif coor[0]:
-				d = Direction.LEFT
+			d = _get_directions(coor)
 
-		if d == Direction.RIGHT:
-			speech.publish("going right")
-			move.move(Direction.RIGHT)
-			move.move(Direction.FORWARD)
-			move.move(Direction.LEFT)
-		elif d == Direction.FORWARD:
-			speech.publish("going forward")
-			move.move(Direction.FORWARD)
-		elif d == Direction.LEFT:
-			speech.publish("going left")
-			move.move(Direction.LEFT)
-			move.move(Direction.FORWARD)
-			move.move(Direction.RIGHT)
-		elif d == Direction.BACKWARD:
-			speech.publish("going backward")
-			move.move(Direction.RIGHT)
-			move.move(Direction.RIGHT)
-			move.move(Direction.FORWARD)
-			move.move(Direction.RIGHT)
-			move.move(Direction.RIGHT)
-
+		_do_move(d, move, speech)
 
 	# turn right to the other robot
 	move.move(Direction.RIGHT)
 	do_dance(worker, move)
+	# reverse
 	move.move(Direction.LEFT)
 	move.move(Direction.LEFT)
+	# leave
 	move.move(Direction.FORWARD)
 	move.move(Direction.FORWARD)
 
