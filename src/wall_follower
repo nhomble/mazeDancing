@@ -30,6 +30,8 @@ def _get_directions(openings):
 		return Direction.FORWARD
 	elif openings[0]:
 		return Direction.LEFT
+	else:
+		return Direction.BACKWARD
 
 def _do_move(d, move, speech):
 	if d == Direction.RIGHT:
@@ -39,6 +41,10 @@ def _do_move(d, move, speech):
 		move.move(d)
 	elif d == Direction.LEFT:
 		move.move(d)
+		move.move(Direction.FORWARD)
+	elif d == Direction.BACKWARD:
+		move.move(Direction.LEFT)
+		move.move(Direction.LEFT)
 		move.move(Direction.FORWARD)
 
 def _tuch(direction, move, stall):
@@ -61,6 +67,7 @@ def wall_follower(move, maze, speech, stall=5):
 			move.maze.mark_ahead()
 			openings[0] = True
 
+		move.move(Direction.RIGHT)
 		speech.publish("check ahead")
 		if _tuch(Direction.FORWARD, move, stall):
 			speech.publish("FORWARD IS OPEN")
@@ -77,6 +84,7 @@ def wall_follower(move, maze, speech, stall=5):
 		move.move(Direction.LEFT)
 
 		d = _get_directions(openings)
+		print("going to: " + str(d))
 		_do_move(d, move, speech)
 
 	speech.publish("now backtrack")

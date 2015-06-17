@@ -153,7 +153,7 @@ def _check_dir(measure):
 	if measure is None:
 		rospy.loginfo("none")
 		return True
-	if measure[0] > CHECK_OPEN:
+	if measure[0] > CHECK_OPEN and measure[0] < 10:
 		rospy.loginfo("open")
 		return True
 	elif measure[1] > MAX_STD_DEV:
