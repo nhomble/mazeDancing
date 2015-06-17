@@ -135,7 +135,7 @@ class Move_Manager(object):
 	def _turn(self, direction, hardcode):
 		# HACK we just hardcode a fixed number of identical twist messages to do
 		# an orthogonal turn on a flat surface
-		val = -TWIST_Z if direction == Direction.RIGHT else TWIST_Z
+		val = -(TWIST_Z) if direction == Direction.RIGHT else TWIST_Z
 		self._send_twist(0, val)
 
 	# actually send message
