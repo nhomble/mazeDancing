@@ -14,7 +14,7 @@ TWIST_X = .120			# .12 m/s
 TWIST_Z = 2/TIME		
 DELAY = 1				# hard 1 second delay
 
-DANCE_DELAY = 3
+DANCE_DELAY = 5
 
 MAX_NUDGE = .75
 
@@ -89,7 +89,8 @@ class Direction(object):
 		(1,): "RIGHT",
 		(2,): "FORWARD",
 		(3,): "BACKWARD",
-		(4,): "ERROR"
+		(4,): "ERROR",
+		None: "NONE"
 	}
 
 # internal maze representation
@@ -149,7 +150,7 @@ class Follower(object):
 	BOTH = 3
 
 class Turn(object):
-	CLOCKWISE = 1,
+	CLOCKWISE = 1
 	COUNTER = 2
 
 class Tag(object):

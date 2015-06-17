@@ -11,7 +11,7 @@ from Move_Manager  import *
 from Dance import *
 
 def fixed_path(move):
-	path = [Direction.LEFT, Direction.RIGHT, Direction.FORWARD]
+	path = [Direction.LEFT]
 	do_dance(path, move)
 
 def detect_path():

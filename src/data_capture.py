@@ -49,6 +49,7 @@ def _send_twist(x, z):
 f = open('data.txt', 'a')
 for i in range(180):
 	_send_twist(0, .05)
-	string = "{} {} {} {} {} {} {} {} {}".format(m_arr[0], m_arr[1], m_arr[2], m_arr[3], p_arr[0], p_arr[1], p_arr[2], p_arr[3], i)
+	string = "{} {} {} {} {} {} {} {} {}\n".format(m_arr[0], m_arr[1], m_arr[2], m_arr[3], p_arr[0], p_arr[1], p_arr[2], p_arr[3], i)
 	f.write(string)
 	print(string)
+f.close()

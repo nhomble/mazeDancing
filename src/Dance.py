@@ -16,11 +16,20 @@ SCOUT
 #	move in that direction for a whole circle
 #	then pause  to delimit the directions
 def do_dance(directions, move):
+	# add terminator
+	directions.append(None)
+	_hist = []
 	for d in directions:
+		rospy.loginfo(_hist)
+		rospy.loginfo(Direction.to_string[d])
 		clock = Language.DIR_TO_CLOCK[d]
 		move.move(clock[0])
 		rospy.sleep(DANCE_DELAY)
 		move.move(clock[1])
+		rospy.sleep(DANCE_DELAY)
+		_hist.append(clock[0])
+		_hist.append(clock[1])
+	time.sleep(DANCE_DELAY)
 
 '''
 =======================================================
