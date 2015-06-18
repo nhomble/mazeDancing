@@ -46,18 +46,27 @@ _dirs = []
 _turns = []
 
 def _translate(l, trans):
-	i = 2
+	i = 0
 	ret = []
 	while i < len(l) - 1:
 		couple = (l[i], l[i+1])
 		ret.append(trans[couple[0]][couple[1]])
-		i += 2
+		i += 1
+	return ret
+
+def _couple(l, trans):
+	i = 0
+	ret = []
+	while 2*i < len(l):
+		couple = (l[2*i],l[2*i + 1])
+		ret.append(trans[couple[0]][couple[1]])
+		i += 1
 	return ret
 
 def _get_turns(tags):
 	return _translate(tags, Language.ID_TO_CLOCK)
 def _get_directions(turns):
-	return _translate(turns, Language.CLOCK_TO_DIR)
+	return _couple(turns, Language.CLOCK_TO_DIR)
 
 def _check_is_done(tags):
 	global _dirs
@@ -92,7 +101,8 @@ def _tag_callback(data):
 		_detected_tags.append(tag)
 
 		# check end condition
-		_is_done = False if len(_detected_tags) < 4 or len(_detected_tags) % 2 != 1 else _check_is_done(_detected_tags)
+		# we need at least two to combine
+		_is_done = False if len(_detected_tags) < 2 else check_is_done(_detected_tags)
 	
 #	if _is_done:
 #		del _dirs[-1]
@@ -103,8 +113,6 @@ def interpret_dance():
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback)
 	while not _is_done and not rospy.is_shutdown():
 		rospy.loginfo(_detected_tags)
-		rospy.loginfo(_turns)
-		rospy.loginfo(_dirs)
 		rospy.Rate(DELAY).sleep()
 	sub.unregister()
 	return _dirs
@@ -112,3 +120,12 @@ def interpret_dance():
 '''
 ========================================================
 '''
+
+def _test():
+	global _is_done
+	directions = [Direction.LEFT, None]
+	tags = [Tag.FRONT, Tag.LEFT, Tag.BACK, Tag.LEFT, Tag.FRONT]
+	_is_done = _check_is_done(tags)
+	print("is done: " + str(_is_done))
+	if _is_done:
+		print(_dirs)
