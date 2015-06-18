@@ -5,13 +5,20 @@ import sys
 
 # ROS specifoc
 import rospy
+from std_msgs.msg import String
 
 # my modules
 from Move_Manager  import *
 from Dance import *
 
 def fixed_path(move):
+	pub = rospy.Publisher(SPEECH_IO, String)
+	time.sleep(3)
 	path = [Direction.LEFT]
+	pub.publish("The path is")
+	for p in path:
+		time.sleep(1)
+		pub.publish(Direction.to_string[p])
 	do_dance(path, move)
 
 def detect_path():
@@ -19,8 +26,8 @@ def detect_path():
 
 # ROS loop
 def main(move):
-	# fixed_path(move)
-	detect_path()
+	fixed_path(move)
+	# detect_path()
 	time.sleep(2)
 	return 
 
