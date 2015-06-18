@@ -150,11 +150,11 @@ class Follower(object):
 	BOTH = 3
 
 class Turn(object):
-	CLOCKWISE = 1,
-	COUNTER = 2,
+	CLOCKWISE = -1,
+	COUNTER = -2,
 	to_string = {
-		(1,): "clockwise",
-		(2,): "counter clockwise"
+		(-1,): "clockwise",
+		(-2,): "counter clockwise"
 	}
 
 class Tag(object):

@@ -87,6 +87,8 @@ def wall_follower(move, maze, speech, stall=5):
 		d = _get_directions(openings)
 		if not done:
 			_do_move(d, move, speech)
+		else:
+			speech.publish("found goal")
 
 	speech.publish("now backtrack")
 	move.move(Direction.LEFT)
