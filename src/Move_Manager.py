@@ -150,6 +150,7 @@ class Move_Manager(object):
 		rospy.sleep(DELAY)
 	
 def _check_dir(measure):
+	rospy.loginfo("measure: " + str(measure))
 	if measure is None:
 		rospy.loginfo("none")
 		return True

@@ -3,6 +3,7 @@
 import sys
 from Maze import *
 from consts import *
+
 '''
 print("LEFT == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.FORWARD]))
 print("RIGHT == " + str(Maze_Cell.DIR_TO_TURN[Direction.LEFT][Direction.BACKWARD]))
@@ -19,15 +20,16 @@ print("BACKWARD == " + str(m.orientation))
 m.turn(Direction.RIGHT)
 print("LEFT == " + str(m.orientation))
 '''
+
 m = Maze()
 m.step()
 m.turn(Direction.RIGHT)
 m.step()
-m.step()
 m.turn(Direction.LEFT)
 m.turn(Direction.LEFT)
 m.step()
-m.turn(Direction.RIGHT)
+m.step()
+m.step()
 m.step()
 m.print_maze()
 sc, wo = m.best_path()
