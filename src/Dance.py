@@ -102,7 +102,7 @@ def _tag_callback(data):
 
 		# check end condition
 		# we need at least two to combine
-		_is_done = False if len(_detected_tags) < 2 else check_is_done(_detected_tags)
+		_is_done = False if len(_detected_tags) < 2 else _check_is_done(_detected_tags)
 	
 #	if _is_done:
 #		del _dirs[-1]

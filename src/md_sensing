@@ -39,11 +39,12 @@ class Sensor_Manager(object):
 		self._throttle = 0
 
 	def pcl_callback(self, data):
+		print("callback")
 		if self._throttle == 0:
 			self.last_pcl = data
 			self._throttle += 1
 		else:
-			self._throttle = (self._throttle + 1) % 3
+			self._throttle = (self._throttle + 1) % 5
 			return
 		width = self.last_pcl.width
 		height = self.last_pcl.height
@@ -97,19 +98,19 @@ class Sensor_Manager(object):
 			_variance = (sq_sums[3] - (math.pow(_avg, 2)/nums[3]))/(nums[3]-1)
 			self.full_pcl_pub.publish(_create_message_array(_avg, math.sqrt(_variance), nums[3], within[3]))
 		else:
-			self.full_pcl_pub.publish(_create_message_array(1000, 1000, nums[3], within[3]))
+			self.full_pcl_pub.publish(_create_message_array(0, 2*MAX_STD_DEV, nums[3], within[3]))
 		if nums[0] > 1:
 			_avg = sums[0] / nums[0]
 			_variance = (sq_sums[0] - (math.pow(_avg, 2)/nums[0]))/(nums[0]-1)
 			self.middle_bias_pcl.publish(_create_message_array(_avg, math.sqrt(_variance), nums[0], within[0]))
 		else:
-			self.full_pcl_pub.publish(_create_message_array(1000, 1000, nums[0], within[0]))
+			self.full_pcl_pub.publish(_create_message_array(0, 2*MAX_STD_DEV, nums[0], within[0]))
 		if nums[1] > 1:
 			_avg = sums[1] / nums[1]
 			_variance = (sq_sums[1] - (math.pow(_avg, 2)/nums[1]))/(nums[1]-1)
 			self.left_bias_pcl.publish(_create_message_array(_avg, math.sqrt(_variance), nums[1], within[1]))
 		else:
-			self.full_pcl_pub.publish(_create_message_array(1000, 1000, nums[1], within[1]))
+			self.full_pcl_pub.publish(_create_message_array(0, 2*MAX_STD_DEV, nums[1], within[1]))
 		if nums[2] > 1:
 			_avg = sums[2] / nums[2]
 			_variance = (sq_sums[2] - (math.pow(_avg, 2)/nums[2]))/(nums[2]-1)

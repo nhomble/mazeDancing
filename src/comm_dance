@@ -11,9 +11,7 @@ from std_msgs.msg import String
 from Move_Manager  import *
 from Dance import *
 
-def fixed_path(move):
-	pub = rospy.Publisher(SPEECH_IO, String)
-	time.sleep(3)
+def fixed_path(move, speech):
 	path = [Direction.LEFT]
 	pub.publish("The path is")
 	for p in path:
@@ -21,13 +19,21 @@ def fixed_path(move):
 		pub.publish(Direction.to_string[p])
 	do_dance(path, move)
 
-def detect_path():
-	print(interpret_dance())
+def detect_path(speech):
+	time.sleep(3)
+	speech.publish("start interpreting dance")
+	path = interpret_dance()
+	print(path)
+	speech.publish("I interpreted")
+	for p in path:
+		if p is not None:
+			speech.publish(Direction.to_string[p])
 
 # ROS loop
 def main(move):
-	fixed_path(move)
-	# detect_path()
+	pub = rospy.Publisher(SPEECH_IO, String)
+	# fixed_path(move, pub)
+	detect_path(pub)
 	time.sleep(2)
 	return 
 
