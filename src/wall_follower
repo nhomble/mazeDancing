@@ -54,7 +54,7 @@ def _tuch(direction, move, stall):
 	time.sleep(stall)
 	return move.check(direction)
 
-def wall_follower(move, maze, speech, stall=5):
+def wall_follower(move, maze, speech, stall=.5):
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")

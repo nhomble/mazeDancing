@@ -28,11 +28,12 @@ class Move_Manager(object):
 			Direction.RIGHT: None\
 		}
 		self._sense_subs = [\
-			rospy.Subscriber(PCL_FULL_IO, Float64MultiArray, self._pcl_full),\
-			rospy.Subscriber(PCL_LEFT_IO, Float64MultiArray, self._pcl_left),\
-			rospy.Subscriber(PCL_RIGHT_IO, Float64MultiArray, self._pcl_right),\
-			rospy.Subscriber(PCL_MIDDLE_IO, Float64MultiArray, self._pcl_middle),\
-			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision)\
+#			rospy.Subscriber(PCL_FULL_IO, Float64MultiArray, self._pcl_full),\
+#			rospy.Subscriber(PCL_LEFT_IO, Float64MultiArray, self._pcl_left),\
+#			rospy.Subscriber(PCL_RIGHT_IO, Float64MultiArray, self._pcl_right),\
+#			rospy.Subscriber(PCL_MIDDLE_IO, Float64MultiArray, self._pcl_middle),\
+			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision),\
+			rospy.Subscriber(SCAN_IO, Float64MultiArray, self._scan)\
 		]
 		self.maze = Maze()
 		self.fix_bumper = (False, False)
@@ -75,6 +76,15 @@ class Move_Manager(object):
 
 		self._checks["FULL"] = pcl
 	
+	def _scan(self, data):
+		arr = data.data
+		self._checks["FULL"] = arr[-1]
+		length = len(arr) - 1
+		part = length // 3
+		self._checks[Direction.LEFT] = min(arr[0:part])
+		self._checks[Direction.FORWARD] = min(arr[part:2*part])
+		self._checks[Direction.RIGHT] = min(arr[2*part:3*part])
+
 	# TODO
 	# broken
 	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
@@ -95,6 +105,11 @@ class Move_Manager(object):
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction):
 		measure = self._checks["FULL"]
+		if measure > .5:
+			return True
+		else:
+			return False
+
 		rospy.loginfo(measure)
 		if _check_dir(measure):
 			if direction == Direction.RIGHT or direction == Direction.LEFT:

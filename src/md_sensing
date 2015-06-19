@@ -11,7 +11,7 @@ from roslib import message
 
 from nav_msgs.msg import Odometry
 
-from sensor_msgs.msg import PointCloud2, PointField
+from sensor_msgs.msg import PointCloud2, PointField, LaserScan
 import point_cloud2 as pc2
 
 import cv2
@@ -28,15 +28,38 @@ class Sensor_Manager(object):
 		# need to init a node to subscribe 
 		self._node = rospy.init_node(SENSOR_NODE)
 		# PCL things
-		self._pcl_subscriber = rospy.Subscriber(PCL_SUB, PointCloud2, self.pcl_callback)
+		#self._pcl_subscriber = rospy.Subscriber(PCL_SUB, PointCloud2, self.pcl_callback)
+		self.scanner = rospy.Subscriber('/scan', LaserScan, self._scan_callback)
+		self.spub = rospy.Publisher(SCAN_IO, Float64MultiArray)
 		self.last_pcl = None
 
 		# pubs
-		self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64MultiArray)
-		self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64MultiArray)
-		self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64MultiArray)
-		self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64MultiArray)
-		self._throttle = 0
+		#self.full_pcl_pub = rospy.Publisher(PCL_FULL_IO, Float64MultiArray)
+		#self.left_bias_pcl = rospy.Publisher(PCL_LEFT_IO, Float64MultiArray)
+		#self.right_bias_pcl = rospy.Publisher(PCL_RIGHT_IO, Float64MultiArray)
+		#self.middle_bias_pcl = rospy.Publisher(PCL_MIDDLE_IO, Float64MultiArray)
+
+
+		#self._throttle = 0
+	
+	def _scan_callback(self, data):
+		s = 0
+		lp = 8
+		i = 0
+		part = [0 for _ in range(lp)]
+		length = len(data.ranges)
+		for d in data.ranges:
+			index = i // (length/lp)
+			if not math.isnan(d):
+				s += d
+				part[index] += d
+			i += 1
+		part = map(lambda x: lp * x/length, part)
+#		print("{:.5} {:.5} {:.5} {:.5} {:.5} {:.5} {:.5} {:.5} {:.5}".format(s/length, \
+#			float(part[0]), float(part[1]), float(part[2]), float(part[3]), float(part[4]), float(part[5]), float(part[6]), float(part[7])))
+
+		part.append(s/length)
+		self.spub.publish(_create_message_array(part))
 
 	def pcl_callback(self, data):
 		print("callback")
@@ -90,8 +113,6 @@ class Sensor_Manager(object):
 			within[3] += 1 if points[2] < MAX_DIST else 0
 
 
-		rospy.loginfo("processed points {} {} {} {}".format(nums[0], nums[1], nums[2], nums[3]))
-		rospy.loginfo("within: {} {} {} {}".format(within[0], within[1], within[2], within[3]))
 		# no nums should be 0
 		if nums[3] > 1:
 			_avg = sums[3] / nums[3]
@@ -118,17 +139,17 @@ class Sensor_Manager(object):
 		else:
 			self.full_pcl_pub.publish(_create_message_array(1000, 1000, nums[2], within[2]))
 
-def _create_message_array(avg, var, num, wi):
+def _create_message_array(arr):
 	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
 	dim = MultiArrayDimension()
-	dim.label = "average and variance and number"
-	dim.size = 4
+	dim.label = "{} length scan data".format(len(arr))
+	dim.size = len(arr)
 	dim.stride = 1 
 	layout = MultiArrayLayout()
 	layout.data_offset = 0
 	layout.dim = [dim]
 	message = Float64MultiArray()
-	message.data = [avg, var, num, wi]
+	message.data = arr
 	message.layout = layout
 	return message
 		

@@ -21,6 +21,8 @@ MAX_NUDGE = .75
 SPEECH_NODE = 'espeak_node'
 SPEECH_IO = 'espeak_sub'
 
+SCAN_IO = 'scan_dat'
+
 SENSOR_NODE = 'sensor_manager'
 PCL_FULL_IO = 'pcl/full'
 PCL_RIGHT_IO = 'pcl/right'
