@@ -10,6 +10,7 @@ class Maze(object):
 		self.orientation = Direction.FORWARD
 		self.maze = [[Maze_Cell.UNKNOWN for i in range(n)] for j in range(n)]
 		self.pos = (n//2, n//2)
+		self.last_pos = None
 		self.start = self.pos
 		self.maze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
 
@@ -73,6 +74,10 @@ class Maze(object):
 		if x < 0 or y < 0 or x >= maze or y >= maze:
 			return False
 		return True
+
+	def collision(self):
+		self.maze[self.pos[0]][self.pos[1]] = Maze_Cell.WALL
+		self.pos = self.last_pos
 	
 	def _update_maze(self, new_pos):
 		# check bounds
@@ -83,6 +88,7 @@ class Maze(object):
 			self.start = (self.start[0] + n//2, self.start[1] + n//2)
 
 		# move
+		self.last_pos = self.pos
 		self.pos = new_pos
 		# mark internally
 		self.maze[self.pos[0]][self.pos[1]] = Maze_Cell.OPEN

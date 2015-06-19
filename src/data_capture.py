@@ -11,7 +11,7 @@ from roslib import message
 
 from nav_msgs.msg import Odometry
 
-from sensor_msgs.msg import PointCloud2, PointField
+from sensor_msgs.msg import PointCloud2, PointField, LaserScan
 import point_cloud2 as pc2
 from std_msgs.msg import Float64, Int64, String
 from geometry_msgs.msg import Twist
@@ -23,20 +23,20 @@ import numpy as np
 
 rospy.init_node('data_capture')
 
-m_arr = [-1, -1, -1, -1]
-p_arr = [-1, -1, -1, -1]
+val = 0
 
-def p_m(data):
-	global m_arr
-	m_arr = data.data
+def ls_cb(data):
+	s = 0
+	for d in data.ranges:
+		if not math.isnan(s):
+			s += d
+	s /= 640
+	global val
+	val = s
+	print(val)
 
-def p_f(data):
-	global p_arr
-	p_arr = data.data
 
-rospy.Subscriber(PCL_FULL_IO, Float64MultiArray, p_m)
-rospy.Subscriber(PCL_MIDDLE_IO, Float64MultiArray, p_f)
-time.sleep(5)
+rospy.Subscriber('scan', LaserScan, ls_cb)
 tw_pub = rospy.Publisher(TWIST_PUB, Twist)
 def _send_twist(x, z):
 	for _ in range(TWIST_NUM):
@@ -48,8 +48,8 @@ def _send_twist(x, z):
 
 f = open('data.txt', 'a')
 for i in range(180):
-	_send_twist(0, .05)
-	string = "{} {} {} {} {} {} {} {} {}\n".format(m_arr[0], m_arr[1], m_arr[2], m_arr[3], p_arr[0], p_arr[1], p_arr[2], p_arr[3], i)
+	_send_twist(0, .1)
+	string = "{}\n".format(val)
 	f.write(string)
 	print(string)
 f.close()

@@ -10,7 +10,7 @@ MIN_POINTS = 75
 TWIST_NUM = 20		
 RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .120			# .12 m/s
+TWIST_X = .15			# .12 m/s
 TWIST_Z = 2/TIME		
 DELAY = 1				# hard 1 second delay
 

@@ -23,15 +23,13 @@ class Move_Manager(object):
 		self._rate = rospy.Rate(RATE)
 		self._checks = {\
 			"FULL": None,\
+			"L": None,\
+			"R": None,\
 			Direction.FORWARD: None,\
 			Direction.LEFT: None,\
 			Direction.RIGHT: None\
 		}
 		self._sense_subs = [\
-#			rospy.Subscriber(PCL_FULL_IO, Float64MultiArray, self._pcl_full),\
-#			rospy.Subscriber(PCL_LEFT_IO, Float64MultiArray, self._pcl_left),\
-#			rospy.Subscriber(PCL_RIGHT_IO, Float64MultiArray, self._pcl_right),\
-#			rospy.Subscriber(PCL_MIDDLE_IO, Float64MultiArray, self._pcl_middle),\
 			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision),\
 			rospy.Subscriber(SCAN_IO, Float64MultiArray, self._scan)\
 		]
@@ -45,7 +43,16 @@ class Move_Manager(object):
 		collisions = data.bumps_wheeldrops
 		if collisions == 0:
 			return
+		self.stop()
+		self._sense_subs[0].unregister()
+		self.maze.collision()
+		self.move(Direction.BACKWARD)
+		if collisions == 1:
+			self._send_twist(0, .1)
+		elif collisions == 2:
+			self._send_twist(0, -.1)
 		rospy.loginfo("collision: " + str(collisions))
+		self._sense_subs[0] = rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision)
 	
 	def _pcl_left(self, data):
 		if data is None:
@@ -81,9 +88,11 @@ class Move_Manager(object):
 		self._checks["FULL"] = arr[-1]
 		length = len(arr) - 1
 		part = length // 3
-		self._checks[Direction.LEFT] = min(arr[0:part])
+		self._checks[Direction.RIGHT] = min(arr[0:part])
 		self._checks[Direction.FORWARD] = min(arr[part:2*part])
-		self._checks[Direction.RIGHT] = min(arr[2*part:3*part])
+		self._checks[Direction.LEFT] = min(arr[2*part:3*part])
+		self._checks["R"] = max(arr[2*part:3*part])
+		self._checks["L"] = max(arr[0:part])
 
 	# TODO
 	# broken
@@ -100,14 +109,59 @@ class Move_Manager(object):
 		diff = min(MAX_NUDGE, diff) if diff > 0 else max(-MAX_NUDGE, diff)
 		rospy.loginfo("nudge: " + str(diff))
 		self._send_twist(diff, 0)
+	
+	def center(self, count=1):
+		if count > 3:
+			return
+
+		num = count + 1
+		diff = self._checks["L"] - self._checks["R"]
+		rospy.loginfo("{} - {}  = diff {}".format(self._checks["L"], self._checks["R"], diff))
+		if abs(abs(self._checks["L"] - self._checks[Direction.FORWARD]) - abs(self._checks["R"] - self._checks[Direction.FORWARD])) > .2:
+			return
+		if abs(diff) < .15:
+			if diff < 0:
+				self._send_twist(0, -.05)
+				self.center(count=num)
+			elif diff > 0:
+				self._send_twist(0, .05)
+				self.center(count=num)
+		elif abs(diff) >= .15:
+			if diff < 0:
+				self._send_twist(0, .05)
+				self.center(count=num)
+			elif diff > 0:
+				self._send_twist(0, -.05)
+				self.center(count=num)
+		
 
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction):
-		measure = self._checks["FULL"]
+		measure = self._checks[Direction.FORWARD]
 		if measure > .5:
+			# ok but are the sides confident
+			if self._checks[direction] > .5:
+				self.center()
+				return True
+			else:
+				# need to correct
+				if direction == Direction.FORWARD:
+					return False
+				elif direction == Direction.LEFT:
+					self.move(Direction.RIGHT)
+					self.move(Direction.FORWARD, scale=4)
+					self.move(Direction.LEFT)
+					return self.check(direction)
+				elif direction == Direction.RIGHT:
+					self.move(Direction.LEFT)
+					self.move(Direction.FORWARD, scale=4)
+					self.move(Direction.RIGHT)
+					return self.check(direction)
 			return True
 		else:
+			rospy.loginfo("{} {}".format(self._checks["FULL"], self._checks[Direction.FORWARD]))
+			self.center()
 			return False
 
 		rospy.loginfo(measure)
