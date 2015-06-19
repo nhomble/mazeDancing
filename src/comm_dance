@@ -13,6 +13,10 @@ from Dance import *
 
 def fixed_path(move, speech):
 	path = [Direction.LEFT]
+	pub.publish("The path is")
+	for p in path:
+		time.sleep(1)
+		pub.publish(Direction.to_string[p])
 	do_dance(path, move)
 
 def detect_path(speech):
