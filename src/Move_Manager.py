@@ -46,7 +46,7 @@ class Move_Manager(object):
 		self.stop()
 		self._sense_subs[0].unregister()
 		self.maze.collision()
-		self.move(Direction.BACKWARD)
+		self._send_twist(-TWIST_X/7, 0)
 		if collisions == 1:
 			self._send_twist(0, .1)
 		elif collisions == 2:
@@ -111,22 +111,26 @@ class Move_Manager(object):
 		self._send_twist(diff, 0)
 	
 	def center(self, count=1):
-		if count > 3:
+		if count > 4:
 			return
+		if self._checks["FULL"] > .8:
+			return 
 
 		num = count + 1
 		diff = self._checks["L"] - self._checks["R"]
 		rospy.loginfo("{} - {}  = diff {}".format(self._checks["L"], self._checks["R"], diff))
 		if abs(abs(self._checks["L"] - self._checks[Direction.FORWARD]) - abs(self._checks["R"] - self._checks[Direction.FORWARD])) > .2:
 			return
-		if abs(diff) < .15:
+		if abs(diff) > .4:
+			return
+		if abs(diff) < .10:
 			if diff < 0:
 				self._send_twist(0, -.05)
 				self.center(count=num)
 			elif diff > 0:
 				self._send_twist(0, .05)
 				self.center(count=num)
-		elif abs(diff) >= .15:
+		elif abs(diff) >= .2:
 			if diff < 0:
 				self._send_twist(0, .05)
 				self.center(count=num)
@@ -138,11 +142,11 @@ class Move_Manager(object):
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction):
-		measure = self._checks[Direction.FORWARD]
-		if measure > .5:
+		if direction == Direction.FORWARD:
+			self.center()
+		if self._checks[Direction.FORWARD] > .65 or self._checks["FULL"] > .6:
 			# ok but are the sides confident
-			if self._checks[direction] > .5:
-				self.center()
+			if self._checks[direction] > .6:
 				return True
 			else:
 				# need to correct
@@ -150,18 +154,17 @@ class Move_Manager(object):
 					return False
 				elif direction == Direction.LEFT:
 					self.move(Direction.RIGHT)
-					self.move(Direction.FORWARD, scale=4)
+					self.move(Direction.FORWARD, scale=5)
 					self.move(Direction.LEFT)
 					return self.check(direction)
 				elif direction == Direction.RIGHT:
 					self.move(Direction.LEFT)
-					self.move(Direction.FORWARD, scale=4)
+					self.move(Direction.FORWARD, scale=5)
 					self.move(Direction.RIGHT)
 					return self.check(direction)
 			return True
 		else:
 			rospy.loginfo("{} {}".format(self._checks["FULL"], self._checks[Direction.FORWARD]))
-			self.center()
 			return False
 
 		rospy.loginfo(measure)
@@ -185,6 +188,7 @@ class Move_Manager(object):
 
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
+			self.center()
 			self._send_twist(TWIST_X/scale, 0)
 			self.maze.step()
 		elif direction == Direction.BACKWARD:
@@ -204,7 +208,9 @@ class Move_Manager(object):
 	def _turn(self, direction, hardcode):
 		# HACK we just hardcode a fixed number of identical twist messages to do
 		# an orthogonal turn on a flat surface
-		val = -(TWIST_Z) if direction == Direction.RIGHT else TWIST_Z
+		scale = .92
+		val = -(TWIST_Z*scale) if direction == Direction.RIGHT else TWIST_Z
+		rospy.loginfo(Direction.to_string[direction] + " {}".format(val))
 		self._send_twist(0, val)
 
 	# actually send message

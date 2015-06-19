@@ -44,7 +44,7 @@ class Sensor_Manager(object):
 	
 	def _scan_callback(self, data):
 		s = 0
-		lp = 8
+		lp = 16
 		i = 0
 		part = [0 for _ in range(lp)]
 		length = len(data.ranges)
