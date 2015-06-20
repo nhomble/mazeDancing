@@ -93,11 +93,11 @@ class Move_Manager(object):
 		# but maybe we should turn the other way
 		if diff < 0:
 			self._send_twist(0, -CENTER_INC)
-			self._send_twist(CENTER_INC, 0)
+			self._send_twist(CENTER_INC/8, 0)
 			self.center(count=num)
 		elif diff > 0:
 			self._send_twist(0, CENTER_INC)
-			self._send_twist(CENTER_INC, 0)
+			self._send_twist(CENTER_INC/8, 0)
 			self.center(count=num)
 	
 	def not_too_close(self, count=1):
