@@ -21,68 +21,44 @@ class Move_Manager(object):
 	def __init__(self):
 		self._tw_pub = rospy.Publisher(TWIST_PUB, Twist)
 		self._rate = rospy.Rate(RATE)
-		self._checks = {\
+		self._checks = {
 			"FULL": None,\
-			"L": None,\
-			"R": None,\
+			"L_AVG": None,\
+			"R_AVG": None,\
+			"M_AVG": None,\
 			Direction.FORWARD: None,\
 			Direction.LEFT: None,\
-			Direction.RIGHT: None\
+			Direction.RIGHT: None,\
+			"ARRAY": None\
 		}
 		self._sense_subs = [\
-			rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision),\
+			rospy.Subscriber(BUMPER_IO, TurtlebotSensorState, self._collision),\
 			rospy.Subscriber(SCAN_IO, Float64MultiArray, self._scan)\
 		]
 		self.maze = Maze()
-		self.fix_bumper = (False, False)
+		self._last_collision = None
 	
 	# 1: right
 	# 2: left
 	# 3: both
+	# just record that we hit something
 	def _collision(self, data):
 		collisions = data.bumps_wheeldrops
-		if collisions == 0:
+		if collisions == 0 or self._last_collision is not None:
 			return
 		self.stop()
-		self._sense_subs[0].unregister()
-		self.maze.collision()
 		self._send_twist(-TWIST_X/7, 0)
-		if collisions == 1:
-			self._send_twist(0, .1)
-		elif collisions == 2:
-			self._send_twist(0, -.1)
-		rospy.loginfo("collision: " + str(collisions))
-		self._sense_subs[0] = rospy.Subscriber('/mobile_base/sensors/core', TurtlebotSensorState, self._collision)
+		self._last_collision = collisions
 	
-	def _pcl_left(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-			return
-		pcl = data.data
-		self._checks[Direction.LEFT] = pcl
+	# executed when we have the chance
+	def _handle_collision(self):
+		self.maze.collision()
+		#if self._last_collision == 1:
+		#	self._send_twist(0, COLLISION_Z)
+		#elif self._last_collision == 2:
+		#	self._send_twist(0, -COLLISION_Z)
+		self._last_collision = None
 
-	def _pcl_right(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-			return
-		pcl = data.data
-		self._checks[Direction.RIGHT] = pcl
-
-	def _pcl_middle(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-			return
-		pcl = data.data
-		self._checks[Direction.FORWARD] = pcl
-
-	def _pcl_full(self, data):
-		if data is None:
-			rospy.loginfo("data is none")
-			return
-		pcl = data.data
-
-		self._checks["FULL"] = pcl
-	
 	def _scan(self, data):
 		arr = data.data
 		self._checks["FULL"] = arr[-1]
@@ -91,52 +67,44 @@ class Move_Manager(object):
 		self._checks[Direction.RIGHT] = min(arr[0:part])
 		self._checks[Direction.FORWARD] = min(arr[part:2*part])
 		self._checks[Direction.LEFT] = min(arr[2*part:3*part])
-		self._checks["R"] = max(arr[2*part:3*part])
-		self._checks["L"] = max(arr[0:part])
-
-	# TODO
-	# broken
-	# adjust a little bit towards the goal by MIN/MAX_FORWARD_DIST
-	def nudge(self):
-		return
-		# NOTE most reliable measurement at the moment
-		pos = self._checks["FULL"]
-		diff = (GOAL_DIST - pos) / TIME
-		# _send_twist takes 1 second to perform the entire movement
-		# so we should not have to scale diff at all
-
-		# boundary conditions
-		diff = min(MAX_NUDGE, diff) if diff > 0 else max(-MAX_NUDGE, diff)
-		rospy.loginfo("nudge: " + str(diff))
-		self._send_twist(diff, 0)
+		self._checks["R_AVG"] = sum(arr[2*part:3*part])/part
+		self._checks["L_AVG"] = sum(arr[0:part])/part
+		self._checks["M_AVG"] = sum(arr[part:2*part])/part
+		self._checks["ARRAY"] = arr
 	
+	# try to adjust the left and right side to be equidistant from an imaginary wall
 	def center(self, count=1):
-		if count > 4:
+		if self._checks["ARRAY"] is None:
 			return
-		if self._checks["FULL"] > .8:
-			return 
-
+		if self._checks["M_AVG"] > MIN_PART_DIST:
+			return
+		if count > CENTER_MAX_COUNT:
+			return
 		num = count + 1
-		diff = self._checks["L"] - self._checks["R"]
-		rospy.loginfo("{} - {}  = diff {}".format(self._checks["L"], self._checks["R"], diff))
-		if abs(abs(self._checks["L"] - self._checks[Direction.FORWARD]) - abs(self._checks["R"] - self._checks[Direction.FORWARD])) > .2:
+		diff = self._checks["L_AVG"] - self._checks["R_AVG"]
+
+		# avoid big adjustments
+		if abs(diff) > CENTER_MAX_COUNT * CENTER_INC:
 			return
-		if abs(diff) > .4:
-			return
-		if abs(diff) < .10:
-			if diff < 0:
-				self._send_twist(0, -.05)
-				self.center(count=num)
-			elif diff > 0:
-				self._send_twist(0, .05)
-				self.center(count=num)
-		elif abs(diff) >= .2:
-			if diff < 0:
-				self._send_twist(0, .05)
-				self.center(count=num)
-			elif diff > 0:
-				self._send_twist(0, -.05)
-				self.center(count=num)
+
+		# NOTE
+		# we aren't being as smart as we could be
+		# we always try to move towards a wall..
+		# but maybe we should turn the other way
+		if diff < 0:
+			self._send_twist(0, -CENTER_INC)
+			self._send_twist(CENTER_INC, 0)
+			self.center(count=num)
+		elif diff > 0:
+			self._send_twist(0, CENTER_INC)
+			self._send_twist(CENTER_INC, 0)
+			self.center(count=num)
+	
+	def not_too_close(self, count=1):
+		if self._checks["FULL"] < MIN_FULL_DIST/8 and count < 2:
+			self.move(Direction.BACKWARD, scale=10)
+			c = count + 1
+			self.not_too_close(count=c)
 		
 
 	# turning is left to the callee!
@@ -144,9 +112,10 @@ class Move_Manager(object):
 	def check(self, direction):
 		if direction == Direction.FORWARD:
 			self.center()
-		if self._checks[Direction.FORWARD] > .65 or self._checks["FULL"] > .6:
+			self.not_too_close()
+		if self._checks[Direction.FORWARD] > MIN_PART_DIST or self._checks["FULL"] > MIN_FULL_DIST:
 			# ok but are the sides confident
-			if self._checks[direction] > .6:
+			if self._checks[direction] > MIN_PART_DIST:
 				return True
 			else:
 				# need to correct
@@ -180,11 +149,13 @@ class Move_Manager(object):
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, hardcode=True, scale=1):
+		if self._last_collision is not None:
+			self._handle_collision()
+
 		if direction == Turn.CLOCKWISE:
 			direction = Direction.RIGHT
 		if direction == Turn.COUNTER:
 			direction = Direction.LEFT
-
 
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
@@ -195,6 +166,7 @@ class Move_Manager(object):
 			self._send_twist(-TWIST_X/scale, 0)
 			self.maze.step()
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
+			self.center()
 			self._turn(direction, hardcode)
 			self.maze.turn(direction)
 		else:
@@ -208,7 +180,7 @@ class Move_Manager(object):
 	def _turn(self, direction, hardcode):
 		# HACK we just hardcode a fixed number of identical twist messages to do
 		# an orthogonal turn on a flat surface
-		scale = .92
+		scale = 1
 		val = -(TWIST_Z*scale) if direction == Direction.RIGHT else TWIST_Z
 		rospy.loginfo(Direction.to_string[direction] + " {}".format(val))
 		self._send_twist(0, val)
@@ -223,24 +195,3 @@ class Move_Manager(object):
 			self._rate.sleep()
 		self.stop()
 		rospy.sleep(DELAY)
-	
-def _check_dir(measure):
-	rospy.loginfo("measure: " + str(measure))
-	if measure is None:
-		rospy.loginfo("none")
-		return True
-	if measure[0] > CHECK_OPEN and measure[0] < 10:
-		rospy.loginfo("open")
-		return True
-	elif measure[1] > MAX_STD_DEV:
-		rospy.loginfo("std dev")
-		return False
-	elif measure[2] < MIN_POINTS:
-		rospy.loginfo("points")
-		return False
-	elif measure[3]/measure[2] >= MAX_WITHIN_PERC:
-		rospy.loginfo("perc")
-		return False
-	else:
-		rospy.loginfo("reg")
-		return measure[0] > MAX_DIST

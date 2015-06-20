@@ -1,48 +1,33 @@
 #!/usr/bin/env python2
 
 MAX_DIST = .90		# no further away to the wall than this empirically chosen value
-CHECK_OPEN = 2.0
-MAX_STD_DEV = 2.75
-MAX_WITHIN_PERC = .95
-MIN_POINTS = 75
+NUM_LASER_PARTITIONS = 16
 
 # taken from ROS mini_max tutorial
-TWIST_NUM = 20		
-RATE = 5.0
+TWIST_NUM = 20
+RATE = 10.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .2			# .12 m/s
+TWIST_X = .4			# .12 m/s
 TWIST_Z = 2/TIME		
 DELAY = 1				# hard 1 second delay
 
 DANCE_DELAY = 5
 
-MAX_NUDGE = .75
-
+BUMPER_IO = '/mobile_base/sensors/core'
 SPEECH_NODE = 'espeak_node'
 SPEECH_IO = 'espeak_sub'
-
 SCAN_IO = 'scan_dat'
-
 SENSOR_NODE = 'sensor_manager'
-PCL_FULL_IO = 'pcl/full'
-PCL_RIGHT_IO = 'pcl/right'
-PCL_LEFT_IO = 'pcl/left'
-PCL_MIDDLE_IO = 'pcl/middle'
-PCL_VARIANCE = 'pcl/variance'
-
-PCL_X_MIN = -1.0
-PCL_Y_MIN = 0.3
-PCL_X_MAX = 1.0
-PCL_Y_MAX = 0.5
-PCL_INTERVAL = 50
-
-ODOM_SUB = 'odom'
-PCL_SUB = '/camera/depth/points'
-DEPTH_SUB = '/camera/depth/image'
-COLOR_SUB = '/camera/rgb/image_color'
-
 TWIST_PUB = 'cmd_vel_mux/input/teleop'
 
+CENTER_MAX_COUNT = 3
+CENTER_INC = .1
+CENTER_MAX_DIST = .08
+
+MIN_PART_DIST = .65
+MIN_FULL_DIST = .6
+
+COLLISION_Z = 0.01
 '''
 	FORWARD
 LEFT		RIGHT
