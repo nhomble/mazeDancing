@@ -20,9 +20,10 @@ SCAN_IO = 'scan_dat'
 SENSOR_NODE = 'sensor_manager'
 TWIST_PUB = 'cmd_vel_mux/input/teleop'
 
-CENTER_MAX_COUNT = 3
+CENTER_MAX_COUNT = 5
 CENTER_INC = .1
 CENTER_MAX_DIST = .08
+CENTER_FORWARD = CENTER_INC / 12
 
 MIN_PART_DIST = .65
 MIN_FULL_DIST = .6

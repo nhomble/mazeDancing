@@ -84,25 +84,24 @@ class Move_Manager(object):
 		diff = self._checks["L_AVG"] - self._checks["R_AVG"]
 
 		# avoid big adjustments
+		coeff = 1
 		if abs(diff) > CENTER_MAX_COUNT * CENTER_INC:
-			return
+			coeff = -1
 
 		# NOTE
 		# we aren't being as smart as we could be
 		# we always try to move towards a wall..
 		# but maybe we should turn the other way
 		if diff < 0:
-			self._send_twist(0, -CENTER_INC)
-			self._send_twist(CENTER_INC/8, 0)
+			self._send_twist(CENTER_FORWARD, - coeff * CENTER_INC)
 			self.center(count=num)
 		elif diff > 0:
-			self._send_twist(0, CENTER_INC)
-			self._send_twist(CENTER_INC/8, 0)
+			self._send_twist(CENTER_FORWARD, coeff * CENTER_INC)
 			self.center(count=num)
 	
 	def not_too_close(self, count=1):
-		if self._checks["FULL"] < MIN_FULL_DIST/8 and count < 2:
-			self.move(Direction.BACKWARD, scale=10)
+		if self._checks["FULL"] < MIN_FULL_DIST/4 and count < 2:
+			self.move(Direction.BACKWARD, scale=12)
 			c = count + 1
 			self.not_too_close(count=c)
 		
