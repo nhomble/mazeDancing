@@ -54,7 +54,112 @@ def _tuch(direction, move, stall):
 	time.sleep(stall)
 	return move.check(direction)
 
-def wall_follower(move, maze, speech, stall=.5):
+def practice(move,  speech, stall=.5):
+	time.sleep(1)
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is blocked")
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is open")
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is block")
+	speech.publish("follow right wall")
+	move.move(Direction.LEFT)
+	speech.publish("go forward")
+	move.move(Direction.FORWARD)
+	move.maze.print_maze()
+
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is open")
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is blocked")
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is open")
+	speech.publish("follow right wall")
+	speech.publish("go right")
+	move.move(Direction.FORWARD)
+	move.maze.print_maze()
+	move.check(Direction.FORWARD)
+
+	'''
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is blocked")
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is open")
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is blocked")
+	speech.publish("follow right wall")
+	move.move(Direction.LEFT)
+	speech.publish("go forward")
+	move.move(Direction.FORWARD)
+	'''
+
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is blocked")
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is blocked")
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is blocked")
+	speech.publish("follow right wall")
+	speech.publish("go backward")
+	move.move(Direction.RIGHT)
+	move.move(Direction.FORWARD)
+	move.maze.print_maze()
+
+	'''
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is blocked")
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is open")
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is blocked")
+	speech.publish("follow right wall")
+	move.move(Direction.LEFT)
+	speech.publish("go forward")
+	move.move(Direction.FORWARD)
+	'''
+
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is open")
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is open")
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is blocked")
+	speech.publish("follow right wall")
+	move.move(Direction.LEFT)
+	speech.publish("go forward")
+	move.move(Direction.FORWARD)
+
+	speech.publish("we have reached goal")
+	move.maze.print_maze()
+	path1, path2 = move.maze.best_path()
+	str1 = "RETURN PATH: "
+	str2 = "WORKER PATH: "
+	for p in path1:
+		str1 += Direction.to_string[p]
+	for p in path2:
+		str2 += Direction.to_string[p]
+	print(str1)
+	print(str2)
+
+def wall_follower(move, speech, stall=.5):
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
@@ -182,9 +287,9 @@ def checks(move):
 def main():
 	speech = rospy.Publisher(SPEECH_IO, String)
 	move = Move_Manager()
-	maze = Maze()
-	wall_follower(move, maze, speech)
+	#wall_follower(move, speech)
 	#checks(move)
+	practice(move, speech)
 	return 
 
 if __name__ == "__main__":
