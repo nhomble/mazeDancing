@@ -100,8 +100,8 @@ class Move_Manager(object):
 			self.center(count=num)
 	
 	def not_too_close(self, count=1):
-		if self._checks["FULL"] < MIN_FULL_DIST/4 and count < 2:
-			self.move(Direction.BACKWARD, scale=12)
+		if self._checks["FULL"] < MIN_FULL_DIST/8 and count < 3:
+			self.move(Direction.BACKWARD, scale=30)
 			c = count + 1
 			self.not_too_close(count=c)
 		
@@ -111,7 +111,6 @@ class Move_Manager(object):
 	def check(self, direction):
 		if direction == Direction.FORWARD:
 			self.center()
-			self.not_too_close()
 		if self._checks[Direction.FORWARD] > MIN_PART_DIST or self._checks["FULL"] > MIN_FULL_DIST:
 			# ok but are the sides confident
 			if self._checks[direction] > MIN_PART_DIST:
@@ -158,16 +157,16 @@ class Move_Manager(object):
 
 		# NOTE this should be the only place where we delay after movement
 		if direction == Direction.FORWARD:
-			self.center()
 			self._send_twist(TWIST_X/scale, 0)
 			self.maze.step()
+			self.center()
+			self.not_too_close()
 		elif direction == Direction.BACKWARD:
 			self._send_twist(-TWIST_X/scale, 0)
-			self.maze.step()
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
-			self.center()
 			self._turn(direction, hardcode)
 			self.maze.turn(direction)
+			self.center()
 		else:
 			rospy.loginfo("invalid direction to move() " + str(direction))
 
@@ -179,7 +178,7 @@ class Move_Manager(object):
 	def _turn(self, direction, hardcode):
 		# HACK we just hardcode a fixed number of identical twist messages to do
 		# an orthogonal turn on a flat surface
-		scale = 1
+		scale = .94
 		val = -(TWIST_Z*scale) if direction == Direction.RIGHT else TWIST_Z
 		rospy.loginfo(Direction.to_string[direction] + " {}".format(val))
 		self._send_twist(0, val)

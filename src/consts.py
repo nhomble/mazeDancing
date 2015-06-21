@@ -5,10 +5,10 @@ NUM_LASER_PARTITIONS = 16
 
 # taken from ROS mini_max tutorial
 TWIST_NUM = 20
-RATE = 10.0
+RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .4			# .12 m/s
-TWIST_Z = 2/TIME		
+TWIST_X = .25			# .12 m/s
+TWIST_Z = 1.8/TIME		
 DELAY = 1				# hard 1 second delay
 
 DANCE_DELAY = 5
