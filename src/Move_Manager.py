@@ -86,6 +86,8 @@ class Move_Manager(object):
 		# avoid big adjustments
 		coeff = 1
 		if abs(diff) > CENTER_MAX_COUNT * CENTER_INC:
+			return
+		elif abs(diff) > CENTER_MAX_COUNT * CENTER_INC / 2:
 			coeff = -1
 
 		# NOTE
@@ -100,7 +102,7 @@ class Move_Manager(object):
 			self.center(count=num)
 	
 	def not_too_close(self, count=1):
-		if self._checks["FULL"] < MIN_FULL_DIST/8 and count < 3:
+		if self._checks["FULL"] < MIN_FULL_DIST/8 and count < 1:
 			self.move(Direction.BACKWARD, scale=30)
 			c = count + 1
 			self.not_too_close(count=c)

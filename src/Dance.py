@@ -19,6 +19,7 @@ def do_dance(directions, move):
 	# add terminator
 	directions.append(None)
 	_hist = []
+	deg = 0
 	for d in directions:
 		rospy.loginfo(_hist)
 		rospy.loginfo(Direction.to_string[d])
@@ -29,7 +30,20 @@ def do_dance(directions, move):
 		rospy.sleep(DANCE_DELAY)
 		_hist.append(clock[0])
 		_hist.append(clock[1])
-	time.sleep(DANCE_DELAY)
+		if clock[0] == Turn.CLOCKWISE:
+			deg += 90
+		else:
+			deg -= 90
+		if clock[1] == Turn.CLOCKWISE:
+			deg += 90
+		else:
+			deg -= 90
+	while deg < 0:
+		deg += 90
+	while deg > 0:
+		deg -= 90
+		move.move(Direction.LEFT)
+		
 
 '''
 =======================================================
