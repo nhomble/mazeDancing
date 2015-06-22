@@ -58,6 +58,7 @@ _last_tag = None
 _is_done = False
 _dirs = []
 _turns = []
+_start = False
 
 def _translate(l, trans):
 	i = 0
@@ -80,13 +81,18 @@ def _couple(l, trans):
 def _get_turns(tags):
 	return _translate(tags, Language.ID_TO_CLOCK)
 def _get_directions(turns):
-	return _couple(turns, Language.CLOCK_TO_DIR)
+	# HACK
+	ret = _couple(turns, Language.CLOCK_TO_DIR)
+	return ret
 
 def _check_is_done(tags):
 	global _dirs
 	global _turns
 	_turns = _get_turns(tags)
-	_dirs = _get_directions(_turns)
+	try:
+		_dirs = _get_directions(_turns)
+	except:
+		pass
 	return True if _dirs[-1] is None else False
 
 def _tag_callback(data):
@@ -103,6 +109,12 @@ def _tag_callback(data):
 	if _is_done:
 		return
 	# init
+	if not _start:
+		global _start
+		if tag != Tag.FRONT:
+			return
+		else:
+			_start = True
 	if _last_tag is None:
 		_last_tag = tag
 		_detected_tags.append(tag)
