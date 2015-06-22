@@ -7,7 +7,7 @@ NUM_LASER_PARTITIONS = 16
 TWIST_NUM = 20
 RATE = 5.0
 TIME = TWIST_NUM / RATE
-TWIST_X = .25			# .12 m/s
+TWIST_X = .20			# .12 m/s
 TWIST_Z = 1.8/TIME		
 DELAY = 1				# hard 1 second delay
 
