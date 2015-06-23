@@ -16,11 +16,15 @@ from create_node.msg import TurtlebotSensorState
 # maze solving
 from Maze import Maze
 
-# NOTE MUST BE import by a ROS NODE
+# NOTE MUST BE imported by a ROS NODE
 class Move_Manager(object):
 	def __init__(self):
 		self._tw_pub = rospy.Publisher(TWIST_PUB, Twist)
 		self._rate = rospy.Rate(RATE)
+		# FULL is full average
+		# _AVG is just average of some partitions
+		# Direction.* is the minimum distance in select partitions
+		# look at _scan()
 		self._checks = {
 			"FULL": None,\
 			"L_AVG": None,\
@@ -47,18 +51,15 @@ class Move_Manager(object):
 		if collisions == 0 or self._last_collision is not None:
 			return
 		self.stop()
-		self._send_twist(-TWIST_X/7, 0)
+		self._send_twist(-COLLISION_X, 0)
 		self._last_collision = collisions
 	
 	# executed when we have the chance
 	def _handle_collision(self):
 		self.maze.collision()
-		#if self._last_collision == 1:
-		#	self._send_twist(0, COLLISION_Z)
-		#elif self._last_collision == 2:
-		#	self._send_twist(0, -COLLISION_Z)
 		self._last_collision = None
 
+	# LaserScan callback
 	def _scan(self, data):
 		arr = data.data
 		self._checks["FULL"] = arr[-1]
@@ -74,76 +75,68 @@ class Move_Manager(object):
 	
 	# try to adjust the left and right side to be equidistant from an imaginary wall
 	def center(self, count=1):
-		if self._checks["ARRAY"] is None:
+		if  self._checks["ARRAY"] is None or \
+			self._checks["M_AVG"] > MIN_DIST or \
+			count > CENTER_MAX_COUNT:
 			return
-		if self._checks["M_AVG"] > MIN_PART_DIST:
-			return
-		if count > CENTER_MAX_COUNT:
-			return
+
 		num = count + 1
 		diff = self._checks["L_AVG"] - self._checks["R_AVG"]
 
-		# avoid big adjustments
-		coeff = 1
-		if abs(diff) > CENTER_MAX_COUNT * CENTER_INC:
+		# avoid adjustements that are too big (possibly just bad detection)
+		# avoid minute adjustements
+		if  abs(diff) > CENTER_MAX_COUNT * CENTER_INC or \
+			abs(diff) < CENTER_TURN_DIST:
 			return
+
+		# HACK
+		# guessing here, but we need to make a better decision here
+		# should the robot turn towards or away from a wall?
+		coeff = 1
 		elif abs(diff) > CENTER_MAX_COUNT * CENTER_INC / 2:
 			coeff = -1
 
-		# NOTE
-		# we aren't being as smart as we could be
-		# we always try to move towards a wall..
-		# but maybe we should turn the other way
-		if diff < 0:
-			self._send_twist(CENTER_FORWARD, - coeff * CENTER_INC)
-			self.center(count=num)
-		elif diff > 0:
-			self._send_twist(CENTER_FORWARD, coeff * CENTER_INC)
-			self.center(count=num)
+		self._send_twist(CENTER_FORWARD, coeff * CENTER_INC)
+		self.center(count=num)
 	
+	# we don't want to be too close to a wall, we want to be in the center of a "cell"
 	def not_too_close(self, count=1):
-		if self._checks["FULL"] < MIN_FULL_DIST/8 and count < 1:
-			self.move(Direction.BACKWARD, scale=30)
+		if self._checks["M_AVG"] < TOO_CLOSE and count < CLOSE_MAX_COUNT:
+			self._send_twist(-BACKWARDS_X(CLOSE_INC, 0)
 			c = count + 1
 			self.not_too_close(count=c)
-		
 
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
-	def check(self, direction):
+	def check(self, direction, num=1):
 		if direction == Direction.FORWARD:
 			self.center()
-		if self._checks[Direction.FORWARD] > MIN_PART_DIST or self._checks["FULL"] > MIN_FULL_DIST:
-			# ok but are the sides confident
-			if self._checks[direction] > MIN_PART_DIST:
+		# check that we have room
+		if self._checks[Direction.FORWARD] > MIN_DIST or self._checks["M_AVG"] > MIN_DIST:
+			# ok but are the sides confident?
+			if self._checks[direction] > MIN_DIST:
+				# good to go
 				return True
 			else:
-				# need to correct
+				## need to correct, 
+				## lets nudge forward since we might be looking at a corner
+				# if we are trying to go forward then this check is irrelevant 
 				if direction == Direction.FORWARD:
 					return False
+				# reset forward, move up a little, look left again
+				# recursively check again
 				elif direction == Direction.LEFT:
 					self.move(Direction.RIGHT)
-					self.move(Direction.FORWARD, scale=5)
+					self.move(Direction.FORWARD, scale=CHECK_SCALE)
 					self.move(Direction.LEFT)
 					return self.check(direction)
+				# ^^
 				elif direction == Direction.RIGHT:
 					self.move(Direction.LEFT)
-					self.move(Direction.FORWARD, scale=5)
+					self.move(Direction.FORWARD, scale=CHECK_SCALE)
 					self.move(Direction.RIGHT)
 					return self.check(direction)
 			return True
-		else:
-			rospy.loginfo("{} {}".format(self._checks["FULL"], self._checks[Direction.FORWARD]))
-			return False
-
-		rospy.loginfo(measure)
-		if _check_dir(measure):
-			if direction == Direction.RIGHT or direction == Direction.LEFT:
-				measure = self._checks[direction]
-				rospy.loginfo(measure)
-				return _check_dir(measure)
-			else:
-				return True
 		else:
 			return False
 	
@@ -164,7 +157,8 @@ class Move_Manager(object):
 			self.center()
 			self.not_too_close()
 		elif direction == Direction.BACKWARD:
-			self._send_twist(-TWIST_X/scale, 0)
+			# NOTE: backward is not just -TWIST_X
+			self._send_twist(-BACKWARD(MAX_DIST)/scale, 0)
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
 			self._turn(direction, hardcode)
 			self.maze.turn(direction)
@@ -178,14 +172,13 @@ class Move_Manager(object):
 		self._tw_pub.publish(twist)
 
 	def _turn(self, direction, hardcode):
-		# HACK we just hardcode a fixed number of identical twist messages to do
 		# an orthogonal turn on a flat surface
-		scale = .94
-		val = -(TWIST_Z*scale) if direction == Direction.RIGHT else TWIST_Z
-		rospy.loginfo(Direction.to_string[direction] + " {}".format(val))
+		# HACK right turns suck
+		val = -(TWIST_Z*RIGHT_SCALE) if direction == Direction.RIGHT else TWIST_Z
 		self._send_twist(0, val)
 
 	# actually send message
+	# similar to what is found in turtlebot min_max tutorial
 	def _send_twist(self, x, z):
 		for _ in range(TWIST_NUM):
 			twist = Twist()
