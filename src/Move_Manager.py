@@ -70,9 +70,9 @@ class Move_Manager(object):
 		part = length // 3
 		self._checks[Direction.RIGHT] = min(arr[0:part])
 		self._checks[Direction.FORWARD] = min(arr[part:2*part])
-		self._checks[Direction.LEFT] = min(arr[2*part:3*part])
-		self._checks["R_AVG"] = sum(arr[2*part:3*part])/part
-		self._checks["L_AVG"] = sum(arr[0:part])/part
+		self._checks[Direction.LEFT] = min(arr[2*part:3*part-1])
+		self._checks["R_AVG"] = sum(arr[0:part])/part
+		self._checks["L_AVG"] = sum(arr[2*part:3*part])/part
 		self._checks["M_AVG"] = sum(arr[part:2*part])/part
 		self._checks["ARRAY"] = arr
 	
@@ -96,28 +96,33 @@ class Move_Manager(object):
 		# guessing here, but we need to make a better decision here
 		# should the robot turn towards or away from a wall?
 		coeff = 1
-		elif abs(diff) > CENTER_MAX_COUNT * CENTER_INC / 2:
+		if abs(diff) > CENTER_MAX_COUNT * CENTER_INC / 2:
 			coeff = -1
 
-		self._send_twist(CENTER_FORWARD, coeff * CENTER_INC)
+		self._send_twist(CENTER_FORWARD, 0)
+		self._send_twist(0, coeff * CENTER_INC)
 		self.center(count=num)
 	
 	# we don't want to be too close to a wall, we want to be in the center of a "cell"
 	def not_too_close(self, count=1):
 		if self._checks["M_AVG"] < TOO_CLOSE and count < CLOSE_MAX_COUNT:
-			self._send_twist(-BACKWARDS_X(CLOSE_INC, 0)
+			self._send_twist(-BACKWARDS_X(CLOSE_INC), 0)
 			c = count + 1
 			self.not_too_close(count=c)
 
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction, num=1):
+		rospy.loginfo("M: {} L: {} R: {}".format(self._checks["M_AVG"], self._checks["L_AVG"], self._checks["R_AVG"]))
 		if direction == Direction.FORWARD:
 			self.center()
 		# check that we have room
 		if self._checks[Direction.FORWARD] > MIN_DIST or self._checks["M_AVG"] > MIN_DIST:
+			rospy.loginfo("middle is good")
 			# ok but are the sides confident?
-			if self._checks[direction] > MIN_DIST:
+			key = "L_AVG" if direction == Direction.LEFT else "R_AVG"
+			if self._checks[key] > MIN_DIST:
+				rospy.loginfo("side is confidence")
 				# good to go
 				return True
 			else:
@@ -128,6 +133,7 @@ class Move_Manager(object):
 					return False
 				# reset forward, move up a little, look left again
 				# recursively check again
+				# TODO depends which side sensor failed check!!!
 				elif direction == Direction.LEFT:
 					self.move(Direction.RIGHT)
 					self.move(Direction.FORWARD, scale=CHECK_SCALE)
