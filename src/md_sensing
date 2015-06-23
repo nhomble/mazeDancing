@@ -24,12 +24,21 @@ class Sensor_Manager(object):
 	
 	# condense the depth scan into lp partitions
 	def _scan_callback(self, data):
+		start_angle = data.angle_min
+		end_angle = data.angle_max
+		angle_increment = data.angle_increment
+
+		# determine points we should skip
+		skip_l = (abs(start_angle) - RAD_ANGLE) / angle_increment
+		skip_r = (end_angle - RAD_ANGLE) / angle_increment
+		skip_a = int((skip_l + skip_r) // 2)
+
 		s = 0
 		lp = NUM_LASER_PARTITIONS
 		i = 0
 		part = [0 for _ in range(lp)]
 		length = len(data.ranges)
-		for d in data.ranges:
+		for d in data.ranges[skip_a:length-skip_a]:
 			index = i // (length/lp)
 			if not math.isnan(d):
 				s += d

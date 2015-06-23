@@ -1,11 +1,14 @@
 #!/usr/bin/env python2
+import math
+
+# =================== user define ==========================
 
 # LaserScan detection
 NUM_LASER_PARTITIONS = 16
+DEG_ANGLE = 15
 
-# movement primitives
+# movement primitive
 TWIST_X = .20
-TWIST_Z = 1.8/TIME		
 
 # ROS topics
 BUMPER_IO = '/mobile_base/sensors/core'
@@ -31,9 +34,13 @@ def x_to_d(x):
 def BACKWARDS_X(dist):
 	return (-abs(dist) + .019) / -2.972
 
+RAD_ANGLE = DEG_ANGLE * math.pi / 180
+
 # taken from ROS mini_max tutorial
 TWIST_NUM = 20
 RATE = 5.0
+TIME = TWIST_NUM / RATE
+TWIST_Z = 1.8/TIME		
 
 TWIST_X = max(min(TWIST_X, .3), .1)			# ensure bounds
 MIN_DIST = x_to_d(TWIST_X) * 1.1			# data collected by hand and fitted
@@ -46,11 +53,12 @@ CLOSE_INC = x_to_d(TWIST_X) * .05			# backwards distance we increment when too c
 TOO_CLOSE = x_to_d(TWIST_X) * .1			# want to maintain a ten percent buffer
 CLOSE_MAX_COUNT = TOO_CLOSE / CLOSE_INC		# max number of backwards we should do
 
-TIME = TWIST_NUM / RATE
 
 CENTER_INC = .1								# small value that is consistent
 CENTER_TURN_DIST = .08						#
-CENTER_FORWARD = (.18 + .037) / 3.535		# when we turn, we do nudge backwards a little bit
+CENTER_FORWARD = (.018 + .37) / 3.535		# when we turn, we do nudge backwards a little bit
+# HACK
+CENTER_FORWARD = 0
 
 COLLISION_X = BACKWARDS_X(MIN_DIST)			# just reset movement, but not all the way
 
