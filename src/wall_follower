@@ -36,7 +36,6 @@ def _get_directions(openings):
 
 def _do_move(d, move, speech):
 	if d == Direction.RIGHT:
-		move.move(d)
 		move.move(Direction.FORWARD)
 	elif d == Direction.FORWARD:
 		move.move(Direction.LEFT)
@@ -302,9 +301,9 @@ def checks(move):
 def main():
 	speech = rospy.Publisher(SPEECH_IO, String)
 	move = Move_Manager()
-	#wall_follower(move, speech)
+	wall_follower(move, speech)
 	#checks(move)
-	practice(move, speech)
+	#practice(move, speech)
 	return 
 
 if __name__ == "__main__":
