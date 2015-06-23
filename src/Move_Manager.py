@@ -38,6 +38,9 @@ class Move_Manager(object):
 		self.maze = Maze()
 		self._last_collision = None
 	
+	def debug(self, a=1):
+		print(self._checks)
+	
 	# 1: right
 	# 2: left
 	# 3: both

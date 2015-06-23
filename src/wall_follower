@@ -39,13 +39,14 @@ def _do_move(d, move, speech):
 		move.move(d)
 		move.move(Direction.FORWARD)
 	elif d == Direction.FORWARD:
+		move.move(Direction.LEFT)
 		move.move(d)
 	elif d == Direction.LEFT:
 		move.move(d)
+		move.move(d)
 		move.move(Direction.FORWARD)
 	elif d == Direction.BACKWARD:
-		move.move(Direction.LEFT)
-		move.move(Direction.LEFT)
+		move.move(Direction.RIGHT)
 		move.move(Direction.FORWARD)
 
 def _tuch(direction, move, stall):
@@ -187,7 +188,6 @@ def wall_follower(move, speech, stall=.5):
 			openings[2] = True
 
 		speech.publish("now follow right wall")
-		move.move(Direction.LEFT)
 
 		d = _get_directions(openings)
 		if not done:

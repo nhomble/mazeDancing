@@ -20,7 +20,6 @@ def fixed_path(move, speech):
 	do_dance(path, move)
 
 def detect_path(speech):
-	time.sleep(3)
 	speech.publish("start interpreting dance")
 	path = interpret_dance()
 	print(path)
@@ -28,14 +27,55 @@ def detect_path(speech):
 	for p in path:
 		if p is not None:
 			speech.publish(Direction.to_string[p])
+	return path
 
 # ROS loop
 def main(move):
-	pub = rospy.Publisher(SPEECH_IO, String)
-	# fixed_path(move, pub)
-	detect_path(pub)
-	time.sleep(2)
-	return 
+	speech = rospy.Publisher(SPEECH_IO, String)
+	path = detect_path(speech)
+	time.sleep(12)
+	speech.publish("get into position")
+	move.move(Direction.FORWARD)
+	move.move(Direction.LEFT)
+	move.move(Direction.FORWARD)
+	move.move(Direction.FORWARD)
+	
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is blocked")
+	
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is open")
+	
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is blocked")
+
+	speech.publish("follow right wall")
+	move.move(Direction.LEFT)
+	speech.publish("go forward")
+	move.move(Direction.FORWARD)
+
+	speech.publish("check left")
+	move.move(Direction.LEFT)
+	speech.publish("left is open")
+	
+	speech.publish("check ahead")
+	move.move(Direction.RIGHT)
+	speech.publish("ahead is blocked")
+	
+	speech.publish("check right")
+	move.move(Direction.RIGHT)
+	speech.publish("right is open")
+
+	speech.publish("we are at a node")
+	speech.publish("we should go left")
+	move.move(Direction.RIGHT)
+	move.move(Direction.RIGHT)
+	move.move(Direction.FORWARD)
+
+	speech.publish("we have reached goal")
 
 if __name__ == "__main__":
 	try:
