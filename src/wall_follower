@@ -54,6 +54,21 @@ def _tuch(direction, move, stall):
 	time.sleep(stall)
 	return move.check(direction)
 
+def demo_scout(move, speech, stall):
+	pass
+
+def demo_worker(move, speech, stall):
+	pass
+
+def demo(move, speech, stall, is_scout=True):
+	# re-do
+	if is_scout:
+		demo_scout(move, speech, stall)
+	else:
+		demo_worker(move, speech, stall)
+	pass
+
+# just test the feedback and tag detection
 def practice(move,  speech, stall=.5):
 	time.sleep(1)
 	speech.publish("check left")
