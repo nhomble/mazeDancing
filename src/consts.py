@@ -4,8 +4,8 @@ import math
 # =================== user define ==========================
 
 # LaserScan detection
-NUM_LASER_PARTITIONS = 16
-DEG_ANGLE = 15
+NUM_LASER_PARTITIONS = 8
+DEG_ANGLE = 10
 
 # movement primitive
 TWIST_X = .20

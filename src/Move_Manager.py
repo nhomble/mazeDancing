@@ -43,7 +43,7 @@ class Move_Manager(object):
 		self._last_collision = None
 	
 	def debug(self, a=1):
-		print(self._checks)
+		print(self._checks["ARRAY"])
 	
 	# 1: right
 	# 2: left
@@ -120,10 +120,11 @@ class Move_Manager(object):
 		if self._checks[Direction.FORWARD] > MIN_DIST or self._checks["M_AVG"] > MIN_DIST:
 			rospy.loginfo("middle is good")
 			# ok but are the sides confident?
-			# key = "L_AVG" if direction == Direction.LEFT else "R_AVG"
-			if self._checks[direction] > MIN_DIST:
-				rospy.loginfo("side is confidence")
+			key = "L_AVG" if direction == Direction.LEFT else "R_AVG"
+			if self._checks[key] > MIN_DIST:
+				rospy.loginfo("side is confident")
 				# good to go
+				rospy.loginfo("sides {} {} :: {} {}".format(self._checks[Direction.LEFT], self._checks[Direction.RIGHT], self._checks[Direction.FORWARD], self._checks["M_AVG"]))
 				return True
 			else:
 				## need to correct, 
