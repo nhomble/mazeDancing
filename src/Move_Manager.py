@@ -113,15 +113,15 @@ class Move_Manager(object):
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction, num=1):
-		rospy.loginfo("M: {} L: {} R: {}".format(self._checks["M_AVG"], self._checks["L_AVG"], self._checks["R_AVG"]))
+		rospy.loginfo("M: {} L: {} R: {}".format(self._checks["M_AVG"], self._checks[Direction.LEFT], self._checks[Direction.RIGHT]))
 		if direction == Direction.FORWARD:
 			self.center()
 		# check that we have room
 		if self._checks[Direction.FORWARD] > MIN_DIST or self._checks["M_AVG"] > MIN_DIST:
 			rospy.loginfo("middle is good")
 			# ok but are the sides confident?
-			key = "L_AVG" if direction == Direction.LEFT else "R_AVG"
-			if self._checks[key] > MIN_DIST:
+			# key = "L_AVG" if direction == Direction.LEFT else "R_AVG"
+			if self._checks[direction] > MIN_DIST:
 				rospy.loginfo("side is confidence")
 				# good to go
 				return True
@@ -131,19 +131,28 @@ class Move_Manager(object):
 				# if we are trying to go forward then this check is irrelevant 
 				if direction == Direction.FORWARD:
 					return False
-				# reset forward, move up a little, look left again
-				# recursively check again
-				# TODO depends which side sensor failed check!!!
+				# when middle says we are good
+				# but the sides have something in front!
 				elif direction == Direction.LEFT:
-					self.move(Direction.RIGHT)
-					self.move(Direction.FORWARD, scale=CHECK_SCALE)
-					self.move(Direction.LEFT)
+					if self._checks[direction] < MIN_DIST:
+						self.move(Direction.RIGHT)
+						self.move(Direction.FORWARD, scale=CHECK_SCALE)
+						self.move(Direction.LEFT)
+					else:
+						self.move(Direction.LEFT)
+						self.move(Direction.FORWARD, scale=CHECK_SCALE)
+						self.move(Direction.RIGHT)
 					return self.check(direction)
 				# ^^
 				elif direction == Direction.RIGHT:
-					self.move(Direction.LEFT)
-					self.move(Direction.FORWARD, scale=CHECK_SCALE)
-					self.move(Direction.RIGHT)
+					if self._checks[direction] < MIN_DIST:
+						self.move(Direction.LEFT)
+						self.move(Direction.FORWARD, scale=CHECK_SCALE)
+						self.move(Direction.RIGHT)
+					else:
+						self.move(Direction.RIGHT)
+						self.move(Direction.FORWARD, scale=CHECK_SCALE)
+						self.move(Direction.LEFT)
 					return self.check(direction)
 			return True
 		else:
