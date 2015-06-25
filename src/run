@@ -59,7 +59,7 @@ def demo_scout(move, speech, stall):
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
-	while not done:
+	while not done and not rospy.is_shutdown():
 		# =========================== explore surroundings =====================
 		openings = [False, False, False]
 		speech.publish("exploring")
@@ -105,7 +105,11 @@ def demo_scout(move, speech, stall):
 	done = False
 	step = 0
 	path, worker = move.maze.best_path()
-	while not done:
+	move.maze.print_maze()
+	print("my path: " + str(path))
+	print("worker's path: " + str(worker))
+	sys.stdin.read(1)
+	while not done and not rospy.is_shutdown():
 		options = 0
 		coor = [False, False, False]
 
@@ -133,7 +137,7 @@ def demo_scout(move, speech, stall):
 		# node
 		if options > 1:
 			# HACK
-			if step >= len(path):
+			if step >= len(path) or path[step] is None:
 				done = True
 				continue
 			d = path[step]
@@ -144,7 +148,9 @@ def demo_scout(move, speech, stall):
 		_do_move(d, move, speech)
 
 	# turn right to the other robot
+	speech.publish("make eye contact with worker")
 	move.move(Direction.RIGHT)
+	speech.publish("do dance")
 	do_dance(worker, move)
 	# leave
 	move.move(Direction.FORWARD)
