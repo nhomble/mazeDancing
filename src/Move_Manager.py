@@ -92,7 +92,7 @@ class Move_Manager(object):
 	
 	# we don't want to be too close to a wall, we want to be in the center of a "cell"
 	def not_too_close(self, count=1):
-		if	self._checks["M_AVG"] < TOO_CLOSE and \
+		if	self._checks[Direction.FORWARD] < TOO_CLOSE and \
 			count < CLOSE_MAX_COUNT and \
 			DO_NOT_GET_CLOSE:
 
@@ -109,12 +109,14 @@ class Move_Manager(object):
 		if self._checks[Direction.FORWARD] > MIN_DIST:
 			# ok but are the sides confident?
 			if not DO_GET_EDGE or self._checks[direction] > MIN_DIST:
+				rospy.loginfo(self._checks)
 				return True
 			else:
 				## need to correct, 
 				## lets nudge forward since we might be looking at a corner
 				# if we are trying to go forward then this check is irrelevant 
 				if direction == Direction.FORWARD:
+					rospy.loginfo(self._checks)
 					return False
 				# when middle says we are good
 				# but the sides have something in front!
@@ -139,8 +141,10 @@ class Move_Manager(object):
 						self.move(Direction.FORWARD, scale=CHECK_SCALE)
 						self.move(Direction.LEFT)
 					return self.check(direction)
+			rospy.loginfo(self._checks)
 			return True
 		else:
+			rospy.loginfo(self._checks)
 			return False
 	
 	# we always turn orthogonally so we won't ask for z input
@@ -177,7 +181,7 @@ class Move_Manager(object):
 	def _turn(self, direction, hardcode):
 		# an orthogonal turn on a flat surface
 		# HACK right turns suck
-		val = -(TWIST_Z*RIGHT_SCALE) if direction == Direction.RIGHT else TWIST_Z
+		val = -(TWIST_Z*RIGHT_SCALE) if direction == Direction.RIGHT else (LEFT_SCALE) * TWIST_Z
 		self._send_twist(0, val)
 
 	# actually send message

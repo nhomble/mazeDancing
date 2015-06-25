@@ -12,12 +12,12 @@ DO_NOT_GET_CLOSE	= False						# maintain distance from wall
 # =================== user defined ========================
 
 # LaserScan detection
-MIDDLE_RANGE = (-2,2)		# choose the theta range to count points as center
+MIDDLE_RANGE = (-.5,.5)		# choose the theta range to count points as center
 DEG_ANGLE = 10				# trim the sides of the LaserScan
 
 # movement primitive
 TWIST_X = .20				# hardcoded linear movement speed
-MIN_DIST_BUFFER = .1		# after we calculate the approx. distance we move f(TWIST_X)
+MIN_DIST_BUFFER = .2		# after we calculate the approx. distance we move f(TWIST_X)
 							# we add cushion to that number f(TWIST_X) * (1 + BUFFER)
 
 # ROS topics

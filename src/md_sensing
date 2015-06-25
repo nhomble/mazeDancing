@@ -27,7 +27,7 @@ class Sensor_Manager(object):
 		start_angle = data.angle_min
 		end_angle = data.angle_max
 		angle_increment = data.angle_increment
-		curr_angle = start_angle
+		curr_angle = end_angle
 
 		# determine points we should skip
 		skip_l = (abs(start_angle) - RAD_ANGLE) / angle_increment
@@ -35,21 +35,21 @@ class Sensor_Manager(object):
 		skip_a = int((skip_l + skip_r) // 2)
 		skip_a = skip_a if DO_REDUCE_ANGLE else 0
 
-		curr_angle += angle_increment * skip_a
+		curr_angle -= angle_increment * skip_a
 
 		# L, M, R
 		part = [0, 0, 0]
 		num = [0, 0, 0]
 		length = len(data.ranges)
 		for d in data.ranges[skip_a:length-skip_a]:
+			index = 2
+			if curr_angle > MIDDLE_RANGE[0]:
+				index = 1 if curr_angle < MIDDLE_RANGE[1] else 0
+			num[index] += 1
 			if not math.isnan(d):
-				index = 0
-				if curr_angle > MIDDLE_RANGE[0]:
-					index = 1 if curr_angle < MIDDLE_RANGE[1] else 2
 				part[index] += d
-				num[index] += 1
-			curr_angle += angle_increment
-		ret = map(lambda s, n: s/n, part, num)
+			curr_angle -= angle_increment
+		ret = map(lambda s, n: s/n if n != 0 else 0, part, num)
 		self.spub.publish(_create_message_array(ret))
 
 def _create_message_array(arr):
@@ -69,7 +69,7 @@ def _create_message_array(arr):
 def main():
 	manager = Sensor_Manager()
 	while not rospy.is_shutdown():
-		rospy.Rate(10).sleep()
+		rospy.Rate(RATE).sleep()
 
 if __name__ == "__main__":
 	try:

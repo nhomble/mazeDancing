@@ -1,13 +1,13 @@
 #!/usr/bin/env python2
 
 from config.user import *
-from config.enum import *
+from config.enums import *
 import math
 
 # ===================== fixed  ================================
 
 def x_to_d(x):
-	return (3.535 * x) - .037
+	return max((3.535 * x) - .037, x * TIME)
 
 def BACKWARDS_X(dist):
 	return (-abs(dist) + .019) / -2.972
@@ -38,6 +38,7 @@ CENTER_FORWARD = (.18 + .037) / 3.535		# when we turn, we do nudge backwards a l
 # HACK
 CENTER_FORWARD = 0
 
-COLLISION_X = BACKWARDS_X(MIN_DIST)			# just reset movement, but not all the way
+COLLISION_X = BACKWARDS_X(MIN_DIST)/10		# just reset movement, but not all the way
 
 RIGHT_SCALE = .94							# for some reason right turn > left turn
+LEFT_SCALE = 1.00
