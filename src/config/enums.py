@@ -92,14 +92,40 @@ class Maze_Cell(object):
 		Direction.FORWARD: {
 			Direction.LEFT: Direction.RIGHT,
 			Direction.RIGHT: Direction.LEFT,
-			Direction.FORWARD: Direction.BACKWARD,
-			Direction.BACKWARD: Direction.FORWARD
+			Direction.FORWARD: Direction.FORWARD,
+			Direction.BACKWARD: Direction.BACKWARD
 		},
 		Direction.BACKWARD: {
 			Direction.LEFT: Direction.LEFT,
 			Direction.RIGHT: Direction.RIGHT,
 			Direction.FORWARD: Direction.FORWARD,
 			Direction.BACKWARD: Direction.BACKWARD
+		}
+	}
+	POS_FROM_OD: {
+		Direction.LEFT: {
+			Direction.LEFT: (1, 0)
+			Direction.RIGHT: (-1, 0)
+			Direction.FORWARD: (0, -1)
+			Direction.BACKWARD: (0, 1)
+		}
+		Direction.RIGHT: {
+			Direction.LEFT: (-1, 0)
+			Direction.RIGHT: (1, 0)
+			Direction.FORWARD: (0, 1)
+			Direction.BACKWARD: (0, -1)
+		}
+		Direction.FORWARD:{
+			Direction.LEFT: (-1, 0)
+			Direction.RIGHT: (1, 0)
+			Direction.FORWARD: (-1, 0)
+			Direction.BACKWARD: (1, 0)
+		}
+		Direction.BACKWARD:{
+			Direction.LEFT: (1, 0)
+			Direction.RIGHT: (-1, 0)
+			Direction.FORWARD: (1, 0)
+			Direction.BACKWARD: (-1, 0)
 		}
 	}
 	

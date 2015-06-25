@@ -21,8 +21,6 @@ def do_dance(directions, move):
 	_hist = []
 	deg = 0
 	for d in directions:
-		rospy.loginfo(_hist)
-		rospy.loginfo(Direction.to_string[d])
 		clock = Language.DIR_TO_CLOCK[d]
 		move.move(clock[0])
 		rospy.sleep(DANCE_DELAY)

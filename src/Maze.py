@@ -30,17 +30,18 @@ class Maze(object):
 
 		# update based on new point
 		self._update_maze(new_pos)
+
+	def get_status(self, direction):
+		v = Maze_Cell.POS_FROM_OD[self.orientation][direction]
+		pos = (self.pos[0] + v[0], self.pos[1] + v[1])
+		return self.maze[pos[0]][pos[1]]
+
+	def need_to_check(self, direction):
+		return self.get_status(direction) == Maze_Cell.UNKNOWN
 	
 	def mark_ahead(self):
-		_pos = None
-		if self.orientation == Direction.LEFT:
-			_pos = (self.pos[0], self.pos[1] - 1)
-		elif self.orientation == Direction.RIGHT:
-			_pos = (self.pos[0], self.pos[1] + 1)
-		elif self.orientation == Direction.FORWARD:
-			_pos = (self.pos[0] - 1, self.pos[1])
-		elif self.orientation == Direction.BACKWARD:
-			_pos = (self.pos[0] + 1, self.pos[1])
+		v = Maze_Cell.POS_FROM_OD[self.orientation][Direction.FORWARD]
+		_pos = (self.pos[0] + v[0], self.pos[1] + v[1])
 
 		if not self._new_pos_is_valid(*_pos):
 			self._expand_maze()
@@ -117,13 +118,19 @@ class Maze(object):
 		self.maze = new_maze
 
 	def print_maze(self):
+		x = 0
 		for row in self.maze:
 			string = ""
+			x += 1
+			y = 0
 			for ele in row:
-				if ele == Maze_Cell.OPEN:
+				if x == self.pos[0] and y == self.pos[1]:
+					string += "*"
+				elif ele == Maze_Cell.OPEN:
 					string += " "
 				else:
 					string += "X"
+				y += 1
 			print(string)
 
 	
@@ -188,11 +195,13 @@ def _extract_path(cells, maze):
 			leave_y = cell.x - last[1].x
 			enter_x = last[1].y - last[2].y
 			enter_y = last[1].x - last[2].x
+			print("{} {} : {} {}".format(enter_x, enter_y, leave_x, leave_y))
 
 			leave_dir = Maze_Cell.CELL_TO_DIR[leave_x][leave_y]
 			enter_dir = Maze_Cell.CELL_TO_DIR[enter_x][enter_y]
 			direction = Maze_Cell.DIR_TO_TURN[enter_dir][leave_dir]
 			ret.append(direction)
+			print("{} {} {}".format(Direction.to_string[leave_dir], Direction.to_string[enter_dir], Direction.to_string[direction]))
 		last = (cell in nodes, cell, last[1])
 
 	return ret

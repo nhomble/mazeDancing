@@ -41,4 +41,4 @@ CENTER_FORWARD = 0
 COLLISION_X = BACKWARDS_X(MIN_DIST)/10		# just reset movement, but not all the way
 
 RIGHT_SCALE = .94							# for some reason right turn > left turn
-LEFT_SCALE = 1.00
+LEFT_SCALE = 1.005

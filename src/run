@@ -63,27 +63,36 @@ def demo_scout(move, speech, stall):
 		# =========================== explore surroundings =====================
 		openings = [False, False, False]
 		speech.publish("exploring")
-		if _tuch(Direction.LEFT, move, stall, speech):
-			speech.publish("left is open")
-			move.maze.mark_ahead()
-			openings[0] = True
-		else:
-			speech.publish("left is blocked")
+		if move.maze.need_to_check(Direction.LEFT):
+			if _tuch(Direction.LEFT, move, stall, speech):
+				speech.publish("left is open")
+				move.maze.mark_ahead()
+				openings[0] = True
+			else:
+				speech.publish("left is blocked")
+				openings[0] = move.maze.get_status(Direction.LEFT) == Maze_Cell.OPEN
 
-		move.move(Direction.RIGHT)
-		if _tuch(Direction.FORWARD, move, stall, speech):
-			speech.publish("forward is open")
-			move.maze.mark_ahead()
-			openings[1] = True
-		else:
-			speech.publish("ahead is blocked")
+			move.move(Direction.RIGHT)
 
-		if _tuch(Direction.RIGHT, move, stall, speech):
-			speech.publish("right is open")
-			move.maze.mark_ahead()
-			openings[2] = True
+		if move.maze.need_to_check(Direction.FORWARD):
+			if _tuch(Direction.FORWARD, move, stall, speech):
+				speech.publish("forward is open")
+				move.maze.mark_ahead()
+				openings[1] = True
+			else:
+				speech.publish("ahead is blocked")
+				openings[1] = move.maze.get_status(Direction.FORWARD) == Maze_Cell.OPEN
+
+		if move.maze.need_to_check(Direction.RIGHT):
+			if _tuch(Direction.RIGHT, move, stall, speech):
+				speech.publish("right is open")
+				move.maze.mark_ahead()
+				openings[2] = True
+			else:
+				speech.publish("right is blocked")
+				openings[2] = move.maze.get_status(Direction.RIGHT) == Maze_Cell.OPEN
 		else:
-			speech.publish("right is blocked")
+			move.move(Direction.RIGHT)
 
 		speech.publish("now follow right wall")
 
@@ -99,6 +108,7 @@ def demo_scout(move, speech, stall):
 	speech.publish("now backtrack")
 	move.move(Direction.LEFT)
 	move.move(Direction.LEFT)
+	move.stop()
 	sub.unregister()
 
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_start)
@@ -106,10 +116,12 @@ def demo_scout(move, speech, stall):
 	step = 0
 	path, worker = move.maze.best_path()
 	move.maze.print_maze()
-	print("my path: " + str(path))
-	print("worker's path: " + str(worker))
+	ts = lambda x: Direction.to_string[x]
+	print("my path: " + str(map(ts, path)))
+	print("worker's path: " + str(map(ts, worker)))
 	sys.stdin.read(1)
 	while not done and not rospy.is_shutdown():
+		speech.publish("backtracking")	
 		options = 0
 		coor = [False, False, False]
 
@@ -120,6 +132,7 @@ def demo_scout(move, speech, stall):
 		else:
 			speech.publish("left is blocked")
 
+		move.move(Direction.RIGHT)
 		if _tuch(Direction.FORWARD, move, stall, speech):
 			speech.publish("ahead is open")
 			options += 1
@@ -147,14 +160,11 @@ def demo_scout(move, speech, stall):
 
 		_do_move(d, move, speech)
 
-	# turn right to the other robot
-	speech.publish("make eye contact with worker")
-	move.move(Direction.RIGHT)
+	speech.publish("ready to dance")
+	sys.stdin.read(1)
 	speech.publish("do dance")
 	do_dance(worker, move)
-	# leave
-	move.move(Direction.FORWARD)
-	move.move(Direction.FORWARD)
+	speech.publish("done dancing, take me away")
 
 def demo_worker(move, speech, stall):
 	pass
