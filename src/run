@@ -3,7 +3,7 @@
 import time
 import sys
 
-# ROS specifoc
+# ROS specific
 import roslib; roslib.load_manifest('mazeDancing')
 import rospy
 from std_msgs.msg import String
@@ -161,11 +161,9 @@ def demo_scout(move, speech, stall):
 def demo_worker(move, speech, stall):
 	speech.publish("waiting for dance")
 	path = interpret_dance()
-	if path[-1] is None:
-		path.pop()
 	print(path)
 	speech.publish("I interpreted")
-	print(str(map(lambda x: Direction.to_string[x], path)))
+	print(str(map(lambda x: Direction.to_string[x] if x is not None else "", path)))
 	for p in path:
 		speech.publish(Direction.to_string[p])
 	
@@ -174,8 +172,9 @@ def demo_worker(move, speech, stall):
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
+	step = 0
 	while not done and not rospy.is_shutdown():
-		speech.publish("backtracking")	
+		speech.publish("finishing")	
 		options = 0
 		coor = [False, False, False]
 
