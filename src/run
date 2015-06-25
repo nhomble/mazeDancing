@@ -167,7 +167,65 @@ def demo_scout(move, speech, stall):
 	speech.publish("done dancing, take me away")
 
 def demo_worker(move, speech, stall):
-	pass
+	speech.publish("waiting for dance")
+	path = interpret_dance()
+	if path[-1] is None:
+		path.pop()
+	print(path)
+	speech.publish("I interpreted")
+	print(str(map(lambda x: Direction.to_string[x], path)))
+	for p in path:
+		speech.publish(Direction.to_string[p])
+	
+	sys.stdin.read(1)
+
+	global done
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
+	speech.publish("start")
+	while not done and not rospy.is_shutdown():
+		speech.publish("backtracking")	
+		options = 0
+		coor = [False, False, False]
+
+		if _tuch(Direction.LEFT, move, stall, speech):
+			speech.publish("left is open")
+			options += 1
+			coor[0] = True
+		else:
+			speech.publish("left is blocked")
+
+		move.move(Direction.RIGHT)
+		if _tuch(Direction.FORWARD, move, stall, speech):
+			speech.publish("ahead is open")
+			options += 1
+			coor[1] = True
+		else:
+			speech.publish("ahead is blocked")
+
+		if _tuch(Direction.RIGHT, move, stall, speech):
+			speech.publish("right is open")
+			options += 1
+			coor[2] = True
+		else:
+			speech.publish("right is blocked")
+
+		# node
+		if options > 1:
+			# HACK
+			if step >= len(path) or path[step] is None:
+				done = True
+				continue
+			d = path[step]
+			step += 1
+		else:
+			d = _get_directions(coor)
+
+		# ================================= done? =============================
+		if not done:
+			_do_move(d, move, speech)
+		else:
+			speech.publish("found goal")
+			return
 
 def demo(move, speech, stall=.5, is_scout=True):
 	if is_scout:
