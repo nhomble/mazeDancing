@@ -21,15 +21,7 @@ class Move_Manager(object):
 	def __init__(self):
 		self._tw_pub = rospy.Publisher(TWIST_PUB, Twist)
 		self._rate = rospy.Rate(RATE)
-		# FULL is full average
-		# _AVG is just average of some partitions
-		# Direction.* is the minimum distance in select partitions
-		# look at _scan()
 		self._checks = {
-			"FULL": None,\
-			"L_AVG": None,\
-			"R_AVG": None,\
-			"M_AVG": None,\
 			Direction.FORWARD: None,\
 			Direction.LEFT: None,\
 			Direction.RIGHT: None,\
@@ -65,26 +57,21 @@ class Move_Manager(object):
 	# LaserScan callback
 	def _scan(self, data):
 		arr = data.data
-		self._checks["FULL"] = arr[-1]
-		length = len(arr) - 1
-		part = length // 3
-		self._checks[Direction.RIGHT] = min(arr[0:part])
-		self._checks[Direction.FORWARD] = min(arr[part:2*part])
-		self._checks[Direction.LEFT] = min(arr[2*part:3*part-1])
-		self._checks["R_AVG"] = sum(arr[0:part])/part
-		self._checks["L_AVG"] = sum(arr[2*part:3*part])/part
-		self._checks["M_AVG"] = sum(arr[part:2*part])/part
+		self._checks[Direction.RIGHT] = arr[0]
+		self._checks[Direction.FORWARD] = arr[1]
+		self._checks[Direction.LEFT] = arr[2]
 		self._checks["ARRAY"] = arr
 	
 	# try to adjust the left and right side to be equidistant from an imaginary wall
 	def center(self, count=1):
 		if  self._checks["ARRAY"] is None or \
-			self._checks["M_AVG"] > MIN_DIST or \
-			count > CENTER_MAX_COUNT:
+			self._checks[Direction.FORWARD] > MIN_DIST or \
+			count > CENTER_MAX_COUNT or\
+			not DO_CENTER:
 			return
 
 		num = count + 1
-		diff = self._checks["L_AVG"] - self._checks["R_AVG"]
+		diff = self._checks[Direction.LEFT] - self._checks[Direction.RIGHT]
 
 		# avoid adjustements that are too big (possibly just bad detection)
 		# avoid minute adjustements
@@ -105,7 +92,10 @@ class Move_Manager(object):
 	
 	# we don't want to be too close to a wall, we want to be in the center of a "cell"
 	def not_too_close(self, count=1):
-		if self._checks["M_AVG"] < TOO_CLOSE and count < CLOSE_MAX_COUNT:
+		if	self._checks["M_AVG"] < TOO_CLOSE and \
+			count < CLOSE_MAX_COUNT and \
+			DO_NOT_GET_CLOSE:
+
 			self._send_twist(-BACKWARDS_X(CLOSE_INC), 0)
 			c = count + 1
 			self.not_too_close(count=c)
@@ -113,18 +103,12 @@ class Move_Manager(object):
 	# turning is left to the callee!
 	# if True, then the robot has enough room to perform the directional movement
 	def check(self, direction, num=1):
-		rospy.loginfo("M: {} L: {} R: {}".format(self._checks["M_AVG"], self._checks[Direction.LEFT], self._checks[Direction.RIGHT]))
 		if direction == Direction.FORWARD:
 			self.center()
 		# check that we have room
-		if self._checks[Direction.FORWARD] > MIN_DIST or self._checks["M_AVG"] > MIN_DIST:
-			rospy.loginfo("middle is good")
+		if self._checks[Direction.FORWARD] > MIN_DIST:
 			# ok but are the sides confident?
-			key = "L_AVG" if direction == Direction.LEFT else "R_AVG"
-			if self._checks[key] > MIN_DIST:
-				rospy.loginfo("side is confident")
-				# good to go
-				rospy.loginfo("sides {} {} :: {} {}".format(self._checks[Direction.LEFT], self._checks[Direction.RIGHT], self._checks[Direction.FORWARD], self._checks["M_AVG"]))
+			if not DO_GET_EDGE or self._checks[direction] > MIN_DIST:
 				return True
 			else:
 				## need to correct, 

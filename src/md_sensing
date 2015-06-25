@@ -27,32 +27,30 @@ class Sensor_Manager(object):
 		start_angle = data.angle_min
 		end_angle = data.angle_max
 		angle_increment = data.angle_increment
+		curr_angle = start_angle
 
 		# determine points we should skip
 		skip_l = (abs(start_angle) - RAD_ANGLE) / angle_increment
 		skip_r = (end_angle - RAD_ANGLE) / angle_increment
 		skip_a = int((skip_l + skip_r) // 2)
-		skip_a = 0
+		skip_a = skip_a if DO_REDUCE_ANGLE else 0
 
-		s = 0
-		lp = NUM_LASER_PARTITIONS
-		i = 0
-		part = [0 for _ in range(lp)]
+		curr_angle += angle_increment * skip_a
+
+		# L, M, R
+		part = [0, 0, 0]
+		num = [0, 0, 0]
 		length = len(data.ranges)
-		#rospy.loginfo("{} {}".format(length, skip_a))
 		for d in data.ranges[skip_a:length-skip_a]:
-			index = i // (length/lp)
 			if not math.isnan(d):
-				s += d
+				index = 0
+				if curr_angle > MIDDLE_RANGE[0]:
+					index = 1 if curr_angle < MIDDLE_RANGE[1] else 2
 				part[index] += d
-			i += 1
-		part = map(lambda x: lp * x/length, part)
-		#rospy.loginfo("{:.5} {:.5} {:.5} {:.5} {:.5} {:.5} {:.5} {:.5} {:.5}".format(s/length, \
-		#	float(part[0]), float(part[1]), float(part[2]), float(part[3]), float(part[4]), float(part[5]), float(part[6]), float(part[7])))
-		#rospy.loginfo(str(data.ranges[length-skip_a:length]))
-
-		part.append(s/length)
-		self.spub.publish(_create_message_array(part))
+				num[index] += 1
+			curr_angle += angle_increment
+		ret = map(lambda s, n: s/n, part, num)
+		self.spub.publish(_create_message_array(ret))
 
 def _create_message_array(arr):
 	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
