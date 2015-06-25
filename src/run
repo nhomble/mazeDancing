@@ -1,0 +1,175 @@
+#!/usr/bin/env python2
+
+import time
+import sys
+
+# ROS specifoc
+import roslib; roslib.load_manifest('mazeDancing')
+import rospy
+from std_msgs.msg import String
+from ar_track_alvar.msg import *
+
+# my modules
+from Move_Manager  import *
+from Dance import *
+
+done = False
+def _tag_callback_end(data):
+	global done
+	if len(data.markers) > 0 and data.markers[0].id == 2:
+		done = True
+
+def _tag_callback_start(data):
+	global done
+	if len(data.markers) > 0 and data.markers[0].id == 1:
+		done = True
+
+def _get_directions(openings):
+	if openings[2]:
+		return Direction.RIGHT
+	elif openings[1]:
+		return Direction.FORWARD
+	elif openings[0]:
+		return Direction.LEFT
+	else:
+		return Direction.BACKWARD
+
+def _do_move(d, move, speech):
+	if d == Direction.RIGHT:
+		move.move(Direction.FORWARD)
+	elif d == Direction.FORWARD:
+		move.move(Direction.LEFT)
+		move.move(d)
+	elif d == Direction.LEFT:
+		move.move(d)
+		move.move(d)
+		move.move(Direction.FORWARD)
+	elif d == Direction.BACKWARD:
+		move.move(Direction.RIGHT)
+		move.move(Direction.FORWARD)
+
+def _tuch(direction, move, stall, speech):
+	speech.publish("check " + Direction.to_string[direction])
+	if direction == Direction.LEFT or direction == Direction.RIGHT:
+		move.move(direction)
+	time.sleep(stall)
+	return move.check(direction)
+
+def demo_scout(move, speech, stall):
+	global done
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
+	speech.publish("start")
+	while not done:
+		# =========================== explore surroundings =====================
+		openings = [False, False, False]
+		speech.publish("exploring")
+		if _tuch(Direction.LEFT, move, stall, speech):
+			speech.publish("left is open")
+			move.maze.mark_ahead()
+			openings[0] = True
+		else:
+			speech.publish("left is blocked")
+
+		move.move(Direction.RIGHT)
+		if _tuch(Direction.FORWARD, move, stall, speech):
+			speech.publish("forward is open")
+			move.maze.mark_ahead()
+			openings[1] = True
+		else:
+			speech.publish("ahead is blocked")
+
+		if _tuch(Direction.RIGHT, move, stall, speech):
+			speech.publish("right is open")
+			move.maze.mark_ahead()
+			openings[2] = True
+		else:
+			speech.publish("right is blocked")
+
+		speech.publish("now follow right wall")
+
+		# ============================ move =================================
+		d = _get_directions(openings)
+
+		# ================================= done? =============================
+		if not done:
+			_do_move(d, move, speech)
+		else:
+			speech.publish("found goal")
+
+	speech.publish("now backtrack")
+	move.move(Direction.LEFT)
+	move.move(Direction.LEFT)
+	sub.unregister()
+
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_start)
+	done = False
+	step = 0
+	path, worker = move.maze.best_path()
+	while not done:
+		options = 0
+		coor = [False, False, False]
+
+		if _tuch(Direction.LEFT, move, stall, speech):
+			speech.publish("left is open")
+			options += 1
+			coor[0] = True
+		else:
+			speech.publish("left is blocked")
+
+		if _tuch(Direction.FORWARD, move, stall, speech):
+			speech.publish("ahead is open")
+			options += 1
+			coor[1] = True
+		else:
+			speech.publish("ahead is blocked")
+
+		if _tuch(Direction.RIGHT, move, stall, speech):
+			speech.publish("right is open")
+			options += 1
+			coor[2] = True
+		else:
+			speech.publish("right is blocked")
+
+		# node
+		if options > 1:
+			# HACK
+			if step >= len(path):
+				done = True
+				continue
+			d = path[step]
+			step += 1
+		else:
+			d = _get_directions(coor)
+
+		_do_move(d, move, speech)
+
+	# turn right to the other robot
+	move.move(Direction.RIGHT)
+	do_dance(worker, move)
+	# leave
+	move.move(Direction.FORWARD)
+	move.move(Direction.FORWARD)
+
+def demo_worker(move, speech, stall):
+	pass
+
+def demo(move, speech, stall=.5, is_scout=True):
+	if is_scout:
+		demo_scout(move, speech, stall)
+	else:
+		demo_worker(move, speech, stall)
+	pass
+
+# ROS loop
+def main(argv):
+	speech = rospy.Publisher(SPEECH_IO, String)
+	move = Move_Manager()
+	demo(move, speech, is_scout=(argv[1] == "scout"))
+	return 
+
+if __name__ == "__main__":
+	try:
+		rospy.init_node('wall_follower')
+		sys.exit(main(sys.argv))
+	except rospy.ROSInterruptException:
+		pass
