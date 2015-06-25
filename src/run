@@ -63,36 +63,28 @@ def demo_scout(move, speech, stall):
 		# =========================== explore surroundings =====================
 		openings = [False, False, False]
 		speech.publish("exploring")
-		if move.maze.need_to_check(Direction.LEFT):
-			if _tuch(Direction.LEFT, move, stall, speech):
-				speech.publish("left is open")
-				move.maze.mark_ahead()
-				openings[0] = True
-			else:
-				speech.publish("left is blocked")
-				openings[0] = move.maze.get_status(Direction.LEFT) == Maze_Cell.OPEN
-
-			move.move(Direction.RIGHT)
-
-		if move.maze.need_to_check(Direction.FORWARD):
-			if _tuch(Direction.FORWARD, move, stall, speech):
-				speech.publish("forward is open")
-				move.maze.mark_ahead()
-				openings[1] = True
-			else:
-				speech.publish("ahead is blocked")
-				openings[1] = move.maze.get_status(Direction.FORWARD) == Maze_Cell.OPEN
-
-		if move.maze.need_to_check(Direction.RIGHT):
-			if _tuch(Direction.RIGHT, move, stall, speech):
-				speech.publish("right is open")
-				move.maze.mark_ahead()
-				openings[2] = True
-			else:
-				speech.publish("right is blocked")
-				openings[2] = move.maze.get_status(Direction.RIGHT) == Maze_Cell.OPEN
+		if _tuch(Direction.LEFT, move, stall, speech):
+			speech.publish("left is open")
+			move.maze.mark_ahead()
+			openings[0] = True
 		else:
-			move.move(Direction.RIGHT)
+			speech.publish("left is blocked")
+
+		move.move(Direction.RIGHT)
+
+		if _tuch(Direction.FORWARD, move, stall, speech):
+			speech.publish("forward is open")
+			move.maze.mark_ahead()
+			openings[1] = True
+		else:
+			speech.publish("ahead is blocked")
+
+		if _tuch(Direction.RIGHT, move, stall, speech):
+			speech.publish("right is open")
+			move.maze.mark_ahead()
+			openings[2] = True
+		else:
+			speech.publish("right is blocked")
 
 		speech.publish("now follow right wall")
 
