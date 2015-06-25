@@ -14,4 +14,8 @@
 
 	<node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" respawn="false" output="screen" args="image:=/camera/depth/image_raw"/>
 	<node pkg="mazeDancing" name="scout" required="true" type="run" output="screen" args="scout"/>
+
+	<rosparam command="load" param="/depthimage_to_laserscan/range_min">.2</rosparam>
+	<rosparam command="load" param="/depthimage_to_laserscan/scan_height">5</rosparam>
+	<rosparam command="load" param="/depthimage_to_laserscan/range_max">8.0</rosparam>
 </launch>
