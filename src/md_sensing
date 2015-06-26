@@ -49,13 +49,13 @@ class Sensor_Manager(object):
 			if not math.isnan(d):
 				part[index] += d
 			curr_angle -= angle_increment
+		# fancy average
 		ret = map(lambda s, n: s/n if n != 0 else 0, part, num)
 		self.spub.publish(_create_message_array(ret))
 
 def _create_message_array(arr):
-	Float64MultiArray, MultiArrayLayout, MultiArrayDimension
 	dim = MultiArrayDimension()
-	dim.label = "{} length scan data".format(len(arr))
+	dim.label = "{} data array".format(len(arr))
 	dim.size = len(arr)
 	dim.stride = 1 
 	layout = MultiArrayLayout()

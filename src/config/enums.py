@@ -143,6 +143,8 @@ class Turn(object):
 		(-2,): "counter clockwise"
 	}
 
+# NOTE
+# need to double check that ar_track_alvar agrees with this
 class Tag(object):
 	START = 1,
 	GOAL = 2,
