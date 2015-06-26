@@ -24,6 +24,7 @@ def _tag_callback_start(data):
 	if len(data.markers) > 0 and data.markers[0].id == Tag.START[0]:
 		done = True
 
+# right wall follower
 def _get_directions(openings):
 	if openings[2]:
 		return Direction.RIGHT
@@ -88,7 +89,7 @@ def demo_scout(move, speech, stall):
 
 		speech.publish("now follow right wall")
 
-		# ============================ move =================================
+		# ============================ get move =================================
 		d = _get_directions(openings)
 
 		# ================================= done? =============================

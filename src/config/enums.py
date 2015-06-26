@@ -133,7 +133,6 @@ class Maze_Cell(object):
 class Follower(object):
 	LEFT = 1,
 	RIGHT = 2,
-	BOTH = 3
 
 class Turn(object):
 	CLOCKWISE = -1,
