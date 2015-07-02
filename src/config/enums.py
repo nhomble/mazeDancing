@@ -133,7 +133,6 @@ class Maze_Cell(object):
 class Follower(object):
 	LEFT = 1,
 	RIGHT = 2,
-	BOTH = 3
 
 class Turn(object):
 	CLOCKWISE = -1,
@@ -143,6 +142,8 @@ class Turn(object):
 		(-2,): "counter clockwise"
 	}
 
+# NOTE
+# need to double check that ar_track_alvar agrees with this
 class Tag(object):
 	START = 1,
 	GOAL = 2,

@@ -13,9 +13,9 @@
 	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkers" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame)" />
 
 	<node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" respawn="false" output="screen" args="image:=/camera/depth/image_raw"/>
-	<node pkg="mazeDancing" name="worker" required="true" type="run" output="screen" args="worker"/>
 	<rosparam command="load" param="/depthimage_to_laserscan/range_min">.2</rosparam>
 	<rosparam command="load" param="/depthimage_to_laserscan/scan_height">5</rosparam>
 	<rosparam command="load" param="/depthimage_to_laserscan/range_max">8.0</rosparam>
 
+	<node pkg="mazeDancing" name="worker" required="true" type="run" output="screen" args="worker"/>
 </launch>
