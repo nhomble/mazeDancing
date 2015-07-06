@@ -42,6 +42,8 @@ class Move_Manager(object):
 	# 3: both
 	# just record that we hit something
 	def _collision(self, data):
+		# TODO
+		return
 		collisions = data.bumps_wheeldrops
 		if collisions == 0 or self._last_collision is not None:
 			return
