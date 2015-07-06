@@ -103,7 +103,7 @@ def _tag_callback(data):
 	if len(data.markers) == 0:
 		return
 	_marker  = data.markers[0]
-	if _marker.id < Tag.FRONT[0] or _marker.id > Tag.WORKER[0]:
+	if _marker.id < Tag.FIRST[0] or _marker.id > Tag.LAST[0]:
 		return
 	tag = Tag.translate_id(_marker.id)
 	if _is_done:
@@ -139,6 +139,7 @@ def interpret_dance():
 		rospy.loginfo(_detected_tags)
 		rospy.Rate(DELAY).sleep()
 	sub.unregister()
+	_dirs.pop()		# get rid of last command since it is just None
 	return _dirs
 
 '''
