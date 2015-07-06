@@ -16,14 +16,15 @@ from Dance import *
 done = False
 def _tag_callback_end(data):
 	global done
-	if len(data.markers) > 0 and data.markers[0].id == 2:
+	if len(data.markers) > 0 and data.markers[0].id == Tag.GOAL[0]:
 		done = True
 
 def _tag_callback_start(data):
 	global done
-	if len(data.markers) > 0 and data.markers[0].id == 1:
+	if len(data.markers) > 0 and data.markers[0].id == Tag.START[0]:
 		done = True
 
+# right wall follower
 def _get_directions(openings):
 	if openings[2]:
 		return Direction.RIGHT
@@ -88,7 +89,7 @@ def demo_scout(move, speech, stall):
 
 		speech.publish("now follow right wall")
 
-		# ============================ move =================================
+		# ============================ get move =================================
 		d = _get_directions(openings)
 
 		# ================================= done? =============================
@@ -168,7 +169,6 @@ def demo_worker(move, speech, stall):
 		speech.publish(Direction.to_string[p])
 	
 	sys.stdin.read(1)
-
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")

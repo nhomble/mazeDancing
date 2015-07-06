@@ -21,6 +21,7 @@ def do_dance(directions, move):
 	_hist = []
 	deg = 0
 	for d in directions:
+		# clock is a two parameter tuple
 		clock = Language.DIR_TO_CLOCK[d]
 		move.move(clock[0])
 		rospy.sleep(DANCE_DELAY)
@@ -78,6 +79,7 @@ def _couple(l, trans):
 
 def _get_turns(tags):
 	return _translate(tags, Language.ID_TO_CLOCK)
+
 def _get_directions(turns):
 	# HACK
 	ret = _couple(turns, Language.CLOCK_TO_DIR)
@@ -101,7 +103,7 @@ def _tag_callback(data):
 	if len(data.markers) == 0:
 		return
 	_marker  = data.markers[0]
-	if _marker.id < 3 or _marker.id > 7:
+	if _marker.id < Tag.FIRST[0] or _marker.id > Tag.LAST[0]:
 		return
 	tag = Tag.translate_id(_marker.id)
 	if _is_done:
@@ -119,8 +121,6 @@ def _tag_callback(data):
 	# we got a new position
 	elif _last_tag != tag:
 		# sometimes we skip
-#		if abs(tag[0] - _last_tag[0]) == 2:
-#			_detected_tags.append(Tag.translate_id((tag[0] + _last_tag[0]) / 2))
 		_last_tag = tag
 		_detected_tags.append(tag)
 
@@ -139,6 +139,7 @@ def interpret_dance():
 		rospy.loginfo(_detected_tags)
 		rospy.Rate(DELAY).sleep()
 	sub.unregister()
+	_dirs.pop()		# get rid of last command since it is just None
 	return _dirs
 
 '''

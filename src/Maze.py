@@ -158,14 +158,6 @@ def _best_worker_path(a_star, maze):
 		else:
 			ret.append(Direction.FORWARD)
 	return ret
-	# get path from algo
-	cells = []
-	cell = a_star.end
-	while cell is not a_star.start:
-		cells.insert(0, cell)
-		cell = cell.parent
-	cells.insert(0, cell)
-	return _extract_path(cells, maze)
 
 def _extract_path(cells, maze):
 	# of these cells, which are actual nodes

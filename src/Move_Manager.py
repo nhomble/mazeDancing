@@ -42,6 +42,8 @@ class Move_Manager(object):
 	# 3: both
 	# just record that we hit something
 	def _collision(self, data):
+		# TODO
+		return
 		collisions = data.bumps_wheeldrops
 		if collisions == 0 or self._last_collision is not None:
 			return
@@ -62,6 +64,7 @@ class Move_Manager(object):
 		self._checks[Direction.LEFT] = arr[2]
 		self._checks["ARRAY"] = arr
 	
+	# TODO: buggy
 	# try to adjust the left and right side to be equidistant from an imaginary wall
 	def center(self, count=1):
 		if  self._checks["ARRAY"] is None or \
@@ -90,6 +93,7 @@ class Move_Manager(object):
 		self._send_twist(0, coeff * CENTER_INC)
 		self.center(count=num)
 	
+	# TODO
 	# we don't want to be too close to a wall, we want to be in the center of a "cell"
 	def not_too_close(self, count=1):
 		if	self._checks[Direction.FORWARD] < TOO_CLOSE and \
@@ -148,7 +152,7 @@ class Move_Manager(object):
 			return False
 	
 	# we always turn orthogonally so we won't ask for z input
-	def move(self, direction, hardcode=True, scale=1):
+	def move(self, direction, scale=1):
 		if self._last_collision is not None:
 			self._handle_collision()
 
@@ -167,7 +171,7 @@ class Move_Manager(object):
 			# NOTE: backward is not just -TWIST_X
 			self._send_twist(-BACKWARD(MAX_DIST)/scale, 0)
 		elif direction == Direction.RIGHT or direction == Direction.LEFT:
-			self._turn(direction, hardcode)
+			self._turn(direction)
 			self.maze.turn(direction)
 			self.center()
 		else:
@@ -178,7 +182,7 @@ class Move_Manager(object):
 		twist = Twist()
 		self._tw_pub.publish(twist)
 
-	def _turn(self, direction, hardcode):
+	def _turn(self, direction):
 		# an orthogonal turn on a flat surface
 		# HACK right turns suck
 		val = -(TWIST_Z*RIGHT_SCALE) if direction == Direction.RIGHT else (LEFT_SCALE) * TWIST_Z
