@@ -151,7 +151,11 @@ class Tag(object):
 	RIGHT = 4,
 	LEFT = 5,
 	BACK = 6,
-	WORKER = 7				# allow the scout robot to detect worker robot
+	WORKER = 7,				# allow the scout robot to detect worker robot
+
+	# first and last tag id used for reference later
+	FIRST = 1,
+	LAST = 7,
 	@staticmethod
 	def translate_id(num):
 		return (num,)
