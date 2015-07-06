@@ -169,8 +169,6 @@ def demo_worker(move, speech, stall):
 		speech.publish(Direction.to_string[p])
 	
 	sys.stdin.read(1)
-	step = 0
-
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
