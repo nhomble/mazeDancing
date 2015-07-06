@@ -3,7 +3,7 @@
 # =================== toggle functionality ==========================
 
 # set functionality to true/false
-DO_REDUCE_ANGLE		= False						# trim LaserScan data to [-DEG_ANGLE, DEG_ANGLE]
+DO_REDUCE_ANGLE		= True						# trim LaserScan data to [-DEG_ANGLE, DEG_ANGLE]
 DO_CENTER			= False						# when near a wall, try to make the left and right
 												# side of robot equidistant from wall
 DO_GET_EDGE			= False						# attempt to detect edges and manever past them
