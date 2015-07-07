@@ -2,10 +2,10 @@
 ```
 $ cd [your groovy ROS workspace directory]
 $ git clone https://github.com/nhomble/mazeDancing
-\# apt-get install ros-groovy 
-\# apt-get install ros-groovy-openni 
-\# apt-get install ros-groovy-ar-track-alvar 
-\# apt-get install ros-groovy-depthimage-to-laserscan 
+# apt-get install ros-groovy 
+# apt-get install ros-groovy-openni 
+# apt-get install ros-groovy-ar-track-alvar 
+# apt-get install ros-groovy-depthimage-to-laserscan 
 $ rospack profile
 ```
 # Running
