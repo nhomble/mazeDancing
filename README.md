@@ -1,4 +1,4 @@
-# Installation (TODO)
+# Installation
 ```
 $ cd [your groovy ROS workspace directory]
 $ git clone https://github.com/nhomble/mazeDancing
