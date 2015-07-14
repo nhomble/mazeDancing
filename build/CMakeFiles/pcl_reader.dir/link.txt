@@ -1,1 +1,0 @@
-/usr/bin/c++   -O2 -g    CMakeFiles/pcl_reader.dir/src/pcl_reader.cpp.o  -o ../bin/pcl_reader -rdynamic -L/opt/ros/groovy/lib 

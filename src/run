@@ -58,8 +58,8 @@ def _tuch(direction, move, stall, speech):
 
 def demo_scout(move, speech, stall):
 	arr = [Direction.LEFT]
-	do_dance(arr, move)
-	return
+	#do_dance(arr, move)
+	#return
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")

@@ -215,19 +215,6 @@ doxygen/fast:
 .PHONY : doxygen/fast
 
 #=============================================================================
-# Target rules for targets named pcl_reader
-
-# Build rule for target.
-pcl_reader: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 pcl_reader
-.PHONY : pcl_reader
-
-# fast build rule for target.
-pcl_reader/fast:
-	$(MAKE) -f CMakeFiles/pcl_reader.dir/build.make CMakeFiles/pcl_reader.dir/build
-.PHONY : pcl_reader/fast
-
-#=============================================================================
 # Target rules for targets named rosbuild_clean-test-results
 
 # Build rule for target.
@@ -409,30 +396,6 @@ gtest_main/fast:
 	$(MAKE) -f gtest/CMakeFiles/gtest_main.dir/build.make gtest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-src/pcl_reader.o: src/pcl_reader.cpp.o
-.PHONY : src/pcl_reader.o
-
-# target to build an object file
-src/pcl_reader.cpp.o:
-	$(MAKE) -f CMakeFiles/pcl_reader.dir/build.make CMakeFiles/pcl_reader.dir/src/pcl_reader.cpp.o
-.PHONY : src/pcl_reader.cpp.o
-
-src/pcl_reader.i: src/pcl_reader.cpp.i
-.PHONY : src/pcl_reader.i
-
-# target to preprocess a source file
-src/pcl_reader.cpp.i:
-	$(MAKE) -f CMakeFiles/pcl_reader.dir/build.make CMakeFiles/pcl_reader.dir/src/pcl_reader.cpp.i
-.PHONY : src/pcl_reader.cpp.i
-
-src/pcl_reader.s: src/pcl_reader.cpp.s
-.PHONY : src/pcl_reader.s
-
-# target to generate assembly for a file
-src/pcl_reader.cpp.s:
-	$(MAKE) -f CMakeFiles/pcl_reader.dir/build.make CMakeFiles/pcl_reader.dir/src/pcl_reader.cpp.s
-.PHONY : src/pcl_reader.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -450,7 +413,6 @@ help:
 	@echo "... install/local"
 	@echo "... install/strip"
 	@echo "... list_install_components"
-	@echo "... pcl_reader"
 	@echo "... rebuild_cache"
 	@echo "... rosbuild_clean-test-results"
 	@echo "... rosbuild_precompile"
@@ -466,9 +428,6 @@ help:
 	@echo "... tests"
 	@echo "... gtest"
 	@echo "... gtest_main"
-	@echo "... src/pcl_reader.o"
-	@echo "... src/pcl_reader.i"
-	@echo "... src/pcl_reader.s"
 .PHONY : help
 
 

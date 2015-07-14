@@ -18,6 +18,7 @@ SET(CMAKE_C_INCLUDE_PATH
   "/opt/ros/groovy/stacks/turtlebot/turtlebot_app_manager/srv_gen/cpp/include"
   "/opt/ros/groovy/stacks/multimaster_experimental/app_manager/msg_gen/cpp/include"
   "/opt/ros/groovy/stacks/multimaster_experimental/app_manager/srv_gen/cpp/include"
+  "/opt/ros/groovy/stacks/ar_track_alvar/msg_gen/cpp/include"
   "/opt/ros/groovy/include"
   "/opt/ros/groovy/include/pcl-1.6"
   "/opt/ros/groovy/include/opencv"

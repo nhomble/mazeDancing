@@ -6,7 +6,6 @@
 /home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/CMakeFiles/doxygen.dir
 /home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/gtest/CMakeFiles/gtest.dir
 /home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/gtest/CMakeFiles/gtest_main.dir
-/home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/CMakeFiles/pcl_reader.dir
 /home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/CMakeFiles/rosbuild_clean-test-results.dir
 /home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/CMakeFiles/rosbuild_precompile.dir
 /home/turtlebot2/nhomble/rosws/sandbox/mazeDancing/build/CMakeFiles/rosbuild_premsgsrvgen.dir
