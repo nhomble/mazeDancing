@@ -132,6 +132,7 @@ class Maze(object):
 					string += "X"
 				y += 1
 			print(string)
+		print(self.maze)
 
 	
 def _best_scout_path(a_star, maze):
