@@ -1,19 +1,20 @@
 #!/usr/bin/env python2
 
 import numpy
+import IPython
 from consts import *
 
 from a_star import *
 
 class Maze(object):
-	def __init__(self, n=8):
+	def __init__(self, n=10):
 		self.orientation = Direction.FORWARD
 		self.maze = [[Maze_Cell.UNKNOWN for i in range(n)] for j in range(n)]
 		self.pos = (n//2, n//2)
 		self.last_pos = None
 		self.start = self.pos
-		self.maze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
-
+		#self.maze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
+		self.maze = [[(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (2,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)]]
 		self.path = []
 
 	# get new step
@@ -133,7 +134,25 @@ class Maze(object):
 				y += 1
 			print(string)
 		print(self.maze)
+		print()
+		print(self.maze[5][5])
 
+	def generate_directions(self):
+		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
+			print("Ready")
+		x = 1
+		while(x<=10):
+	                if(self.maze[self.start[0]-x][self.start[1]] == Maze_Cell.OPEN):
+        	                print("Forward")
+			if(self.maze[self.start[0]][self.start[1]-x] == Maze_Cell.OPEN):
+				print("Left")
+			if(self.maze[self.start[0]][self.start[1]+x] == Maze_Cell.OPEN):
+				print("Right")
+			else:
+				x+=1
+
+	
+		
 	
 def _best_scout_path(a_star, maze):
 	cells = []
@@ -198,3 +217,10 @@ def _extract_path(cells, maze):
 		last = (cell in nodes, cell, last[1])
 
 	return ret
+
+
+a = Maze()
+#self.maze = [[(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (2,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)]]
+a.print_maze()
+a.generate_directions()
+	
