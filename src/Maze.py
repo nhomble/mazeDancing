@@ -136,20 +136,44 @@ class Maze(object):
 		print(self.maze)
 		print()
 		print(self.maze[5][5])
+		print(self.maze[4][5])
+		print(self.maze[3][5])
+		print(self.maze[3][4])
+		print(self.maze[3][3])
+		print(self.maze[2][3])
+		print(self.maze[1][3])
+		print(self.maze[1][4])
+		print(self.maze[1][5])
+		print(self.maze[1][6])
+
+
 
 	def generate_directions(self):
 		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
 			print("Ready")
-		x = 1
-		while(x<=10):
-	                if(self.maze[self.start[0]-x][self.start[1]] == Maze_Cell.OPEN):
-        	                print("Forward")
-			if(self.maze[self.start[0]][self.start[1]-x] == Maze_Cell.OPEN):
-				print("Left")
-			if(self.maze[self.start[0]][self.start[1]+x] == Maze_Cell.OPEN):
-				print("Right")
+		x = self.start[0]
+ 		y = self.start[1]
+		i = 0		
+		
+		temp_arr = self.maze
+		directions_arr = []
+		while(True):
+			if(temp_arr[x-1][y] == Maze_Cell.OPEN):
+				directions_arr.append("Forward")
+				temp_arr[x][y] = 0
+				x = x - 1
+			elif(temp_arr[x][y-1] == Maze_Cell.OPEN):
+				directions_arr.append("Left")
+				temp_arr[x][y] = 0
+				y = y - 1
+			elif(temp_arr[x][y+1] == Maze_Cell.OPEN):
+				directions_arr.append("Right")
+				temp_arr[x][y] = 0
+				y = y + 1
 			else:
-				x+=1
+				break
+		print(directions_arr)
+			
 
 	
 		
