@@ -153,23 +153,46 @@ class Maze(object):
 			print("Ready")
 		x = self.start[0]
  		y = self.start[1]
-		i = 0		
+		i = "Forward"		
 		
 		temp_arr = self.maze
 		directions_arr = []
+		
 		while(True):
+			print(i)
 			if(temp_arr[x-1][y] == Maze_Cell.OPEN):
-				directions_arr.append("Forward")
-				temp_arr[x][y] = 0
-				x = x - 1
+				if(i == "Forward"):
+					directions_arr.append("Forward")
+					temp_arr[x][y] = 0
+					x = x - 1
+				elif(i == "Left"):
+					directions_arr.append("Right")
+					i = "Forward"
+				elif(i == "Right"):
+					directions_arr.append("Left")
+					i = "Forward"
+				else:
+					i = "Forward"
 			elif(temp_arr[x][y-1] == Maze_Cell.OPEN):
-				directions_arr.append("Left")
-				temp_arr[x][y] = 0
-				y = y - 1
+				if(i == "Forward"):
+					directions_arr.append("Left")
+					i = "Left"
+				elif(i == "Left"):
+					directions_arr.append("Forward")
+					temp_arr[x][y] = 0
+					y = y - 1
+				else:
+					i = "Forward"
 			elif(temp_arr[x][y+1] == Maze_Cell.OPEN):
-				directions_arr.append("Right")
-				temp_arr[x][y] = 0
-				y = y + 1
+				if(i == "Forward"):
+					directions_arr.append("Right")
+					i = "Right"
+				elif(i == "Right"):
+					directions_arr.append("Forward")
+					temp_arr[x][y] = 0
+					y = y + 1
+				else:
+					i = "Forward"
 			else:
 				break
 		print(directions_arr)
