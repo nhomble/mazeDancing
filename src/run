@@ -189,6 +189,7 @@ def demo_worker(move, speech, stall):
 		for p in path:
 			move.move(p)
 			time.sleep(stall)
+		return
 	
 	'''	if _tuch(Direction.LEFT, move, stall, speech):
 			speech.publish("left is open")
