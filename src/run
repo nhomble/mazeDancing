@@ -12,6 +12,7 @@ from ar_track_alvar.msg import *
 # my modules
 from Move_Manager  import *
 from Dance import *
+from Maze import *
 
 done = False
 def _tag_callback_end(data):
@@ -57,9 +58,9 @@ def _tuch(direction, move, stall, speech):
 	return move.check(direction)
 
 def demo_scout(move, speech, stall):
-	arr = [Direction.LEFT]
-	#do_dance(arr, move)
-	#return
+	arr = Maze.generate_directions
+	do_dance(arr, move)
+	return
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")

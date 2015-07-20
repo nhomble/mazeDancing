@@ -195,9 +195,19 @@ class Maze(object):
 					i = "Forward"
 			else:
 				break
+		
+		proper_arr = []
+		for p in directions_arr:
+			if(p == "Forward"):
+				proper_arr.append(Direction.FORWARD)
+			elif(p == "Left"):
+				proper_arr.append(Direction.LEFT)
+			else:
+				proper_arr.append(Direction.RIGHT)
+	
 		print(directions_arr)
-			
-
+		print(proper_arr)
+		return proper_arr
 	
 		
 	
@@ -267,7 +277,6 @@ def _extract_path(cells, maze):
 
 
 a = Maze()
-#self.maze = [[(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (2,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)]]
 a.print_maze()
 a.generate_directions()
 	
