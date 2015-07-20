@@ -2,6 +2,7 @@
 
 import time
 import sys
+import Maze
 
 # ROS specific
 import roslib; roslib.load_manifest('mazeDancing')
@@ -12,6 +13,7 @@ from ar_track_alvar.msg import *
 # my modules
 from Move_Manager  import *
 from Dance import *
+
 
 done = False
 def _tag_callback_end(data):
@@ -62,9 +64,11 @@ def _stat_nav(direction, move, stall, speech):
 	time.sleep(stall)
 
 def demo_scout(move, speech, stall):
-	arr = [Direction.LEFT]
-	#do_dance(arr, move)
-	#return
+	#arr = [Direction.LEFT, Direction.FORWARD]
+	a = Maze()
+	arr = a.generate_directions()
+	do_dance(arr, move)
+	return
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
