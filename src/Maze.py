@@ -145,9 +145,31 @@ class Maze(object):
 		print(self.maze[1][4])
 		print(self.maze[1][5])
 		print(self.maze[1][6])
+	
+	def new_print_maze(self):
+	       
+		maze = []
+		maze = self.develop_maze()
+		
+	        x = 0
+                for row in maze:
+                        string = ""
+                        x += 1
+                        y = 0
+                        for ele in row:
+                                if x == self.pos[0] and y == self.pos[1]:
+                                        string += "*"
+                                elif ele == Maze_Cell.OPEN:
+                                        string += " "
+                                else:
+                                        string += "X"
+                                y += 1
+                        print(string)
+                print(maze)
 
 
-
+	
+	#These directions are if you want to communicate specific turns for the robot to take	
 	def generate_directions(self):
 		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
 			print("Ready")
@@ -159,7 +181,6 @@ class Maze(object):
 		directions_arr = []
 		
 		while(True):
-			print(i)
 			if(temp_arr[x-1][y] == Maze_Cell.OPEN):
 				if(i == "Forward"):
 					directions_arr.append("Forward")
@@ -209,6 +230,67 @@ class Maze(object):
 		print(proper_arr)
 		return proper_arr
 	
+	#This makes it easier to develop a map of the array
+	def generate_path_directions(self):
+		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
+			print("Ready")
+		x = self.start[0]
+ 		y = self.start[1]
+		i = 0		
+		
+		temp_arr = self.maze
+		directions_arr = []
+		while(True):
+			if(temp_arr[x-1][y] == Maze_Cell.OPEN):
+				directions_arr.append("Forward")
+				temp_arr[x][y] = 0
+				x = x - 1
+			elif(temp_arr[x][y-1] == Maze_Cell.OPEN):
+				directions_arr.append("Left")
+				temp_arr[x][y] = 0
+				y = y - 1
+			elif(temp_arr[x][y+1] == Maze_Cell.OPEN):
+				directions_arr.append("Right")
+				temp_arr[x][y] = 0
+				y = y + 1
+			else:
+				break
+		
+		proper_arr = []
+                for p in directions_arr:
+                        if(p == "Forward"):
+                                proper_arr.append(Direction.FORWARD)
+                        elif(p == "Left"):
+                                proper_arr.append(Direction.LEFT)
+                        else:
+                                proper_arr.append(Direction.RIGHT)
+		return proper_arr
+	
+	def develop_maze(self):
+		orientation = Direction.FORWARD
+		n = 10
+                newMaze = [[Maze_Cell.UNKNOWN for i in range(n)] for j in range(n)]
+                pos = (n//2, n//2)
+                last_pos = None
+                start = self.pos
+                newMaze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
+		x = self.start[0]
+		y = self.start[1]		
+
+
+		arr = self.generate_path_directions()
+		for p in arr:
+			if(p == Direction.FORWARD):
+				newMaze[x-1][y] = Maze_Cell.OPEN
+				x = x - 1
+			elif(p == Direction.LEFT):
+				newMaze[x][y-1] = Maze_Cell.OPEN
+				y = y - 1
+			else:
+				newMaze[x][y+1] = Maze_Cell.OPEN
+				y = y + 1
+
+		return(newMaze)	
 		
 	
 def _best_scout_path(a_star, maze):
@@ -277,6 +359,7 @@ def _extract_path(cells, maze):
 
 
 a = Maze()
-a.print_maze()
-a.generate_directions()
-	
+#a.print_maze()
+#a.generate_directions()
+#a.develop_maze()	
+a.new_print_maze()
