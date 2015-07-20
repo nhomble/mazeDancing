@@ -12,7 +12,6 @@ from ar_track_alvar.msg import *
 # my modules
 from Move_Manager  import *
 from Dance import *
-from Maze import *
 
 done = False
 def _tag_callback_end(data):
@@ -57,10 +56,15 @@ def _tuch(direction, move, stall, speech):
 	time.sleep(stall)
 	return move.check(direction)
 
+def _stat_nav(direction, move, stall, speech):
+	speech.publish("Now Moving " + Direction.to_string[direction])
+	move.move(direction)
+	time.sleep(stall)
+
 def demo_scout(move, speech, stall):
-	arr = Maze.generate_directions
-	do_dance(arr, move)
-	return
+	arr = [Direction.LEFT]
+	#do_dance(arr, move)
+	#return
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
@@ -153,7 +157,7 @@ def demo_scout(move, speech, stall):
 			d = path[step]
 			step += 1
 		else:
-			d = _get_directions(coor)
+			d = _get_directions(coor) 
 
 		_do_move(d, move, speech)
 
@@ -182,7 +186,11 @@ def demo_worker(move, speech, stall):
 		options = 0
 		coor = [False, False, False]
 
-		if _tuch(Direction.LEFT, move, stall, speech):
+		for p in path:
+			move.move(p)
+			time.sleep(stall)
+	
+	'''	if _tuch(Direction.LEFT, move, stall, speech):
 			speech.publish("left is open")
 			options += 1
 			coor[0] = True
@@ -221,6 +229,7 @@ def demo_worker(move, speech, stall):
 		else:
 			speech.publish("found goal")
 			return
+							'''
 
 def demo(move, speech, stall=.5, is_scout=True):
 	if is_scout:
