@@ -266,6 +266,7 @@ class Maze(object):
                                 proper_arr.append(Direction.RIGHT)
 		return proper_arr
 	
+	#Uses path_directions to create a corresponding maze
 	def develop_maze(self):
 		orientation = Direction.FORWARD
 		n = 10
