@@ -65,10 +65,10 @@ def _stat_nav(direction, move, stall, speech):
 
 def demo_scout(move, speech, stall):
 	#arr = [Direction.LEFT, Direction.FORWARD]
-	a = Maze()
-	arr = a.generate_path_directions()
-	do_dance(arr, move)
-	return
+	#a = Maze()
+	#arr = a.generate_path_directions()
+	#do_dance(arr, move)
+	#return
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	speech.publish("start")
@@ -119,11 +119,11 @@ def demo_scout(move, speech, stall):
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_start)
 	done = False
 	step = 0
-	path, worker = move.maze.best_path()
+	#path, worker = move.maze.best_path()
 	move.maze.print_maze()
 	ts = lambda x: Direction.to_string[x]
-	print("my path: " + str(map(ts, path)))
-	print("worker's path: " + str(map(ts, worker)))
+	#print("my path: " + str(map(ts, path)))
+	#print("worker's path: " + str(map(ts, worker)))
 	sys.stdin.read(1)
 	while not done and not rospy.is_shutdown():
 		speech.publish("backtracking")	
@@ -168,7 +168,12 @@ def demo_scout(move, speech, stall):
 	speech.publish("ready to dance")
 	sys.stdin.read(1)
 	speech.publish("do dance")
-	do_dance(worker, move)
+	#do_dance(worker, move)
+	#a = Maze()
+        arr = move.maze.generate_path_directions()
+        do_dance(arr, move)
+        #return
+
 	speech.publish("done dancing, take me away")
 
 def demo_worker(move, speech, stall):
