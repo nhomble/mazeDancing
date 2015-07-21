@@ -189,11 +189,15 @@ def demo_worker(move, speech, stall):
 		speech.publish("finishing")	
 		options = 0
 		coor = [False, False, False]
-
-		for p in path:
-			move.move(p)
-			time.sleep(stall)
-		return
+		a = Maze()
+	        arr = a.generate_path_directions()
+		a.new_print_maze(a.develop_maze(path))
+		done = True
+		
+		#for p in path:
+		#	move.move(p)
+		#	time.sleep(stall)
+		#return
 	
 	'''	if _tuch(Direction.LEFT, move, stall, speech):
 			speech.publish("left is open")

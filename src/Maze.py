@@ -133,18 +133,6 @@ class Maze(object):
 					string += "X"
 				y += 1
 			print(string)
-		print(self.maze)
-		print()
-		print(self.maze[5][5])
-		print(self.maze[4][5])
-		print(self.maze[3][5])
-		print(self.maze[3][4])
-		print(self.maze[3][3])
-		print(self.maze[2][3])
-		print(self.maze[1][3])
-		print(self.maze[1][4])
-		print(self.maze[1][5])
-		print(self.maze[1][6])
 	
 	def new_print_maze(self):
 	       
@@ -267,7 +255,7 @@ class Maze(object):
 		return proper_arr
 	
 	#Uses path_directions to create a corresponding maze
-	def develop_maze(self):
+	def develop_maze(self, arr):
 		orientation = Direction.FORWARD
 		n = 10
                 newMaze = [[Maze_Cell.UNKNOWN for i in range(n)] for j in range(n)]
@@ -279,7 +267,6 @@ class Maze(object):
 		y = self.start[1]		
 
 
-		arr = self.generate_path_directions()
 		for p in arr:
 			if(p == Direction.FORWARD):
 				newMaze[x-1][y] = Maze_Cell.OPEN
@@ -363,4 +350,4 @@ a = Maze()
 #a.print_maze()
 #a.generate_directions()
 #a.develop_maze()	
-a.new_print_maze()
+
