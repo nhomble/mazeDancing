@@ -66,7 +66,7 @@ def _stat_nav(direction, move, stall, speech):
 def demo_scout(move, speech, stall):
 	#arr = [Direction.LEFT, Direction.FORWARD]
 	a = Maze()
-	arr = a.generate_directions()
+	arr = a.generate_path_directions()
 	do_dance(arr, move)
 	return
 	global done
