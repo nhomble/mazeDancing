@@ -190,8 +190,8 @@ def demo_worker(move, speech, stall):
 		options = 0
 		coor = [False, False, False]
 		a = Maze()
-	        arr = a.generate_path_directions()
-		a.new_print_maze(a.develop_maze(path))
+	        arr = a.develop_maze(path)
+		a.new_print_maze(arr)
 		done = True
 		
 		#for p in path:

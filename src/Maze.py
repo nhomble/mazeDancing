@@ -134,10 +134,10 @@ class Maze(object):
 				y += 1
 			print(string)
 	
-	def new_print_maze(self):
+	def new_print_maze(self, maze):
 	       
-		maze = []
-		maze = self.develop_maze()
+		
+		#maze = self.develop_maze()
 		
 	        x = 0
                 for row in maze:
@@ -265,8 +265,8 @@ class Maze(object):
                 newMaze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
 		x = self.start[0]
 		y = self.start[1]		
-
-
+		
+		print(arr)
 		for p in arr:
 			if(p == Direction.FORWARD):
 				newMaze[x-1][y] = Maze_Cell.OPEN
@@ -278,7 +278,7 @@ class Maze(object):
 				newMaze[x][y+1] = Maze_Cell.OPEN
 				y = y + 1
 
-		return(newMaze)	
+		self.new_print_maze(newMaze)	
 		
 	
 def _best_scout_path(a_star, maze):
@@ -349,5 +349,6 @@ def _extract_path(cells, maze):
 a = Maze()
 #a.print_maze()
 #a.generate_directions()
-#a.develop_maze()	
+arr = a.generate_path_directions()
+a.develop_maze(arr)	
 
