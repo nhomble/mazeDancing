@@ -197,7 +197,7 @@ def demo_worker(move, speech, stall):
 		a = Maze()
 	        arr = a.develop_maze(path)
 		a.new_print_maze(arr)
-		done = True
+		return
 		
 		#for p in path:
 		#	move.move(p)
