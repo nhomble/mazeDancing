@@ -3,7 +3,7 @@
 import numpy
 import IPython
 from consts import *
-
+from copy import copy, deepcopy
 from a_star import *
 
 class Maze(object):
@@ -13,8 +13,9 @@ class Maze(object):
 		self.pos = (n//2, n//2)
 		self.last_pos = None
 		self.start = self.pos
-		self.maze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
-	#	self.maze = [[(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (2,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)]]
+	#	self.maze[self.start[0]][self.start[1]] = Maze_Cell.OPEN
+		self.maze = [[(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (2,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (2,), (2,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)]]		
+		self.maze2 = [[(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (2,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (2,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)], [(1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,), (1,)]]
 		self.path = []
 
 	# get new step
@@ -219,14 +220,14 @@ class Maze(object):
 		return proper_arr
 	
 	#This makes it easier to develop a map of the array
-	def generate_path_directions(self):
+	def generate_path_directions(self, maze):
 		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
 			print("Ready")
 		x = self.start[0]
  		y = self.start[1]
 		i = 0		
 		
-		temp_arr = self.maze
+		temp_arr = maze
 		directions_arr = []
 		while(True):
 			if(temp_arr[x-1][y] == Maze_Cell.OPEN):
@@ -243,7 +244,8 @@ class Maze(object):
 				y = y + 1
 			else:
 				break
-		
+		print(x)
+		print(y)
 		proper_arr = []
                 for p in directions_arr:
                         if(p == "Forward"):
@@ -280,7 +282,122 @@ class Maze(object):
 
 		self.new_print_maze(newMaze)	
 		
+	def overlap_mazes(self, maze1, maze2):
+		#find last open position in both mazes
+
+		x = self.start[0]
+                y = self.start[1]
+				
+                temp_arr = deepcopy(maze1)
+
+                while(True):
+                        if(temp_arr[x-1][y] == Maze_Cell.OPEN):  
+                                temp_arr[x][y] = 0
+                                x = x - 1
+			elif(temp_arr[x][y-1] == Maze_Cell.OPEN):
+                                temp_arr[x][y] = 0
+                                y = y - 1
+                        elif(temp_arr[x][y+1] == Maze_Cell.OPEN):
+                                temp_arr[x][y] = 0
+                                y = y + 1
+                        else:
+                                break
+
+ 		last_pos_x1 = x
+		last_pos_y1 = y
+		
+		x = self.start[0]
+                y = self.start[1]
+                i = 0
+		
+                temp_arr = deepcopy(maze2)
+                while(True):
+                        if(temp_arr[x-1][y] == Maze_Cell.OPEN):
+                                temp_arr[x][y] = 0
+                                x = x - 1
+                        elif(temp_arr[x][y-1] == Maze_Cell.OPEN):
+                                temp_arr[x][y] = 0
+                                y = y - 1
+                        elif(temp_arr[x][y+1] == Maze_Cell.OPEN):
+                                temp_arr[x][y] = 0
+                                y = y + 1
+                        else:
+                                break
+		
+		last_pos_x2 = x
+		last_pos_y2 = y
+		
+		str = "The positions of maze1 are ( %s , %s ) and the positions of maze2 are ( %s , %s)" % (last_pos_x1, last_pos_y1, last_pos_x2, last_pos_y2)
+		print(str)
+		
+		#Determine how many units to shift over
+		offset_x = 0
+		offset_y = 0
+		if(last_pos_x1 == last_pos_x2):
+			offset_x = 0
+		else:
+			offset_x = abs(last_pos_x1 - last_pos_x2)
 	
+		if(last_pos_y1 == last_pos_y2):
+			offset_y = 0
+		else:
+			offset_y = abs(last_pos_y1 - last_pos_y2)
+		print(offset_x)
+		print(offset_y)
+		
+		#Create Offset Maze		
+		n = 10
+                offsetMaze = [[Maze_Cell.UNKNOWN for i in range(n)] for j in range(n)]
+                pos = (n//2, n//2)
+		x = self.start[0]
+                y = self.start[1]
+		
+		
+                temp_arr = deepcopy(maze2)
+		while(True):
+                        if(temp_arr[x-1][y] == Maze_Cell.OPEN):
+				offsetMaze[x + offset_x][y + offset_y] = temp_arr[x][y]
+                                temp_arr[x][y] = 0
+                                x = x - 1
+                        elif(temp_arr[x][y-1] == Maze_Cell.OPEN):
+              			offsetMaze[x + offset_x][y + offset_y] = temp_arr[x][y]
+                                temp_arr[x][y] = 0
+                                y = y - 1
+                        elif(temp_arr[x][y+1] == Maze_Cell.OPEN):
+                                offsetMaze[x + offset_x][y + offset_y] = temp_arr[x][y]
+				temp_arr[x][y] = 0
+                                y = y + 1
+                        else:
+                                break
+		
+      		offsetMaze[x + offset_x][y + offset_y] = temp_arr[x][y]
+		self.new_print_maze(offsetMaze)
+		
+		#Merge maze1 and offsetMaze
+		opens_arr = []
+			
+		for j in range(10):
+			for i in range(10):
+				if(offsetMaze[i][j] == Maze_Cell.OPEN):
+					opens_arr.append(i)
+					opens_arr.append(j)
+		print(opens_arr)
+
+		mergeMaze = deepcopy(maze1)
+		
+		a = 0		
+		while(a < (len(opens_arr))):
+			if(a+1 >= len(opens_arr)):
+				break
+			else:
+				c = opens_arr[a]
+				d = opens_arr[a+1]
+				mergeMaze[c][d] = Maze_Cell.OPEN
+				a = a + 2
+
+		self.new_print_maze(mergeMaze)
+	
+		
 def _best_scout_path(a_star, maze):
 	cells = []
 	cell = a_star.end
@@ -346,9 +463,10 @@ def _extract_path(cells, maze):
 	return ret
 
 
-#a = Maze()
-#a.print_maze()
+a = Maze()
+#a.new_print_maze(a.maze2)
 #a.generate_directions()
 #arr = a.generate_path_directions()
 #a.develop_maze(arr)	
+a.overlap_mazes(a.maze, a.maze2)
 
