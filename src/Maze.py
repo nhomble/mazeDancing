@@ -146,15 +146,13 @@ class Maze(object):
                         x += 1
                         y = 0
                         for ele in row:
-                                if x == self.pos[0] and y == self.pos[1]:
-                                        string += "*"
-                                elif ele == Maze_Cell.OPEN:
+                                if ele == Maze_Cell.OPEN:
                                         string += " "
                                 else:
                                         string += "X"
                                 y += 1
                         print(string)
-                print(maze)
+               
 
 
 	
@@ -220,14 +218,14 @@ class Maze(object):
 		return proper_arr
 	
 	#This makes it easier to develop a map of the array
-	def generate_path_directions(self, maze):
+	def generate_path_directions(self):
 		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
 			print("Ready")
 		x = self.start[0]
  		y = self.start[1]
 		i = 0		
 		
-		temp_arr = maze
+		temp_arr = self.maze
 		directions_arr = []
 		while(True):
 			if(temp_arr[x-1][y] == Maze_Cell.OPEN):
@@ -328,7 +326,7 @@ class Maze(object):
 		last_pos_y2 = y
 		
 		str = "The positions of maze1 are ( %s , %s ) and the positions of maze2 are ( %s , %s)" % (last_pos_x1, last_pos_y1, last_pos_x2, last_pos_y2)
-		print(str)
+		#print(str)
 		
 		#Determine how many units to shift over
 		offset_x = 0
@@ -342,8 +340,8 @@ class Maze(object):
 			offset_y = 0
 		else:
 			offset_y = abs(last_pos_y1 - last_pos_y2)
-		print(offset_x)
-		print(offset_y)
+		#print(offset_x)
+		#print(offset_y)
 		
 		#Create Offset Maze		
 		n = 10
@@ -371,7 +369,7 @@ class Maze(object):
                                 break
 		
       		offsetMaze[x + offset_x][y + offset_y] = temp_arr[x][y]
-		self.new_print_maze(offsetMaze)
+		#self.new_print_maze(offsetMaze)
 		
 		#Merge maze1 and offsetMaze
 		opens_arr = []
@@ -381,7 +379,7 @@ class Maze(object):
 				if(offsetMaze[i][j] == Maze_Cell.OPEN):
 					opens_arr.append(i)
 					opens_arr.append(j)
-		print(opens_arr)
+		#print(opens_arr)
 
 		mergeMaze = deepcopy(maze1)
 		
@@ -394,8 +392,12 @@ class Maze(object):
 				d = opens_arr[a+1]
 				mergeMaze[c][d] = Maze_Cell.OPEN
 				a = a + 2
-
+		self.new_print_maze(maze1)
+		print("\n \n \n")
+		self.new_print_maze(maze2)
+		print("\n \n \n")
 		self.new_print_maze(mergeMaze)
+		
 	
 		
 def _best_scout_path(a_star, maze):
@@ -463,10 +465,10 @@ def _extract_path(cells, maze):
 	return ret
 
 
-a = Maze()
+#a = Maze()
 #a.new_print_maze(a.maze2)
 #a.generate_directions()
 #arr = a.generate_path_directions()
 #a.develop_maze(arr)	
-a.overlap_mazes(a.maze, a.maze2)
+#a.overlap_mazes(a.maze, a.maze2)
 
