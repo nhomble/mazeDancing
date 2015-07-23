@@ -111,8 +111,8 @@ def demo_scout(move, speech, stall):
 			speech.publish("found goal")
 
 	speech.publish("now backtrack")
-	move.move(Direction.LEFT)
-	move.move(Direction.LEFT)
+	#move.move(Direction.LEFT)
+	#move.move(Direction.LEFT)
 	move.stop()
 	sub.unregister()
 

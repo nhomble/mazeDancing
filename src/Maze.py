@@ -465,10 +465,10 @@ def _extract_path(cells, maze):
 	return ret
 
 
-#a = Maze()
+a = Maze()
 #a.new_print_maze(a.maze2)
 #a.generate_directions()
 #arr = a.generate_path_directions()
 #a.develop_maze(arr)	
-#a.overlap_mazes(a.maze, a.maze2)
+a.overlap_mazes(a.maze, a.maze2)
 
