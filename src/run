@@ -76,7 +76,7 @@ def demo_scout(move, speech, stall):
 		# =========================== explore surroundings =====================
 		openings = [False, False, False]
 		speech.publish("exploring")
-		if _tuch(Direction.LEFT, move, stall, speech):
+		if _tuch(Direction.LEFT, move, stall, speech) and done == False:
 			speech.publish("left is open")
 			move.maze.mark_ahead()
 			openings[0] = True
@@ -85,14 +85,14 @@ def demo_scout(move, speech, stall):
 
 		move.move(Direction.RIGHT)
 
-		if _tuch(Direction.FORWARD, move, stall, speech):
+		if _tuch(Direction.FORWARD, move, stall, speech) and done == False:
 			speech.publish("forward is open")
 			move.maze.mark_ahead()
 			openings[1] = True
 		else:
 			speech.publish("ahead is blocked")
 
-		if _tuch(Direction.RIGHT, move, stall, speech):
+		if _tuch(Direction.RIGHT, move, stall, speech) and done == False:
 			speech.publish("right is open")
 			move.maze.mark_ahead()
 			openings[2] = True
