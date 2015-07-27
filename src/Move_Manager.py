@@ -63,6 +63,7 @@ class Move_Manager(object):
 		self._checks[Direction.FORWARD] = arr[1]
 		self._checks[Direction.LEFT] = arr[2]
 		self._checks["ARRAY"] = arr
+		print(arr[1])
 	
 	# TODO: buggy
 	# try to adjust the left and right side to be equidistant from an imaginary wall
