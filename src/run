@@ -9,11 +9,12 @@ import roslib; roslib.load_manifest('mazeDancing')
 import rospy
 from std_msgs.msg import String
 from ar_track_alvar.msg import *
+from geometry_msgs.msg import Twist
 
 # my modules
 from Move_Manager  import *
 from Dance import *
-
+from consts import *
 
 done = False
 def _tag_callback_end(data):
@@ -71,6 +72,7 @@ def demo_scout(move, speech, stall):
 	#return
 	global done
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
+	pub = rospy.Publisher(TWIST_PUB, Twist)
 	speech.publish("start")
 	while not done and not rospy.is_shutdown():
 		# =========================== explore surroundings =====================
@@ -111,9 +113,15 @@ def demo_scout(move, speech, stall):
 			speech.publish("found goal")
 
 	speech.publish("now backtrack")
-	
+
+	done = False	
+	#Keep Spinning Until Tag2 is Seen
+	right_cmd = Twist()
+        right_cmd.linear.x=0
+        right_cmd.angular.z = math.radians(-90)
+
 	while not done and not rospy.is_shutdown():
-		move.move(Direction.LEFT)
+		pub.publish(right_cmd)
 	
 	#move.move(Direction.LEFT)
 	#move.move(Direction.LEFT)
