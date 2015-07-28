@@ -146,10 +146,10 @@ def demo_scout(move, speech, stall):
 	#	pub.publish(right_cmd)
 
 	#time.sleep(stall)
-	#dist = move.calculate_units()
-	#time.sleep(stall)
-	#speech.publish(str(dist) + "Units Ahead")
-	#time.sleep(stall)
+	dist = move.calculate_units()
+	time.sleep(stall)
+	speech.publish(str(dist) + "Units Ahead")
+	time.sleep(stall)
 	
 	#move.move(Direction.LEFT)
 	#move.move(Direction.LEFT)
