@@ -63,7 +63,7 @@ class Move_Manager(object):
 		self._checks[Direction.FORWARD] = arr[1]
 		self._checks[Direction.LEFT] = arr[2]
 		self._checks["ARRAY"] = arr
-		print(arr[1])
+		#print(arr[1])
 	
 	def calculate_units(self):
 		dist = (self._checks[Direction.FORWARD] // 0.5)
