@@ -74,6 +74,7 @@ def demo_scout(move, speech, stall):
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	pub = rospy.Publisher(TWIST_PUB, Twist)
 	speech.publish("start")
+	tag_direction = None
 	while not done and not rospy.is_shutdown():
 		# =========================== explore surroundings =====================
 		openings = [False, False, False]
@@ -84,6 +85,9 @@ def demo_scout(move, speech, stall):
 			openings[0] = True
 		else:
 			speech.publish("left is blocked")
+		
+		if(done == True):
+			tag_direction = Direction.LEFT	
 
 		move.move(Direction.RIGHT)
 
@@ -93,13 +97,19 @@ def demo_scout(move, speech, stall):
 			openings[1] = True
 		else:
 			speech.publish("ahead is blocked")
-
+		
+		if(done == True):
+			tag_direction = Direction.FORWARD
+		
 		if _tuch(Direction.RIGHT, move, stall, speech):
 			speech.publish("right is open")
 			move.maze.mark_ahead()
 			openings[2] = True
 		else:
 			speech.publish("right is blocked")
+
+		if(done == True):
+			tag_direction = Direction.RIGHT
 
 		speech.publish("now follow right wall")
 
@@ -110,7 +120,15 @@ def demo_scout(move, speech, stall):
 		if not done:
 			_do_move(d, move, speech)
 		else:
+			if(tag_direction == Direction.FORWARD):
+				move.move(Direction.LEFT)
+			if(tag_direction == Direction.LEFT):
+				move.move(Direction.LEFT)
+				move.move(Direction.LEFT)
+	
 			speech.publish("found goal")
+	
+	
 
 	speech.publish("now backtrack")
 
