@@ -122,6 +122,11 @@ def demo_scout(move, speech, stall):
 
 	while not done and not rospy.is_shutdown():
 		pub.publish(right_cmd)
+
+	dist = move.calculate_units()
+	time.sleep(2)
+	speech.publish(str(dist) + "Units Ahead")
+	time.sleep(2)
 	
 	#move.move(Direction.LEFT)
 	#move.move(Direction.LEFT)
