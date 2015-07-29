@@ -160,7 +160,7 @@ def demo_scout(move, speech, stall):
 	speech.publish(str(dist1) + "Units Ahead")
 	time.sleep(stall)
 
-	for u in range(0, dist1):
+	for u in range(0, int(dist1)):
 		move.maze.mark_ahead()
 	
 	
@@ -178,6 +178,8 @@ def demo_scout(move, speech, stall):
 	#print("my path: " + str(map(ts, path)))
 	#print("worker's path: " + str(map(ts, worker)))
 	sys.stdin.read(1)
+        
+        '''	
 	while not done and not rospy.is_shutdown():
 		speech.publish("backtracking")	
 		options = 0
@@ -216,7 +218,7 @@ def demo_scout(move, speech, stall):
 		else:
 			d = _get_directions(coor) 
 
-		_do_move(d, move, speech)
+		_do_move(d, move, speech) '''
 
 	speech.publish("ready to dance")
 	sys.stdin.read(1)
