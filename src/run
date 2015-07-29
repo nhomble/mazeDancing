@@ -17,19 +17,23 @@ from Dance import *
 from consts import *
 
 done = False
+<<<<<<< HEAD
 dist = None
+=======
+
+>>>>>>> 2cf1ec37f4e0b713c3f80c5bf13c7e42b184e165
 def _tag_callback_end(data):
 	global done
 	global dist
 	dist = data.pose.x
 	if len(data.markers) > 0 and data.markers[0].id == Tag.GOAL[0]:
 		done = True
-
+		
 def _tag_callback_start(data):
 	global done
 	if len(data.markers) > 0 and data.markers[0].id == Tag.START[0]:
 		done = True
-
+		
 # right wall follower
 def _get_directions(openings):
 	if openings[2]:
@@ -89,9 +93,10 @@ def demo_scout(move, speech, stall):
 			openings[0] = True
 		else:
 			speech.publish("left is blocked")
-		
-		if(done == True):
-			tag_direction = Direction.LEFT	
+
+		print(done)
+		if(done == True and tag_direction == None):
+			tag_direction = Direction.LEFT
 
 		move.move(Direction.RIGHT)
 
@@ -102,17 +107,19 @@ def demo_scout(move, speech, stall):
 		else:
 			speech.publish("ahead is blocked")
 		
-		if(done == True):
+		print(done)
+		if(done == True and tag_direction == None):
 			tag_direction = Direction.FORWARD
-		
+
 		if _tuch(Direction.RIGHT, move, stall, speech):
 			speech.publish("right is open")
 			move.maze.mark_ahead()
 			openings[2] = True
 		else:
 			speech.publish("right is blocked")
-
-		if(done == True):
+		
+		print(done)
+		if(done == True and tag_direction == None):
 			tag_direction = Direction.RIGHT
 
 		speech.publish("now follow right wall")
@@ -136,14 +143,14 @@ def demo_scout(move, speech, stall):
 
 	speech.publish("now backtrack")
 
-	done = False	
+	#done = False	
 	#Keep Spinning Until Tag2 is Seen
 	right_cmd = Twist()
         right_cmd.linear.x=0
         right_cmd.angular.z = math.radians(-90)
 
-	while not done and not rospy.is_shutdown():
-		pub.publish(right_cmd)
+	#while not done and not rospy.is_shutdown():
+	#	pub.publish(right_cmd)
 
 	time.sleep(stall)
 	dist1 = (dist // 0.5)
