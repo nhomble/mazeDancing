@@ -1,0 +1,32 @@
+<launch>
+        <include file="$(find turtlebot_follower)/launch/includes/_velocity_smoother.launch"/>
+        <node pkg="mazeDancing" name="sensingNode" required="true" type="md_sensing" output="screen"></node>
+        <node pkg="mazeDancing" name="speechNode" required="true" type="md_speech" output="screen"></node>
+        <arg name="marker_size" default="4.4" />
+        <arg name="max_new_marker_error" default="0.08" />
+        <arg name="max_track_error" default="0.2" />
+
+        <arg name="cam_image_topic" default="/camera/depth_registered/points" />
+        <arg name="cam_info_topic" default="/camera/rgb/camera_info" />
+        <arg name="output_frame" default="/base_link" />
+
+        <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkers" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_imag$
+
+        <node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" respawn="false" output="screen" args="image:=/camera/depth/image_raw"/>
+        <node pkg="mazeDancing" name="scoutLeader" required="true" type="run" output="screen" args="scoutLeader"/>
+
+        <rosparam command="load" param="/depthimage_to_laserscan/range_min">.2</rosparam>
+        <rosparam command="load" param="/depthimage_to_laserscan/scan_height">5</rosparam>
+        <rosparam command="load" param="/depthimage_to_laserscan/range_max">8.0</rosparam>
+</launch>
+
+
+
+
+
+
+
+
+
+
+
