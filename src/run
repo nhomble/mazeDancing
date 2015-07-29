@@ -30,6 +30,11 @@ def _tag_callback_start(data):
 	global done
 	if len(data.markers) > 0 and data.markers[0].id == Tag.START[0]:
 		done = True
+
+def _tag_callback_detect(data):
+	global done
+	if len(data.markers) > 0 and data.markers[0].id == Tag.FRONT[0]:
+		done = True
 		
 # right wall follower
 def _get_directions(openings):
@@ -220,6 +225,128 @@ def demo_scout(move, speech, stall):
 
 	speech.publish("done dancing, take me away")
 
+def demo_scoutLeader(move, speech, stall):
+	#arr = [Direction.LEFT, Direction.FORWARD]
+	#a = Maze()
+	#arr = a.generate_path_directions()
+	#do_dance(arr, move)
+	#return
+	global done
+	global dist
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_detect)
+	pub = rospy.Publisher(TWIST_PUB, Twist)
+	speech.publish("start")
+	tag_direction = None
+	while not done and not rospy.is_shutdown():
+		# =========================== explore surroundings =====================
+		openings = [False, False, False]
+		speech.publish("exploring")
+		if _tuch(Direction.LEFT, move, stall, speech):
+			speech.publish("left is open")
+			move.maze.mark_ahead()
+			openings[0] = True
+		else:
+			speech.publish("left is blocked")
+
+		print(done)
+		if(done == True and tag_direction == None):
+			tag_direction = Direction.LEFT
+
+		move.move(Direction.RIGHT)
+
+		if _tuch(Direction.FORWARD, move, stall, speech):
+			speech.publish("forward is open")
+			move.maze.mark_ahead()
+			openings[1] = True
+		else:
+			speech.publish("ahead is blocked")
+		
+		print(done)
+		if(done == True and tag_direction == None):
+			tag_direction = Direction.FORWARD
+
+		if _tuch(Direction.RIGHT, move, stall, speech):
+			speech.publish("right is open")
+			move.maze.mark_ahead()
+			openings[2] = True
+		else:
+			speech.publish("right is blocked")
+		
+		print(done)
+		if(done == True and tag_direction == None):
+			tag_direction = Direction.RIGHT
+
+		speech.publish("now follow right wall")
+
+		# ============================ get move =================================
+		d = _get_directions(openings)
+
+		# ================================= done? =============================
+		if not done:
+			_do_move(d, move, speech)
+		else:
+			if(tag_direction == Direction.FORWARD):
+				move.move(Direction.LEFT)
+			if(tag_direction == Direction.LEFT):
+				move.move(Direction.LEFT)
+				move.move(Direction.LEFT)
+	
+			speech.publish("found goal")
+	
+	
+
+	speech.publish("now waiting")
+
+	move.stop()
+	sub.unregister()
+
+	done = False
+	step = 0
+	#path, worker = move.maze.best_path()
+	move.maze.print_maze()
+	ts = lambda x: Direction.to_string[x]
+
+	leadMaze = move.maze.get_maze()
+
+
+	#print("my path: " + str(map(ts, path)))
+	#print("worker's path: " + str(map(ts, worker)))
+	sys.stdin.read(1)
+
+
+	speech.publish("waiting for dance")
+	path = interpret_dance()
+	print(path)
+	speech.publish("I interpreted")
+	print(str(map(lambda x: Direction.to_string[x] if x is not None else "", path)))
+	for p in path:
+		speech.publish(Direction.to_string[p])
+	
+	sys.stdin.read(1)
+	global done
+	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
+	speech.publish("start")
+	step = 0
+	while not done and not rospy.is_shutdown():
+		speech.publish("finishing")	
+		options = 0
+		coor = [False, False, False]
+		a = Maze()
+	        arr = a.develop_maze(path)
+		a.new_print_maze(arr)
+		
+		mergedMaze = a.overlap_mazes(leadMaze, arr)
+
+		a.new_print_maze(mergedMaze)
+
+		return
+		
+		#for p in path:
+		#	move.move(p)
+		#	time.sleep(stall)
+		#return
+
+
 def demo_worker(move, speech, stall):
 	speech.publish("waiting for dance")
 	path = interpret_dance()
@@ -289,18 +416,31 @@ def demo_worker(move, speech, stall):
 			return
 							'''
 
-def demo(move, speech, stall=.5, is_scout=True):
-	if is_scout:
+#def demo(move, speech, stall=.5, is_scout=True):
+def demo(move, speech, stall=.5, x)
+	if x == 1:
 		demo_scout(move, speech, stall)
-	else:
+	elif x == 2:
 		demo_worker(move, speech, stall)
+	else:
+		demo_scoutLeader(move, speech, stall)
 	pass
 
 # ROS loop
 def main(argv):
 	speech = rospy.Publisher(SPEECH_IO, String)
 	move = Move_Manager()
-	demo(move, speech, is_scout=(argv[1] == "scout"))
+	
+	#Find what to run based on argument
+	if(argv[1] == "scout"):
+		x = 1
+	elif(argv[1] == "worker"):
+		x = 2
+	else:
+		x = 3
+
+	#demo(move, speech, is_scout=(argv[1] == "scout"))
+	demo(move, speech, x)
 	return 
 
 if __name__ == "__main__":

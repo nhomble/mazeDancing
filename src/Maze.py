@@ -119,6 +119,9 @@ class Maze(object):
 			new_maze.append([Maze_Cell.UNKNOWN for j in range(2*n)])
 		self.maze = new_maze
 
+	def get_maze(self):
+		return self.maze
+
 	def print_maze(self):
 		x = 0
 		for row in self.maze:
@@ -278,7 +281,8 @@ class Maze(object):
 				newMaze[x][y+1] = Maze_Cell.OPEN
 				y = y + 1
 
-		self.new_print_maze(newMaze)	
+		self.new_print_maze(newMaze)
+		return newMaze	
 		
 	def overlap_mazes(self, maze1, maze2):
 		#find last open position in both mazes
