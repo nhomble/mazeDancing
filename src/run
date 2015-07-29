@@ -17,8 +17,11 @@ from Dance import *
 from consts import *
 
 done = False
+dist = None
 def _tag_callback_end(data):
 	global done
+	global dist
+	dist = data.pose.x
 	if len(data.markers) > 0 and data.markers[0].id == Tag.GOAL[0]:
 		done = True
 
@@ -71,6 +74,7 @@ def demo_scout(move, speech, stall):
 	#do_dance(arr, move)
 	#return
 	global done
+	global dist
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	pub = rospy.Publisher(TWIST_PUB, Twist)
 	speech.publish("start")
@@ -142,9 +146,9 @@ def demo_scout(move, speech, stall):
 		pub.publish(right_cmd)
 
 	time.sleep(stall)
-	dist = move.calculate_units()
+	dist1 = (dist // 0.5)
 	time.sleep(stall)
-	speech.publish(str(dist) + "Units Ahead")
+	speech.publish(str(dist1) + "Units Ahead")
 	time.sleep(stall)
 	
 	#move.move(Direction.LEFT)
