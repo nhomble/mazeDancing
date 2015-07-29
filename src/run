@@ -419,12 +419,13 @@ def demo_worker(move, speech, stall):
 			return
 							'''
 
-#def demo(move, speech, stall=.5, is_scout=True):
-def demo(move, speech, stall=.5, x)
-	if x == 1:
+def demo(move, speech, stall=.5, is_scout=True):
+
+#def demo(move, speech, stall=.5, x)
+	if is_scout:
 		demo_scout(move, speech, stall)
-	elif x == 2:
-		demo_worker(move, speech, stall)
+	#elif x == 2:
+	#	demo_worker(move, speech, stall)
 	else:
 		demo_scoutLeader(move, speech, stall)
 	pass
@@ -435,15 +436,15 @@ def main(argv):
 	move = Move_Manager()
 	
 	#Find what to run based on argument
-	if(argv[1] == "scout"):
-		x = 1
-	elif(argv[1] == "worker"):
-		x = 2
-	else:
-		x = 3
+	#if(argv[1] == "scout"):
+	#	x = 1
+	#elif(argv[1] == "worker"):
+	#	x = 2
+	#else:
+	#	x = 3
 
-	#demo(move, speech, is_scout=(argv[1] == "scout"))
-	demo(move, speech, x)
+	demo(move, speech, is_scout=(argv[1] == "scout"))
+	#demo(move, speech, x)
 	return 
 
 if __name__ == "__main__":
