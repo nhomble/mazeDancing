@@ -158,7 +158,7 @@ def demo_scout(move, speech, stall):
 
 	while not rospy.is_shutdown():
 		if(offset < -0.009 or offset > 0.009):
-			pub.publish(right_cmd)
+			move.small_move()
 		else:
 			break
 
