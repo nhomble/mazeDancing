@@ -18,11 +18,15 @@ from consts import *
 
 done = False
 dist = None
+offset = None
 
 def _tag_callback_end(data):
 	global done
 	global dist
+	global offset
 	dist = data.markers[0].pose.pose.position.x
+	offset = data.markers[0].pose.pose.position.y
+
 	if len(data.markers) > 0 and data.markers[0].id == Tag.GOAL[0]:
 		done = True
 		
@@ -81,6 +85,7 @@ def demo_scout(move, speech, stall):
 	#return
 	global done
 	global dist
+	global offset
 	sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, _tag_callback_end)
 	pub = rospy.Publisher(TWIST_PUB, Twist)
 	speech.publish("start")
@@ -149,10 +154,10 @@ def demo_scout(move, speech, stall):
 	#Keep Spinning Until Tag2 is Seen
 	right_cmd = Twist()
         right_cmd.linear.x=0
-        right_cmd.angular.z = math.radians(-90)
+        right_cmd.angular.z = math.radians(-90) * (5/7)
 
-	#while not done and not rospy.is_shutdown():
-	#	pub.publish(right_cmd)
+	while not rospy.is_shutdown() and offset > 0.009:
+		pub.publish(right_cmd)
 
 	time.sleep(stall)
 	dist1 = ((dist) // 0.5)
