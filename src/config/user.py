@@ -30,7 +30,9 @@ TWIST_PUB = 'cmd_vel_mux/input/teleop'
 
 # timing
 DELAY = 1				# hard 1 second delay
-DANCE_DELAY = 5
+DANCE_DELAY = 2
+#DANCE_DELAY = 5
+
 
 # feedback systems
 CHECK_SCALE = 10		# when we are creeping along a detected edge we move by TWIST_X / CHECK_SCALE
