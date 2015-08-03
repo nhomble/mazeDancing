@@ -155,14 +155,10 @@ def demo_scout(move, speech, stall):
 	right_cmd = Twist()
         right_cmd.linear.x=0
         right_cmd.angular.z = math.radians(-90) * (5/7)
-	count = 0
-	while not rospy.is_shutdown() and count < 6:
-		if(offset < 0):
-			move.small_move_right()
-			count+=1
-		elif(offset > 0):
-			move.small_move_left()
-			count+=1
+
+	while not rospy.is_shutdown():
+		if(offset < -0.009 or offset > 0.009):
+			pub.publish(right_cmd)
 		else:
 			break
 
@@ -172,10 +168,6 @@ def demo_scout(move, speech, stall):
 	time.sleep(stall)
 	speech.publish(str(dist1) + "Units Ahead")
 	time.sleep(stall)
-
-	for u in range(0, int(dist1)):
-		move.maze.mark_ahead()
-	
 	
 	#move.move(Direction.LEFT)
 	#move.move(Direction.LEFT)
@@ -238,7 +230,7 @@ def demo_scout(move, speech, stall):
 	speech.publish("do dance")
 	#do_dance(worker, move)
 	#a = Maze()
-        arr = move.maze.generate_path_directions()
+        arr = move.maze.generate_path_directions(int(dist1))
         do_dance(arr, move)
         #return
 	speech.publish("done dancing, take me away")

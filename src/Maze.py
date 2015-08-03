@@ -221,12 +221,13 @@ class Maze(object):
 		return proper_arr
 	
 	#This makes it easier to develop a map of the array
-	def generate_path_directions(self):
+	def generate_path_directions(self, extra):
 		if(self.maze[self.start[0]][self.start[1]] == Maze_Cell.OPEN):
 			print("Ready")
 		x = self.start[0]
  		y = self.start[1]
-		i = 0		
+		i = 0
+		val = extra		
 		
 		temp_arr = self.maze
 		directions_arr = []
@@ -247,7 +248,8 @@ class Maze(object):
 				break
 		print(x)
 		print(y)
-		proper_arr = []
+		proper_arr = []				
+
                 for p in directions_arr:
                         if(p == "Forward"):
                                 proper_arr.append(Direction.FORWARD)
@@ -255,6 +257,13 @@ class Maze(object):
                                 proper_arr.append(Direction.LEFT)
                         else:
                                 proper_arr.append(Direction.RIGHT)
+
+		last_dir = proper_arr[len(proper_arr)-1]
+				
+
+		for u in range(0, val):
+			proper_arr.append(last_dir)
+
 		return proper_arr
 	
 	#Uses path_directions to create a corresponding maze
