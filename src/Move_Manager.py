@@ -156,8 +156,10 @@ class Move_Manager(object):
 			rospy.loginfo(self._checks)
 			return False
 	
-	def small_move(self):
-		self._send_twist(0, math.radians(-90)*5/7
+	def small_move_right(self):
+		self._send_twist(0, math.radians(-90)*1/35)
+	def small_move_left(self):
+		self._send_twist(0, math.radians(90)*1/25)
 	
 	# we always turn orthogonally so we won't ask for z input
 	def move(self, direction, scale=1):

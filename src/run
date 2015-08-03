@@ -155,10 +155,14 @@ def demo_scout(move, speech, stall):
 	right_cmd = Twist()
         right_cmd.linear.x=0
         right_cmd.angular.z = math.radians(-90) * (5/7)
-
-	while not rospy.is_shutdown():
-		if(offset < -0.009 or offset > 0.009):
-			move.small_move()
+	count = 0
+	while not rospy.is_shutdown() and count < 6:
+		if(offset < 0):
+			move.small_move_right()
+			count+=1
+		elif(offset > 0):
+			move.small_move_left()
+			count+=1
 		else:
 			break
 
