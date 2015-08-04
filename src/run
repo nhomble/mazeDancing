@@ -92,6 +92,9 @@ def demo_scout(move, speech, stall):
 	tag_direction = None
 	while not done and not rospy.is_shutdown():
 		# =========================== explore surroundings =====================
+		if(done == True and tag_direction == None):
+                        tag_direction = Direction.FORWARD
+
 		openings = [False, False, False]
 		speech.publish("exploring")
 		if _tuch(Direction.LEFT, move, stall, speech):

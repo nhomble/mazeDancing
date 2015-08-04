@@ -129,9 +129,7 @@ class Maze(object):
 			x += 1
 			y = 0
 			for ele in row:
-				if x == self.pos[0] and y == self.pos[1]:
-					string += "*"
-				elif ele == Maze_Cell.OPEN:
+				if ele == Maze_Cell.OPEN:
 					string += " "
 				else:
 					string += "X"

@@ -24,9 +24,11 @@ def do_dance(directions, move):
 		# clock is a two parameter tuple
 		clock = Language.DIR_TO_CLOCK[d]
 		move.move(clock[0])
-		rospy.sleep(DANCE_DELAY)
+		#rospy.sleep(DANCE_DELAY)
+		#rospy.sleep(1)
 		move.move(clock[1])
-		rospy.sleep(DANCE_DELAY)
+		#rospy.sleep(DANCE_DELAY)
+		#rospy.sleep(1)
 		_hist.append(clock[0])
 		_hist.append(clock[1])
 		if clock[0] == Turn.CLOCKWISE:
